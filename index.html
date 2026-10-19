@@ -252,6 +252,9 @@ img{max-width:100%}
 .lesson .code pre{position:absolute;inset:0;pointer-events:none;color:var(--code-fg);overflow:hidden}
 .lesson .code textarea{position:relative;display:block;width:100%;min-height:100px;resize:none;background:transparent;color:transparent;caret-color:#FFFFFF;outline:none;overflow:hidden;-webkit-text-fill-color:transparent}
 .lesson .code textarea::selection{background:rgba(114,214,202,.32)}
+.lesson pre,.lesson code,.lesson textarea,.lesson .rl{font-variant-ligatures:none}
+.lesson .chip.run{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.lesson .t-kw{color:#FF9EC4}.lesson .t-num{color:#F5C46B}.lesson .t-fn{color:#8EC5FF}
 .lesson .t-tag{color:var(--c-tag)} .lesson .t-attr{color:var(--c-attr)} .lesson .t-val{color:var(--c-val)} .lesson .t-com{color:var(--c-com);font-style:italic} .lesson .t-doc{color:var(--c-doc)} .lesson .t-p{color:var(--c-com)}
 .lesson .pv{display:flex;flex-direction:column;background:var(--paper);min-width:0;border-top:1px solid var(--line)}
 @container (min-width:700px){.lesson .pv{border-top:0;border-left:1px solid var(--line)}}
@@ -429,6 +432,34 @@ img{max-width:100%}
 .v-css .fx-box div{flex:none;min-width:48px;padding:0 12px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font:700 15px var(--f-mono);display:grid;place-items:center}
 .v-css .fx-box div.grow{flex:1;outline:3px solid var(--ok);outline-offset:-3px}
 .v-css .fx-code{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap}
+
+/* ====================== 模块：JavaScript 核心 ====================== */
+.v-js{--accent:#8A6700;--accent-ink:#FFFFFF;--accent-soft:#F6EDCF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-js{--accent:#E8C14A;--accent-ink:#1E1700;--accent-soft:#2F2810}}
+:root[data-theme="dark"] .v-js{--accent:#E8C14A;--accent-ink:#1E1700;--accent-soft:#2F2810}
+/* 真假值、顺序题、数组实验台 */
+.lesson .lab{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.lesson .lab-head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.lesson .lab-head button,.lesson .lab-opts button{font:12.5px var(--f-mono);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.lesson .lab-head button[aria-pressed="true"],.lesson .lab-opts button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.lesson .lab-head .sp{flex:1}
+.lesson .lab-body{padding:14px 16px;display:grid;gap:10px}
+.lesson .lab-body p{margin:0;max-width:none;font-size:15px}
+.lesson .lab-code{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.lesson .lab-out{margin:0;padding:12px 16px;background:var(--bg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid var(--line)}
+.v-js .tf{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px}
+.v-js .tf button{font:14px var(--f-mono);padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink);min-width:64px}
+.v-js .tf button.t{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.v-js .tf button.f{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.v-js .tf button small{display:block;font:600 11px var(--f-body)}
+.v-js .order-pick{display:flex;flex-wrap:wrap;gap:8px}
+.v-js .order-pick button{font:13px var(--f-mono);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.v-js .order-pick button:disabled{opacity:.35;cursor:default}
+.v-js .order-res{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;align-items:center;font:13px var(--f-mono)}
+.v-js .order-res span{padding:6px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.v-js .order-res span.ok{background:var(--ok-soft);color:var(--ok)}
+.v-js .order-res span.no{background:var(--bad-soft);color:var(--bad)}
+.lesson .test-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
 </style>
 </head>
 <body>
@@ -1611,14 +1642,627 @@ body {
 </div>
 </section>
 
+<!-- ====================== 模块：JavaScript 核心 ====================== -->
+<section class="view lesson v-js" data-view="js" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#js-start"><span>01</span>第一行 JS</a></li>
+      <li><a href="#js-vars"><span>02</span>变量与类型</a></li>
+      <li><a href="#js-logic"><span>03</span>判断与真假</a></li>
+      <li><a href="#js-loops"><span>04</span>循环</a></li>
+      <li><a href="#js-func"><span>05</span>函数与闭包</a></li>
+      <li><a href="#js-data"><span>06</span>数组与对象</a></li>
+      <li><a href="#js-class"><span>07</span>类与模块</a></li>
+      <li><a href="#js-dom"><span>08</span>DOM 与事件</a></li>
+      <li><a href="#js-async"><span>09</span>异步与 fetch</a></li>
+      <li><a href="#js-errors"><span>10</span>错误与调试</a></li>
+      <li><a href="#js-sheet"><span>11</span>方法速查</a></li>
+      <li><a href="#js-quiz"><span>12</span>自测</a></li>
+      <li><a href="#js-challenge"><span>13</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第三站</p>
+      <h1><span class="lt">( )=&gt;</span> JavaScript 核心</h1>
+      <p class="lede">HTML 搭骨架，CSS 穿衣服，JavaScript 让页面动起来：响应点击、修改内容、向后端要数据。它也是你后面写 React 和 Node.js 后端用的同一门语言。这一页的代码都能直接运行，点<b>▶ 运行</b>或按 Ctrl + Enter，结果显示在右边的控制台里。</p>
+      <div class="stack" aria-label="网页的三层">
+        <div class="layer"><span class="tag">HTML</span><b>结构 · 骨架</b><small>页面上有什么内容，分别是什么角色</small><code>&lt;button&gt;登录&lt;/button&gt;</code></div>
+        <div class="layer"><span class="tag">CSS</span><b>样式 · 外观</b><small>颜色、大小、位置、动画</small><code>button { color: red; }</code></div>
+        <div class="layer on"><span class="tag">JavaScript</span><b>行为 · 交互</b><small>点击后发生什么、和后端通信</small><code>btn.onclick = login;</code></div>
+      </div>
+      <ul class="goals">
+        <li>读懂并写出常见的 JS 逻辑</li>
+        <li>用 DOM 和事件做出可交互的页面</li>
+        <li>用 async / await 向后端请求数据</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="js-start">
+      <div class="chap-head"><span class="chap-num">01</span><h2>第一行 JavaScript</h2></div>
+      <p class="sub">浏览器里自带 JS 引擎。最常用的调试手段是 <code class="i">console.log()</code>，把任何值打印到控制台。改一改再点运行。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">hello.js</span></div>
+<textarea data-code>console.log("你好，JavaScript！");
+console.log(1 + 2 * 3);
+console.log("拼接" + "字符串", 42, true);
+
+// 双斜杠是单行注释，/* */ 是多行注释
+const name = "Jim";
+console.log(`模板字符串：你好，${name}，今天是学 JS 的第 ${3} 天`);</textarea>
+      </div>
+      <h3>把 JS 放进网页</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>&lt;script src="app.js" defer&gt;</td><td>最推荐。写在 head 里，<code class="i">defer</code> 让脚本等 HTML 解析完再执行，不会阻塞页面显示，也能拿到所有元素</td></tr>
+          <tr><td>&lt;script type="module" src="main.js"&gt;</td><td>ES 模块，可以用 import / export，默认就是 defer。Vite 项目都这么写</td></tr>
+          <tr><td>&lt;script&gt;...&lt;/script&gt;</td><td>直接写在页面里，适合几行小代码。放在 body 最后才能拿到前面的元素</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">随手试</span><p>在任意网页按 <b>F12</b> 打开开发者工具，切到 Console 面板，可以直接输入 JS 回车执行，是最快的试验场。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="js-vars">
+      <div class="chap-head"><span class="chap-num">02</span><h2>变量与数据类型</h2></div>
+      <p class="sub">变量是给值起的名字。现代 JS 只用两个关键字：不会重新赋值用 <code class="i">const</code>，会变的用 <code class="i">let</code>。<code class="i">var</code> 是旧写法，有作用域上的坑，不要再用。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">变量与 typeof</span><small class="cat-badge">试试给 PI 重新赋值</small></div>
+<textarea data-code>const PI = 3.14;        // 常量：不能再赋值
+let count = 0;          // 变量：可以改
+count = count + 1;
+count += 1;
+count++;
+console.log("count =", count);
+
+// 七种基本类型 + 对象
+console.log(typeof 42);          // number：整数小数都是它
+console.log(typeof "你好");       // string
+console.log(typeof true);        // boolean
+console.log(typeof undefined);   // undefined：声明了但没赋值
+console.log(typeof null);        // "object"——历史遗留的 bug，记住 null 表示“空”
+console.log(typeof 10n);         // bigint：超大整数
+console.log(typeof Symbol());    // symbol：唯一标识
+console.log(typeof { a: 1 }, typeof [1, 2], typeof function () {});
+
+// 类型转换
+console.log(Number("42") + 1, String(42) + 1, parseInt("12px"));
+console.log(0.1 + 0.2);  // 浮点数精度问题，算钱时要小心</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>类型</th><th>例子</th><th>要点</th></tr></thead>
+        <tbody>
+          <tr><td>number</td><td><code class="i">42</code> <code class="i">3.14</code> <code class="i">NaN</code></td><td>整数小数同一种类型。<code class="i">NaN</code> 表示“不是数字”，它和谁都不相等，连自己也不等</td></tr>
+          <tr><td>string</td><td><code class="i">"双引号"</code> <code class="i">'单引号'</code> <code class="i">`反引号`</code></td><td>反引号是模板字符串，能换行、能用 <code class="i">${}</code> 插值</td></tr>
+          <tr><td>boolean</td><td><code class="i">true</code> <code class="i">false</code></td><td>判断条件的结果</td></tr>
+          <tr><td>undefined</td><td><code class="i">let x;</code></td><td>“还没有值”，系统给的</td></tr>
+          <tr><td>null</td><td><code class="i">let user = null;</code></td><td>“空”，你主动设置的</td></tr>
+          <tr><td>object</td><td><code class="i">{}</code> <code class="i">[]</code> 函数</td><td>对象、数组、函数都是引用类型：赋值时复制的是“地址”，不是内容</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">const 不等于不可变</span><p><code class="i">const user = { age: 1 }</code> 之后，<code class="i">user = {}</code> 会报错，但 <code class="i">user.age = 2</code> 可以。const 只保证这个名字一直指向同一个对象。</p></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="js-logic">
+      <div class="chap-head"><span class="chap-num">03</span><h2>判断：比较、真假值与条件</h2></div>
+      <p class="sub">比较永远用三个等号 <code class="i">===</code>。两个等号 <code class="i">==</code> 会先偷偷转换类型，<code class="i">0 == ""</code> 居然是 true。</p>
+      <h3>真假值：放进 if 里会被当成什么？</h3>
+      <p>if 的条件不一定是布尔值，JS 会把它转换一下。只有 6 个值会被当成 false（叫 falsy），其他全是 true。先猜，再点开看。</p>
+      <div class="lab" id="jsTruthy">
+        <div class="lab-head"><span>点一个值看它是真还是假</span><span class="sp"></span><button type="button" data-all>全部揭晓</button><button type="button" data-reset>重来</button></div>
+        <div class="tf"></div>
+        <div class="lab-body"><p class="tf-msg" aria-live="polite">记住这 6 个假值：<code class="i">false</code> <code class="i">0</code> <code class="i">""</code> <code class="i">null</code> <code class="i">undefined</code> <code class="i">NaN</code>。</p></div>
+      </div>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">条件写法</span><small class="cat-badge">改改 score 和 user 再运行</small></div>
+<textarea data-code>const score = 82;
+
+if (score >= 90) {
+  console.log("优秀");
+} else if (score >= 60) {
+  console.log("及格");
+} else {
+  console.log("加油");
+}
+
+// 三元运算符：条件 ? 是 : 否
+const label = score >= 60 ? "通过" : "未通过";
+console.log(label);
+
+// && 并且，|| 或者，! 取反
+console.log(score > 60 && score < 90, !true);
+
+// 默认值：?? 只在 null / undefined 时用右边
+const nickname = null;
+console.log(nickname ?? "匿名用户");
+
+// 可选链 ?.：对象可能不存在时不报错
+const user = { profile: null };
+console.log(user.profile?.avatar);   // undefined，不会报错
+
+// switch：多个固定值的分支
+const day = 3;
+switch (day) {
+  case 6:
+  case 7:
+    console.log("周末");
+    break;
+  default:
+    console.log("工作日");
+}</textarea>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="js-loops">
+      <div class="chap-head"><span class="chap-num">04</span><h2>循环：重复做一件事</h2></div>
+      <p class="sub">遍历数组首选 <code class="i">for...of</code>，需要下标时用经典 for。实际项目里更常用下一节的数组方法 <code class="i">map</code> / <code class="i">filter</code>。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">四种循环</span></div>
+<textarea data-code>// 经典 for：初始化; 条件; 每轮之后
+for (let i = 1; i <= 3; i++) {
+  console.log("第", i, "次");
+}
+
+// for...of：直接拿到数组里的每一项
+const fruits = ["苹果", "香蕉", "橙子"];
+for (const f of fruits) {
+  console.log(f);
+}
+
+// for...in：遍历对象的键
+const scores = { 语文: 90, 数学: 85 };
+for (const key in scores) {
+  console.log(key, scores[key]);
+}
+
+// while：不知道要循环几次时用
+let n = 1;
+while (n < 100) {
+  n *= 2;
+}
+console.log("第一个 ≥ 100 的 2 的幂：", n);
+
+// break 跳出循环，continue 跳过本轮
+for (const x of [1, 2, 3, 4, 5]) {
+  if (x === 2) continue;
+  if (x === 4) break;
+  console.log("x =", x);
+}</textarea>
+      </div>
+      <div class="tip warn"><span class="lbl">小心死循环</span><p>while 的条件永远为真，页面就会卡死。写 while 时先想清楚：循环体里哪一行会让条件最终变成 false。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="js-func">
+      <div class="chap-head"><span class="chap-num">05</span><h2>函数、作用域与闭包</h2></div>
+      <p class="sub">函数是一段可以反复调用的代码，可以接收参数、返回结果。JS 里函数也是值，可以存进变量、当参数传来传去。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">三种写法</span></div>
+<textarea data-code>// 1. 函数声明
+function add(a, b) {
+  return a + b;
+}
+
+// 2. 箭头函数（最常用）：只有一行时可以省掉 {} 和 return
+const multiply = (a, b) => a * b;
+
+// 3. 默认参数、剩余参数
+const greet = (name = "朋友") => `你好，${name}`;
+const sum = (...nums) => nums.reduce((s, n) => s + n, 0);
+
+console.log(add(2, 3), multiply(2, 3));
+console.log(greet(), greet("Jim"));
+console.log(sum(1, 2, 3, 4));
+
+// 函数可以当参数传：这种函数叫“回调函数”
+const twice = (fn, x) => fn(fn(x));
+console.log(twice(n => n + 10, 1));</textarea>
+      </div>
+      <h3>闭包：函数记住了它出生时的环境</h3>
+      <p>闭包听起来玄，其实是一句话：<b>内部函数可以一直访问外部函数的变量，哪怕外部函数已经执行完了。</b>点开每一行看它在做什么。</p>
+      <div class="reader" data-mode="js" id="jsClosure">
+        <div class="reader-bar"><span class="ed-title">counter.js<small>点一行看解释</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>概念</th><th>一句话</th></tr></thead>
+        <tbody>
+          <tr><td>作用域</td><td>变量在哪里能用。<code class="i">{}</code> 里用 let / const 声明的变量，出了花括号就访问不到</td></tr>
+          <tr><td>闭包</td><td>函数 + 它能访问的外部变量。用来做私有数据、计数器、防抖节流</td></tr>
+          <tr><td>this</td><td>普通函数里 this 取决于“谁调用它”；箭头函数没有自己的 this，用外层的。写 React 和事件回调时多用箭头函数，少踩坑</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="js-data">
+      <div class="chap-head"><span class="chap-num">06</span><h2>数组与对象：处理数据的主力</h2></div>
+      <p class="sub">后端返回的数据几乎都是“对象组成的数组”。下面这组商品数据，点不同的方法看它返回什么。这几个方法都<b>不改原数组</b>，而是返回新结果。</p>
+      <div class="lab" id="jsArrayLab">
+        <pre class="lab-code" data-src></pre>
+        <div class="lab-head lab-opts"></div>
+        <pre class="lab-code" data-call></pre>
+        <pre class="lab-out" data-out aria-live="polite"></pre>
+        <div class="lab-body"><p data-why></p></div>
+      </div>
+      <h3>对象、解构与展开</h3>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">对象的常用操作</span></div>
+<textarea data-code>const user = {
+  name: "Jim",
+  age: 28,
+  skills: ["HTML", "CSS"],
+  address: { city: "上海" },
+};
+
+// 读写属性
+console.log(user.name, user["age"], user.address.city);
+user.age = 29;
+
+// 解构：一次取出多个属性
+const { name, skills, address: { city } } = user;
+console.log(name, skills, city);
+
+// 数组解构
+const [first, second = "无"] = ["HTML"];
+console.log(first, second);
+
+// 展开 ...：复制并修改（React 里更新 state 天天用）
+const older = { ...user, age: 30 };
+const moreSkills = [...user.skills, "JavaScript"];
+console.log(older.age, user.age, moreSkills);
+
+// 遍历对象
+console.log(Object.keys(user), Object.entries({ a: 1, b: 2 }));
+
+// JSON：和后端交换数据的格式
+const text = JSON.stringify({ id: 1, done: false });
+console.log(text, JSON.parse(text).done);</textarea>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="js-class">
+      <div class="chap-head"><span class="chap-num">07</span><h2>类与模块</h2></div>
+      <p class="sub">class 是创建一类相似对象的模板。现代前端更多用函数和对象，但看懂 class 很必要，后端框架和各种库里到处都是。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">class 与继承</span></div>
+<textarea data-code>class Animal {
+  constructor(name) {      // new 的时候执行，用来初始化
+    this.name = name;
+  }
+  speak() {
+    return `${this.name} 发出了声音`;
+  }
+}
+
+class Dog extends Animal { // 继承 Animal 的属性和方法
+  speak() {                // 重写父类方法
+    return `${this.name}：汪汪！`;
+  }
+}
+
+const a = new Animal("小动物");
+const d = new Dog("旺财");
+console.log(a.speak());
+console.log(d.speak());
+console.log(d instanceof Animal);  // true：Dog 也是 Animal</textarea>
+      </div>
+      <h3>ES 模块：把代码拆成多个文件</h3>
+      <div class="compare">
+        <div class="cmp good"><h5>math.js：导出</h5><pre><span class="t-com">// 具名导出，可以有多个</span>
+<span class="t-kw">export</span> <span class="t-kw">const</span> add = (a, b) =&gt; a + b;
+<span class="t-kw">export</span> <span class="t-kw">const</span> PI = <span class="t-num">3.14</span>;
+
+<span class="t-com">// 默认导出，每个文件最多一个</span>
+<span class="t-kw">export</span> <span class="t-kw">default</span> <span class="t-kw">function</span> <span class="t-fn">square</span>(x) {
+  <span class="t-kw">return</span> x * x;
+}</pre></div>
+        <div class="cmp good"><h5>main.js：导入</h5><pre><span class="t-com">// 具名导入要用 {}，名字必须一致</span>
+<span class="t-kw">import</span> { add, PI } <span class="t-kw">from</span> <span class="t-val">"./math.js"</span>;
+
+<span class="t-com">// 默认导入不用 {}，名字随便起</span>
+<span class="t-kw">import</span> square <span class="t-kw">from</span> <span class="t-val">"./math.js"</span>;
+
+<span class="t-com">// 导入 npm 包</span>
+<span class="t-kw">import</span> React <span class="t-kw">from</span> <span class="t-val">"react"</span>;</pre></div>
+      </div>
+      <p>模块需要在 <code class="i">&lt;script type="module"&gt;</code> 里或者用 Vite 这类构建工具运行。后面的 React 和工程化模块里你会天天写 import。</p>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="js-dom">
+      <div class="chap-head"><span class="chap-num">08</span><h2>DOM 与事件：让页面动起来</h2></div>
+      <p class="sub">浏览器把 HTML 解析成一棵对象树，叫 DOM。JS 通过它找到元素、修改内容、监听点击。运行下面的代码后，在预览里添加和删除待办。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">待办清单</span><small class="cat-badge">页面 HTML 已写好，JS 负责交互</small></div>
+        <template><style>
+  body { font-family: system-ui, sans-serif; }
+  form { display: flex; gap: 8px; }
+  input { flex: 1; padding: 6px 8px; }
+  li { display: flex; justify-content: space-between; padding: 4px 0; }
+  li.done span { text-decoration: line-through; color: #999; }
+</style>
+<form id="form">
+  <input id="input" placeholder="要做什么？" required>
+  <button>添加</button>
+</form>
+<ul id="list">
+  <li><span>学 HTML</span><button class="del">删除</button></li>
+</ul>
+<p id="count"></p></template>
+<textarea data-code>// 1. 找到元素
+const form = document.querySelector("#form");
+const input = document.querySelector("#input");
+const list = document.querySelector("#list");
+const count = document.querySelector("#count");
+
+function updateCount() {
+  // 2. 修改内容
+  count.textContent = `共 ${list.children.length} 项`;
+}
+
+// 3. 监听提交事件
+form.addEventListener("submit", (event) => {
+  event.preventDefault();          // 阻止表单默认的刷新页面
+  const li = document.createElement("li");
+  li.innerHTML = `<span></span><button class="del">删除</button>`;
+  li.querySelector("span").textContent = input.value;  // 用 textContent 防止 XSS
+  list.append(li);
+  input.value = "";
+  updateCount();
+  console.log("添加了一项");
+});
+
+// 4. 事件委托：只在父元素上监听一次，新加的 li 也能响应
+list.addEventListener("click", (event) => {
+  const li = event.target.closest("li");
+  if (!li) return;
+  if (event.target.matches(".del")) {
+    li.remove();
+    updateCount();
+  } else {
+    li.classList.toggle("done");   // 点文字切换完成状态
+  }
+});
+
+updateCount();</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>API</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>document.querySelector(css)</td><td>用 CSS 选择器找第一个匹配的元素，找不到返回 null</td></tr>
+          <tr><td>querySelectorAll(css)</td><td>找所有匹配的元素，可以用 forEach 遍历</td></tr>
+          <tr><td>el.textContent</td><td>读写纯文本，安全</td></tr>
+          <tr><td>el.innerHTML</td><td>读写 HTML。<b>不要</b>把用户输入直接塞进去，会被注入脚本（XSS）</td></tr>
+          <tr><td>el.classList.add / remove / toggle</td><td>增删 class，配合 CSS 切换样式，最常用</td></tr>
+          <tr><td>el.style.color = "red"</td><td>直接改行内样式</td></tr>
+          <tr><td>el.setAttribute / el.dataset</td><td>读写属性和 data-* 数据</td></tr>
+          <tr><td>document.createElement / el.append / el.remove</td><td>创建、插入、删除元素</td></tr>
+          <tr><td>el.addEventListener(type, fn)</td><td>监听事件：click、input、submit、keydown、change……</td></tr>
+          <tr><td>event.target / preventDefault()</td><td>事件发生在哪个元素上 / 阻止默认行为</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">事件冒泡</span><p>点击按钮时，事件会从按钮一路向上传给 li、ul、body。所以只需要在父元素上监听一次，用 <code class="i">event.target</code> 判断点的是谁，这就是<b>事件委托</b>。列表项很多、或者会动态增加时特别好用。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="js-async">
+      <div class="chap-head"><span class="chap-num">09</span><h2>异步：Promise、async / await 与 fetch</h2></div>
+      <p class="sub">请求后端、读文件、定时器都需要时间。JS 不会傻等，而是先往下执行，等结果回来再处理。这就是异步，也是连接前后端的关键。</p>
+      <h3>先猜一猜：这四行按什么顺序输出？</h3>
+      <div class="lab" id="jsOrder">
+        <pre class="lab-code" data-code></pre>
+        <div class="lab-body">
+          <p>按你认为的输出顺序，依次点下面的按钮：</p>
+          <div class="order-pick"></div>
+          <div class="order-res" aria-live="polite"></div>
+          <p data-why hidden></p>
+          <div><button type="button" class="chip" data-reset>重来</button></div>
+        </div>
+      </div>
+      <h3>从回调到 async / await</h3>
+      <p>下面的 <code class="i">mockFetch</code> 模拟了一个要 0.5 秒才返回的后端接口，用法和真正的 <code class="i">fetch</code> 一样。把 <code class="i">"/api/user/1"</code> 改成 <code class="i">"/api/user/99"</code> 看看出错时怎么处理。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">请求数据</span></div>
+        <template><script>
+  // 模拟后端：0.5 秒后返回，和浏览器自带的 fetch 用法相同
+  const DB = { 1: { id: 1, name: "Jim", role: "学生" }, 2: { id: 2, name: "Lily", role: "老师" } };
+  function mockFetch(url) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const id = Number(url.split("/").pop());
+        const user = DB[id];
+        resolve({
+          ok: !!user,
+          status: user ? 200 : 404,
+          json: async () => user ?? { error: "用户不存在" },
+        });
+      }, 500);
+    });
+  }
+</script></template>
+<textarea data-code>// 写法一：Promise 链 .then().catch()
+mockFetch("/api/user/2")
+  .then((res) => res.json())
+  .then((data) => console.log("then 拿到：", data));
+
+// 写法二：async / await，读起来像同步代码，推荐
+async function loadUser(id) {
+  try {
+    const res = await mockFetch(`/api/user/${id}`);
+    if (!res.ok) {
+      throw new Error(`请求失败，状态码 ${res.status}`);
+    }
+    const user = await res.json();
+    console.log("await 拿到：", user);
+    return user;
+  } catch (err) {
+    console.error("出错了：", err.message);
+  } finally {
+    console.log("不管成功失败，都会执行 finally");
+  }
+}
+
+loadUser(1);
+console.log("我先输出，因为请求还在路上……");
+
+// 同时发多个请求，全部回来再处理
+Promise.all([mockFetch("/api/user/1"), mockFetch("/api/user/2")])
+  .then((list) => console.log("两个请求都回来了，状态：", list.map((r) => r.status)));</textarea>
+      </div>
+      <h3>真实的 fetch 长这样</h3>
+      <div class="compare">
+        <div class="cmp good"><h5>GET：读取数据</h5><pre><span class="t-kw">const</span> res = <span class="t-kw">await</span> <span class="t-fn">fetch</span>(<span class="t-val">"/api/todos"</span>);
+<span class="t-kw">if</span> (!res.ok) <span class="t-kw">throw</span> <span class="t-kw">new</span> <span class="t-fn">Error</span>(res.status);
+<span class="t-kw">const</span> todos = <span class="t-kw">await</span> res.<span class="t-fn">json</span>();</pre></div>
+        <div class="cmp good"><h5>POST：提交 JSON</h5><pre><span class="t-kw">const</span> res = <span class="t-kw">await</span> <span class="t-fn">fetch</span>(<span class="t-val">"/api/todos"</span>, {
+  method: <span class="t-val">"POST"</span>,
+  headers: { <span class="t-val">"Content-Type"</span>: <span class="t-val">"application/json"</span> },
+  body: JSON.<span class="t-fn">stringify</span>({ title: <span class="t-val">"学 JS"</span> }),
+});</pre></div>
+      </div>
+      <div class="tip warn"><span class="lbl">易错</span><p>fetch 只有网络断了才会 reject。服务器返回 404、500 时 fetch 依然“成功”，所以一定要检查 <code class="i">res.ok</code> 或 <code class="i">res.status</code>。另外 <code class="i">await</code> 只能写在 <code class="i">async</code> 函数里（模块顶层除外）。</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="js-errors">
+      <div class="chap-head"><span class="chap-num">10</span><h2>错误与调试</h2></div>
+      <p class="sub">报错不可怕，读懂报错信息是最重要的调试能力。运行下面的代码，看看控制台里的红字说了什么，再把它修好。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">找 bug</span></div>
+<textarea data-code>const user = { name: "Jim", tags: ["前端"] };
+
+console.log(user.name.toUpperCase());
+console.log(user.tags.length);
+
+// 下面这行会报 TypeError：user.profile 是 undefined，不能再读 .avatar
+// 修法：user.profile?.avatar
+console.log(user.profile.avatar);
+
+console.log("上面报错后，这行不会执行");</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>错误</th><th>通常的原因</th></tr></thead>
+        <tbody>
+          <tr><td>ReferenceError: x is not defined</td><td>变量名拼错了，或者在声明前就用了</td></tr>
+          <tr><td>TypeError: Cannot read properties of undefined</td><td>对 undefined / null 读属性。数据还没请求回来、或者路径写错时最常见</td></tr>
+          <tr><td>TypeError: x is not a function</td><td>调用的东西不是函数，比如方法名拼错</td></tr>
+          <tr><td>SyntaxError: Unexpected token</td><td>语法写错：少了括号、引号、逗号</td></tr>
+          <tr><td>TypeError: Assignment to constant variable</td><td>给 const 变量重新赋值</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="dots">
+        <li><code class="i">console.log</code> 打印中间值，<code class="i">console.table(数组)</code> 用表格看数据。</li>
+        <li>在代码里写一行 <code class="i">debugger;</code>，打开开发者工具后运行到这里会自动暂停，可以一步步执行、查看每个变量。</li>
+        <li>Sources 面板可以直接点行号打断点，Network 面板看请求有没有发出去、返回了什么。</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="js-sheet">
+      <div class="chap-head"><span class="chap-num">11</span><h2>常用方法速查</h2></div>
+      <p class="sub">忘了方法名回来搜一下。</p>
+      <div class="sheet-tools">
+        <input type="search" id="jsSheetQ" placeholder="搜索方法或用途，例如：去空格、排序" aria-label="搜索 JS 方法">
+        <div id="jsSheetCats" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>方法</th><th>用途</th><th>分类</th></tr></thead>
+        <tbody id="jsSheetBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="js-quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：12 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">12</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="js-challenge">
+      <div class="chap-head"><span class="chap-num">13</span><h2>动手挑战：购物车小工具</h2></div>
+      <p class="sub">补全下面 5 个函数。每次修改后会自动跑测试，通过的项会打勾；也可以点“▶ 运行”在控制台里自己试。代码会保存在当前浏览器里。</p>
+      <ul class="checks" id="jsChecks"></ul>
+      <div class="editor" id="jsChallengeEd" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">cart.js</span><span class="ed-tools"><button class="chip" type="button" id="jsShowAnswer">看参考答案</button></span></div>
+        <template><script>
+  // 模拟后端：0.3 秒后返回购物车数据
+  function mockFetch(url) {
+    return new Promise((resolve) => setTimeout(() => resolve({
+      ok: true,
+      json: async () => [
+        { name: "键盘", price: 199, qty: 1, category: "外设" },
+        { name: "鼠标", price: 99, qty: 2, category: "外设" },
+        { name: "显示器", price: 1299, qty: 1, category: "显示" },
+      ],
+    }), 300));
+  }
+</script></template>
+<textarea data-code data-store="felearn-js-challenge">const cart = [
+  { name: "键盘", price: 199, qty: 1, category: "外设" },
+  { name: "鼠标", price: 99, qty: 2, category: "外设" },
+  { name: "显示器", price: 1299, qty: 1, category: "显示" },
+];
+
+// 1. 返回总价：每件商品 price × qty 加起来
+function total(items) {
+  // TODO
+}
+
+// 2. 返回价格不超过 max 的商品名字数组，例如 ["键盘", "鼠标"]
+function cheapItems(items, max) {
+  // TODO
+}
+
+// 3. 把数字格式化成 "¥12.50"：两位小数，前面加 ¥
+function formatPrice(n) {
+  // TODO
+}
+
+// 4. 按分类分组：{ 外设: ["键盘", "鼠标"], 显示: ["显示器"] }
+function groupByCategory(items) {
+  // TODO
+}
+
+// 5. 用 await mockFetch("/api/cart") 取数据，再用 res.json() 解析，返回总价
+async function loadCartTotal() {
+  // TODO
+}
+
+console.log(total(cart), cheapItems(cart, 200), formatPrice(12.5));</textarea>
+      </div>
+      <div class="test-bar"><button class="btn" type="button" id="jsRunTests">重新跑测试</button><span class="cat-badge" id="jsTestState"></span></div>
+      <div id="jsDoneBanner" class="done-banner" hidden>全部通过。你已经能用数组方法处理数据、用 async / await 请求接口了，下一站是浏览器与网络。</div>
+      <footer class="end">JavaScript 核心 · FeLearn 一周全栈计划。系统学习推荐 MDN 中文的 JavaScript 指南：developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
   { id: "html5", title: "HTML5 核心速通", short: "HTML5", c: "--html", day: "D1", desc: "页面骨架、语义化标签、表单，每个示例都能边改边看。", ready: true },
   { id: "css", title: "CSS 样式与布局", short: "CSS", c: "--css", day: "D1–D2", desc: "选择器、优先级、盒模型、Flex 与 Grid、响应式，带练习场和挑战。", ready: true },
-  { id: "js", title: "JavaScript", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、DOM 与事件、异步与 fetch。", ready: false },
+  { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
   { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: false },
   { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: false },
+  { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: false },
   { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
 ];
 </script>
@@ -1926,6 +2570,22 @@ const FL = (function(){
     return out;
   }
 
+  // JS 高亮：注释、字符串、关键字、数字；JSX 的标签名也顺带标出来
+  const JS_KW=new Set('const let var function return if else for while do break continue switch case default new class extends super this typeof instanceof in of try catch finally throw async await import export from as true false null undefined yield delete void static get set'.split(' '));
+  function hlJs(src){
+    const re=/(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\[\s\S]|[^`\\])*`?)|(<\/?[A-Za-z][\w.]*|\/?>)|(\b\d[\d_.]*\b)|([A-Za-z_$][\w$]*)|([\s\S])/g;
+    let out='',m;
+    while((m=re.exec(src))){
+      if(m[1])out+='<span class="t-com">'+esc(m[1])+'</span>';
+      else if(m[2])out+='<span class="t-val">'+esc(m[2])+'</span>';
+      else if(m[3])out+='<span class="t-tag">'+esc(m[3])+'</span>';
+      else if(m[4])out+='<span class="t-num">'+esc(m[4])+'</span>';
+      else if(m[5])out+=JS_KW.has(m[5])?'<span class="t-kw">'+m[5]+'</span>':(src[re.lastIndex]==='('?'<span class="t-fn">'+m[5]+'</span>':esc(m[5]));
+      else out+=esc(m[6]);
+    }
+    return out;
+  }
+
   /* ---------- 预览里注入的辅助脚本 ---------- */
   const BASE = '<style>:where(html){color-scheme:light}:where(body){font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;margin:0;padding:14px;line-height:1.6;color:#1d2433;background:#fff}'
     +'#__fl_toast{position:fixed;left:10px;right:10px;bottom:10px;background:#18202E;color:#fff;font:13px/1.55 system-ui,sans-serif;padding:9px 12px;border-radius:8px;white-space:pre-wrap;z-index:2147483647;box-shadow:0 6px 20px rgba(0,0,0,.25)}</style>'
@@ -1954,24 +2614,67 @@ const FL = (function(){
      <div class="editor">：textarea 里是完整 HTML，右侧预览。
      <div class="editor" data-mode="css">：textarea 里只写 CSS，HTML 固定写在 <template> 里。
      data-resize="600"：预览上方多一个“预览宽度”滑块，初始 600px；只写 data-resize 时初始跟随预览区宽度。 */
+  /* ---------- 编辑器的几种模式 ----------
+     html（默认）：textarea 里是完整 HTML，改完自动刷新预览。
+     css：textarea 里只写 CSS，HTML 固定写在 <template> 里。
+     js：textarea 里写 JavaScript，点“运行”执行，console.log 显示在预览下方的控制台；<template> 可选，作为页面上的 HTML。
+     react：textarea 里写 JSX，用 React 18 + Babel 在预览里渲染。
+     模块可以用 FL.addMode(name, {...}) 注册自己的模式（例如后端模块的模拟服务器、SQL 练习）。
+     data-resize="600"：预览上方多一个“预览宽度”滑块，初始 600px；只写 data-resize 时初始跟随预览区宽度。 */
+  const CDN={
+    react:'https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',
+    reactDom:'https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',
+    babel:'https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js',
+    sqlJs:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js',
+    sqlWasm:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/'
+  };
+  // 预览里的“控制台”：接管 console.*，把输出和报错显示在页面上
+  const CONSOLE='<style>#__fl_con{margin-top:12px;border:1px solid #d5dbe4;border-radius:8px;overflow:hidden;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}'
+    +'#__fl_con>b{display:block;padding:4px 10px;background:#eef1f5;color:#5b6577;font:600 11px/1.6 system-ui,sans-serif;letter-spacing:.06em}'
+    +'#__fl_con>div{padding:3px 10px;border-top:1px solid #eef1f5;white-space:pre-wrap;overflow-wrap:anywhere;color:#1d2433}'
+    +'#__fl_con>.w{background:#fff8e1;color:#7a5600}#__fl_con>.e{background:#fdecea;color:#b42318}#__fl_con>.n{color:#97a1b3}</style>'
+    +'<script>(function(){var box;function el(){if(!box){box=document.createElement("div");box.id="__fl_con";box.innerHTML="<b>控制台</b>";(document.body||document.documentElement).appendChild(box);}return box;}'
+    +'function f(v,d){d=d||0;if(typeof v==="string")return d?JSON.stringify(v):v;if(typeof v==="function")return "ƒ "+(v.name||"匿名函数")+"()";if(v===undefined)return "undefined";if(v===null)return "null";'
+    +'if(typeof v==="number"||typeof v==="boolean"||typeof v==="bigint")return String(v);if(v instanceof Error)return v.name+": "+v.message;if(typeof Element!=="undefined"&&v instanceof Element)return "<"+v.tagName.toLowerCase()+(v.id?"#"+v.id:"")+(v.className&&typeof v.className==="string"?"."+v.className.trim().split(/\\s+/).join("."):"")+">";'
+    +'if(v instanceof Promise)return "Promise {…}";if(d>3)return Array.isArray(v)?"[…]":"{…}";if(Array.isArray(v))return "["+v.map(function(x){return f(x,d+1)}).join(", ")+"]";'
+    +'if(v instanceof Map)return "Map("+v.size+") {"+Array.from(v).map(function(e){return f(e[0],d+1)+" => "+f(e[1],d+1)}).join(", ")+"}";if(v instanceof Set)return "Set("+v.size+") {"+Array.from(v).map(function(x){return f(x,d+1)}).join(", ")+"}";'
+    +'try{var k=Object.keys(v);return (v.constructor&&v.constructor!==Object&&v.constructor.name?v.constructor.name+" ":"")+"{"+k.map(function(x){return x+": "+f(v[x],d+1)}).join(", ")+"}";}catch(e){return String(v);}}'
+    +'function add(c,a){var d=document.createElement("div");d.className=c;d.textContent=Array.prototype.map.call(a,function(x){return f(x)}).join(" ");el().appendChild(d);}'
+    +'["log","info","debug","table"].forEach(function(m){console[m]=function(){add("",arguments)}});console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'
+    +'window.addEventListener("error",function(e){add("e",["❌ "+(e.error&&e.error.name?e.error.name+": "+e.error.message:e.message)+(e.lineno?"（第 "+e.lineno+" 行附近）":"")]);});'
+    +'window.addEventListener("unhandledrejection",function(e){add("e",["❌ 未处理的 Promise 错误：",e.reason]);});'
+    +'window.addEventListener("load",function(){setTimeout(function(){if(box&&box.children.length===1){var d=document.createElement("div");d.className="n";d.textContent="（没有输出）";box.appendChild(d);}else if(!box){add("n",["（没有输出）"]);}},60);});'
+    +'})();<\/script>';
+  const modes={
+    html:{hl:hl,label:'代码编辑区',build:(c,t,ed)=>c+BASE+(ed.cb&&ed.cb.checked?OUTLINE:'')},
+    css:{hl:hlCss,label:'CSS 编辑区',build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>'+c+'</style></head><body>'+t+BASE+'</body></html>'},
+    js:{hl:hlJs,label:'JavaScript 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+t+CONSOLE+BASE+'<script>'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'},
+    react:{hl:hlJs,label:'React 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+(t||'<div id="root"></div>')+CONSOLE+BASE
+      +'<script src="'+CDN.react+'"><\/script><script src="'+CDN.reactDom+'"><\/script><script src="'+CDN.babel+'"><\/script>'
+      +'<script>if(!window.Babel)console.error("React 运行库没有加载成功，检查一下网络后再点“运行”。");<\/script>'
+      +'<script type="text/babel" data-presets="react">'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'}
+  };
+  function addMode(name,m){modes[name]=Object.assign({hl:hlJs,label:'代码编辑区'},m);}
+
   const editors=[];
   function makeEditor(box){
     const ta=box.querySelector('textarea[data-code]');
-    const css=box.dataset.mode==='css';
-    const tpl=css?box.querySelector('template').innerHTML:'';
+    const mode=modes[box.dataset.mode||'html'];
+    const tplEl=box.querySelector('template');
+    const tpl=tplEl?tplEl.innerHTML:'';
     const original=ta.value;
     let stored=null;
     if(ta.dataset.store){try{stored=localStorage.getItem(ta.dataset.store);}catch(e){}}
     if(stored)ta.value=stored;
     ta.removeAttribute('data-code');
     ta.spellcheck=false;ta.setAttribute('autocapitalize','off');ta.setAttribute('autocomplete','off');
-    ta.setAttribute('aria-label',css?'CSS 编辑区':'代码编辑区');
+    ta.setAttribute('aria-label',mode.label);
     const grid=document.createElement('div');grid.className='ed-grid';
     const code=document.createElement('div');code.className='code';
     const pre=document.createElement('pre');pre.setAttribute('aria-hidden','true');
     code.append(pre,ta);
     const pv=document.createElement('div');pv.className='pv';
-    pv.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><span>浏览器预览</span></div>';
+    pv.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><span>'+(mode.manual?'运行结果':'浏览器预览')+'</span></div>';
     const stage=document.createElement('div');stage.className='pv-stage';
     const fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts allow-forms');fr.title='预览';
     stage.append(fr);pv.append(stage);
@@ -1979,13 +2682,13 @@ const FL = (function(){
     box.append(grid);
 
     const tools=box.querySelector('.ed-tools')||(()=>{const t=document.createElement('span');t.className='ed-tools';box.querySelector('.ed-bar').append(t);return t;})();
-    let cb=null;
-    if(!css){
+    const ed={box,ta,fr,original,onchange:null,cb:null};
+    if(mode===modes.html){
       const lab=document.createElement('label');lab.className='chip';
-      cb=document.createElement('input');cb.type='checkbox';cb.id='ol-'+editors.length;cb.checked=box.dataset.outline==='on';
-      lab.append(cb,document.createTextNode('标出元素'));
+      ed.cb=document.createElement('input');ed.cb.type='checkbox';ed.cb.id='ol-'+editors.length;ed.cb.checked=box.dataset.outline==='on';
+      lab.append(ed.cb,document.createTextNode('标出元素'));
       tools.append(lab);
-      cb.addEventListener('change',render);
+      ed.cb.addEventListener('change',render);
     }
     if(box.dataset.resize!==undefined){
       const lab=document.createElement('label');lab.className='chip';
@@ -1998,25 +2701,31 @@ const FL = (function(){
       rg.addEventListener('input',setW);
       if(auto)out.textContent='自适应';else setW();
     }
+    if(mode.manual){
+      const run=document.createElement('button');run.type='button';run.className='chip run';run.innerHTML='▶ 运行';run.title='Ctrl + Enter';
+      run.addEventListener('click',render);
+      tools.prepend(run);
+      ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();render();}});
+    }
     const rs=document.createElement('button');rs.type='button';rs.className='chip';rs.textContent='还原代码';
     tools.append(rs);
 
     let timer=null;
-    const ed={box,ta,fr,original,onchange:null};
-    function paint(){pre.innerHTML=(css?hlCss(ta.value):hl(ta.value))+'\n';autosize(ta);}
+    function paint(){pre.innerHTML=mode.hl(ta.value)+'\n';autosize(ta);}
     function render(){
       frames.delete(fr.contentWindow);
-      fr.srcdoc=css?'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>'+ta.value+'</style></head><body>'+tpl+BASE+'</body></html>'
-                   :ta.value+BASE+(cb&&cb.checked?OUTLINE:'');
+      fr.srcdoc=mode.build(ta.value,tpl,ed);
       requestAnimationFrame(()=>frames.set(fr.contentWindow,fr));
     }
+    ed.render=render;
     fr.addEventListener('load',()=>frames.set(fr.contentWindow,fr));
     function changed(){
-      paint();clearTimeout(timer);timer=setTimeout(render,300);
+      paint();
+      if(!mode.manual){clearTimeout(timer);timer=setTimeout(render,300);}
       if(ta.dataset.store){try{localStorage.setItem(ta.dataset.store,ta.value);}catch(e){}}
       if(ed.onchange)ed.onchange(ta.value);
     }
-    ed.set=v=>{ta.value=v;changed();};
+    ed.set=v=>{ta.value=v;changed();if(mode.manual)render();};
     ta.addEventListener('input',changed);
     ta.addEventListener('keydown',e=>{
       if(e.key==='Tab'&&!e.shiftKey&&!e.altKey&&!e.metaKey&&!e.ctrlKey){
@@ -2030,6 +2739,25 @@ const FL = (function(){
     editors.push(ed);
     return ed;
   }
+
+  /* ---------- 自动判题：在隐藏的沙箱 iframe 里运行学习者的代码，再逐条执行检查表达式 ----------
+     tests 是字符串数组，每条是一个返回 true/false 的 JS 表达式（可以 await）。返回 Promise<boolean[]>。 */
+  let testSeq=0;
+  function runTests(code,tests,{prelude='',html='',timeout=3000}={}){
+    const id='t'+(++testSeq);
+    const f=document.createElement('iframe');
+    f.setAttribute('sandbox','allow-scripts');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.title='判题';
+    f.style.cssText='position:absolute;left:-10000px;top:0;width:600px;height:400px;border:0;visibility:hidden';
+    const harness='<script>(async function(){var T='+JSON.stringify(tests)+',r=[];for(var i=0;i<T.length;i++){try{r.push(!!(await (0,eval)("(async()=>("+T[i]+"))()")));}catch(e){r.push(false);}}parent.postMessage({__flT:"'+id+'",r:r},"*");})();<\/script>';
+    f.srcdoc='<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'+html+'<script>console.log=function(){};'+prelude+'<\/script><script>'+code.replace(/<\/script/gi,'<\\/script')+'<\/script>'+harness+'</body></html>';
+    return new Promise(res=>{
+      const done=r=>{removeEventListener('message',on);clearTimeout(tm);f.remove();res(r);};
+      const on=e=>{if(e.source===f.contentWindow&&e.data&&e.data.__flT===id)done(e.data.r);};
+      const tm=setTimeout(()=>done(tests.map(()=>false)),timeout);
+      addEventListener('message',on);
+      document.body.append(f);
+    });
+  }
   const reflow=()=>editors.forEach(ed=>autosize(ed.ta));
   window.addEventListener('resize',reflow);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(reflow);
@@ -2040,7 +2768,7 @@ const FL = (function(){
     data.forEach(([src,note])=>{
       const li=document.createElement('li');
       const b=document.createElement('button');b.type='button';b.className='rl';b.setAttribute('aria-expanded','false');
-      b.innerHTML='<span class="src">'+(r.dataset.mode==='css'?hlCss(src):hl(src))+'</span><span class="more">解释</span>';
+      b.innerHTML='<span class="src">'+(r.dataset.mode==='css'?hlCss(src):r.dataset.mode==='js'?hlJs(src):hl(src))+'</span><span class="more">解释</span>';
       const n=document.createElement('div');n.className='note';n.innerHTML=note;n.hidden=true;
       b.addEventListener('click',()=>{const open=n.hidden;n.hidden=!open;li.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));});
       li.append(b,n);ol.append(li);
@@ -2101,7 +2829,7 @@ const FL = (function(){
     addEventListener('scroll',onScroll,{passive:true});onScroll();
   }
 
-  return {esc,hl,hlCss,makeEditor,makeReader,makeQuiz,tocSpy};
+  return {esc,hl,hlCss,hlJs,makeEditor,makeReader,makeQuiz,tocSpy,runTests,addMode,CONSOLE,BASE,CDN};
 })();
 </script>
 
@@ -2616,6 +3344,210 @@ body {
   chEd.onchange=v=>{clearTimeout(timer);timer=setTimeout(()=>runChecks(v),400);};
   runChecks(chEd.ta.value);
   view.querySelector('#cssShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：JavaScript 核心 ====================== */
+(function(){
+  const {esc,hlJs}=FL;
+  const view=document.querySelector('.v-js');
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  /* ---------- 真假值 ---------- */
+  const TF=[['0',false],['""',false],['"0"',true],['" "',true],['[]',true],['{}',true],['null',false],['undefined',false],['NaN',false],['-1',true],['false',false],['"false"',true]];
+  const tfBox=view.querySelector('#jsTruthy'), tf=tfBox.querySelector('.tf'), tfMsg=tfBox.querySelector('.tf-msg');
+  const MSG={'"0"':'字符串 "0" 不是空字符串，所以是真。','" "':'只有一个空格也不是空字符串，是真。','[]':'空数组是对象，对象永远是真。判断数组是否为空要写 arr.length === 0。','{}':'空对象也是真。','"false"':'这是一个字符串，不是布尔值 false，所以是真。','NaN':'NaN（不是数字）是假值。','-1':'除了 0 和 NaN，所有数字都是真，负数也一样。'};
+  function reveal(b){const v=b.dataset.v==='1';b.classList.add(v?'t':'f');b.querySelector('small').textContent=v?'真 true':'假 false';}
+  TF.forEach(([s,v])=>{
+    const b=document.createElement('button');b.type='button';b.dataset.v=v?'1':'0';b.innerHTML=esc(s)+'<small>?</small>';
+    b.addEventListener('click',()=>{reveal(b);tfMsg.innerHTML=esc(s)+' → <b>'+(v?'真':'假')+'</b>。'+(MSG[s]||(v?'':'它是 6 个假值之一。'));});
+    tf.append(b);
+  });
+  tfBox.querySelector('[data-all]').addEventListener('click',()=>tf.querySelectorAll('button').forEach(reveal));
+  tfBox.querySelector('[data-reset]').addEventListener('click',()=>tf.querySelectorAll('button').forEach(b=>{b.className='';b.querySelector('small').textContent='?';}));
+
+  /* ---------- 闭包逐行解读 ---------- */
+  FL.makeReader(view.querySelector('#jsClosure'),[
+    ['function createCounter() {','定义一个“制造计数器”的函数。'],
+    ['  let count = 0;','<b>外部变量。</b>count 是 createCounter 里的局部变量，外面的代码没办法直接改它，相当于“私有数据”。'],
+    ['  return () => {','返回一个箭头函数。注意返回的是<b>函数本身</b>，还没有执行它。'],
+    ['    count++;','<b>闭包就在这里：</b>内部函数用到了外部的 count。createCounter 执行完以后，count 本该被回收，但因为内部函数还“记着”它，它会一直活着。'],
+    ['    return count;','返回当前的计数。'],
+    ['  };','内部函数结束。'],
+    ['}','createCounter 结束。'],
+    ['const a = createCounter();','调用一次，得到计数器 a，它有自己的一份 count。'],
+    ['const b = createCounter();','再调用一次，得到计数器 b，它的 count 和 a 的<b>互不影响</b>。'],
+    ['a(); a(); console.log(a());','a 被调用了三次，输出 3。'],
+    ['console.log(b());','b 第一次调用，输出 1。每次调用 createCounter 都会产生一个新的闭包。']
+  ],true);
+
+  /* ---------- 数组实验台 ---------- */
+  const products=[{name:'键盘',price:199,category:'外设'},{name:'显示器',price:1299,category:'显示'},{name:'鼠标',price:99,category:'外设'},{name:'耳机',price:399,category:'音频'}];
+  const lab=view.querySelector('#jsArrayLab');
+  lab.querySelector('[data-src]').innerHTML=hlJs('const products = [\n'+products.map(p=>'  { name: "'+p.name+'", price: '+p.price+', category: "'+p.category+'" },').join('\n')+'\n];');
+  const show=v=>JSON.stringify(v,null,2).replace(/"(\w+)":/g,'$1:').replace(/\{\n\s+/g,'{ ').replace(/,\n\s+(?=\w+:)/g,', ').replace(/\n\s+\}/g,' }');
+  const AM=[
+    ['map','products.map(p => p.name)',()=>products.map(p=>p.name),'<b>map</b>：把每一项变成另一个值，返回<b>同样长度</b>的新数组。React 里把数据渲染成列表就用它。'],
+    ['filter','products.filter(p => p.price < 300)',()=>products.filter(p=>p.price<300),'<b>filter</b>：只留下回调返回 true 的项。做搜索、筛选、删除都用它。'],
+    ['find','products.find(p => p.name === "鼠标")',()=>products.find(p=>p.name==='鼠标'),'<b>find</b>：返回<b>第一个</b>满足条件的项本身，找不到返回 undefined。按 id 找一条数据就用它。'],
+    ['some / every','[products.some(p => p.price > 1000), products.every(p => p.price > 50)]',()=>[products.some(p=>p.price>1000),products.every(p=>p.price>50)],'<b>some</b>：有一个满足就返回 true；<b>every</b>：全部满足才返回 true。'],
+    ['reduce','products.reduce((sum, p) => sum + p.price, 0)',()=>products.reduce((s,p)=>s+p.price,0),'<b>reduce</b>：把整个数组“累积”成一个值。第二个参数 0 是初始值，sum 是上一轮的结果。求和、计数、分组都能用它。'],
+    ['sort','[...products].sort((a, b) => a.price - b.price).map(p => p.name)',()=>[...products].sort((a,b)=>a.price-b.price).map(p=>p.name),'<b>sort</b>：排序，回调返回负数时 a 排前面。注意 sort 会<b>修改原数组</b>，所以先用 [...products] 复制一份。'],
+    ['includes / indexOf','[["a", "b"].includes("b"), ["a", "b"].indexOf("c")]',()=>[['a','b'].includes('b'),['a','b'].indexOf('c')],'<b>includes</b> 判断有没有，<b>indexOf</b> 返回位置，没有就是 -1。'],
+    ['forEach','products.forEach(p => console.log(p.name))',()=>'（forEach 没有返回值，只是对每一项执行一次回调）\n键盘\n显示器\n鼠标\n耳机','<b>forEach</b>：只是遍历执行，<b>不返回</b>新数组。需要结果时用 map / filter。']
+  ];
+  const opts=lab.querySelector('.lab-opts');
+  function pick(i){
+    const [,call,fn,why]=AM[i];
+    opts.querySelectorAll('button').forEach((b,k)=>b.setAttribute('aria-pressed',String(k===i)));
+    lab.querySelector('[data-call]').innerHTML=hlJs(call);
+    const r=fn();lab.querySelector('[data-out]').textContent='→ '+(typeof r==='string'?r:show(r));
+    lab.querySelector('[data-why]').innerHTML=why;
+  }
+  AM.forEach((m,i)=>{const b=document.createElement('button');b.type='button';b.textContent=m[0];b.addEventListener('click',()=>pick(i));opts.append(b);});
+  pick(0);
+
+  /* ---------- 猜输出顺序 ---------- */
+  const ORD=view.querySelector('#jsOrder');
+  const LINES=['console.log("A 同步代码");','setTimeout(() => console.log("B setTimeout"), 0);','Promise.resolve().then(() => console.log("C Promise.then"));','console.log("D 同步代码");'];
+  const RIGHT=['A','D','C','B'];
+  ORD.querySelector('[data-code]').innerHTML=hlJs(LINES.join('\n'));
+  const pickEl=ORD.querySelector('.order-pick'), res=ORD.querySelector('.order-res'), why=ORD.querySelector('[data-why]');
+  let seqO=[];
+  function drawOrder(){
+    pickEl.innerHTML='';res.innerHTML='<span style="background:none;color:var(--muted)">你的顺序会显示在这里</span>';why.hidden=true;seqO=[];
+    ['B','D','A','C'].forEach(k=>{
+      const b=document.createElement('button');b.type='button';b.textContent=k;b.title=LINES.find(l=>l.includes('"'+k+' '));
+      b.addEventListener('click',()=>{
+        b.disabled=true;seqO.push(k);
+        res.innerHTML=seqO.map((x,i)=>'<span'+(seqO.length===4?' class="'+(x===RIGHT[i]?'ok':'no')+'"':'')+'>'+(i+1)+'. '+x+'</span>').join('');
+        if(seqO.length===4){
+          const ok=seqO.join('')===RIGHT.join('');
+          why.hidden=false;
+          why.innerHTML=(ok?'<b>完全正确。</b>':'<b>正确顺序是 A → D → C → B。</b>')+'同步代码先全部跑完（A、D）；然后执行<b>微任务</b>，Promise 的 then 属于微任务（C）；最后才轮到<b>宏任务</b>，setTimeout 哪怕延迟写 0 也排在最后（B）。这套调度机制叫<b>事件循环</b>。';
+        }
+      });
+      pickEl.append(b);
+    });
+  }
+  ORD.querySelector('[data-reset]').addEventListener('click',drawOrder);
+  drawOrder();
+
+  /* ---------- 方法速查 ---------- */
+  const SHEET=[
+    ['str.length','字符串长度','字符串'],['str.trim()','去掉首尾空格','字符串'],['str.toUpperCase() / toLowerCase()','转大写 / 小写','字符串'],
+    ['str.includes(s)','是否包含某段文字','字符串'],['str.startsWith(s) / endsWith(s)','是否以某段开头 / 结尾','字符串'],['str.split(sep)','按分隔符切成数组','字符串'],
+    ['str.replace(a, b) / replaceAll','替换文字','字符串'],['str.slice(start, end)','截取一段','字符串'],['str.padStart(n, "0")','补齐长度，常用于补 0','字符串'],
+    ['arr.push(x) / pop()','末尾添加 / 删除（会改原数组）','数组'],['arr.unshift(x) / shift()','开头添加 / 删除（会改原数组）','数组'],['arr.map(fn)','逐项转换，返回新数组','数组'],
+    ['arr.filter(fn)','筛选，返回新数组','数组'],['arr.find(fn) / findIndex(fn)','找第一个满足条件的项 / 下标','数组'],['arr.reduce(fn, init)','累积成一个值','数组'],
+    ['arr.some(fn) / every(fn)','有一个满足 / 全部满足','数组'],['arr.includes(x)','是否包含','数组'],['arr.join(sep)','拼成字符串','数组'],
+    ['arr.slice(a, b)','截取一段，不改原数组','数组'],['arr.splice(i, n)','删除或插入，会改原数组','数组'],['arr.sort(fn)','排序，会改原数组','数组'],
+    ['[...arr] / Array.from(x)','复制数组 / 把类数组转成数组','数组'],['arr.flat() / flatMap(fn)','拍平嵌套数组','数组'],
+    ['Object.keys(obj) / values / entries','取键 / 值 / 键值对数组','对象'],['{ ...obj, a: 1 }','复制并覆盖属性','对象'],['structuredClone(obj)','深拷贝','对象'],
+    ['JSON.stringify(v) / JSON.parse(s)','转成 JSON 字符串 / 解析回来','对象'],['obj?.a?.b','可选链，中间为空不报错','对象'],
+    ['Math.round / floor / ceil','四舍五入 / 向下 / 向上取整','数字'],['Math.max(...arr) / Math.min','最大 / 最小值','数字'],['Math.random()','0 到 1 的随机数','数字'],
+    ['n.toFixed(2)','保留两位小数，返回字符串','数字'],['Number(s) / parseInt(s) / parseFloat(s)','字符串转数字','数字'],['Number.isNaN(x)','判断是不是 NaN','数字'],
+    ['setTimeout(fn, ms) / clearTimeout','延迟执行一次 / 取消','异步'],['setInterval(fn, ms) / clearInterval','每隔一段时间执行 / 取消','异步'],
+    ['fetch(url, options)','发 HTTP 请求，返回 Promise','异步'],['Promise.all([...])','等所有 Promise 都完成','异步'],['async / await','用同步的写法写异步','异步'],
+    ['document.querySelector(css)','找一个元素','DOM'],['el.addEventListener(type, fn)','监听事件','DOM'],['el.classList.toggle(c)','切换 class','DOM'],
+    ['localStorage.setItem(k, v) / getItem(k)','在浏览器里存取字符串，刷新也不丢','DOM'],['new Date() / Date.now()','当前时间 / 时间戳','数字']
+  ];
+  const cats=['全部',...new Set(SHEET.map(r=>r[2]))];let cur='全部';
+  const body=view.querySelector('#jsSheetBody'), q=view.querySelector('#jsSheetQ'), catsEl=view.querySelector('#jsSheetCats');
+  cats.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cat'+(c==='全部'?' on':'');b.textContent=c;b.addEventListener('click',()=>{cur=c;catsEl.querySelectorAll('.cat').forEach(x=>x.classList.toggle('on',x===b));drawSheet();});catsEl.append(b);});
+  function drawSheet(){
+    const s=q.value.trim().toLowerCase();
+    const rows=SHEET.filter(r=>(cur==='全部'||r[2]===cur)&&(!s||(r[0]+r[1]+r[2]).toLowerCase().includes(s)));
+    body.innerHTML=rows.length?rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><span class="cat-badge">'+r[2]+'</span></td></tr>').join(''):'<tr><td colspan="3" class="empty">没有找到，换个关键词试试</td></tr>';
+  }
+  q.addEventListener('input',drawSheet);drawSheet();
+
+  /* ---------- 测验 ---------- */
+  FL.makeQuiz(view.querySelector('#js-quiz'),[
+    ['不会被重新赋值的变量，应该用哪个关键字声明？',['var','let','const','static'],2,'默认用 const，需要重新赋值时才用 let。var 有作用域问题，不再使用。'],
+    ['typeof null 的结果是？',['"null"','"undefined"','"object"','"empty"'],2,'这是 JS 早期留下的 bug，一直保留到现在。判断 null 要写 x === null。'],
+    ['0 == "" 和 0 === "" 分别是？',['true, false','false, false','true, true','false, true'],0,'== 会先转换类型再比，所以 0 == "" 为 true。永远用 === 就不会被坑。'],
+    ['下面哪个值放进 if 里会被当作 true？',['0','""','[]','null'],2,'空数组是对象，对象都是真值。6 个假值是 false、0、""、null、undefined、NaN。'],
+    ['[1, 2, 3].map(n => n * 2) 的结果是？',['6','[2, 4, 6]','[1, 2, 3]','undefined'],1,'map 把每一项转换后，返回同样长度的新数组。'],
+    ['想从数组里筛选出所有满足条件的项，用？',['find','filter','some','forEach'],1,'filter 返回所有满足条件的项组成的新数组；find 只返回第一个。'],
+    ['const { name } = user; 这种写法叫？',['展开','解构','闭包','模板字符串'],1,'解构赋值：一次从对象或数组里取出多个值。'],
+    ['想阻止表单提交时刷新页面，在事件回调里调用？',['event.stop()','event.preventDefault()','return false','form.cancel()'],1,'preventDefault 阻止浏览器的默认行为，比如表单提交、链接跳转。'],
+    ['把用户输入显示到页面上，哪种写法更安全？',['el.innerHTML = input','el.textContent = input','document.write(input)','el.outerHTML = input'],1,'textContent 只当纯文本处理。innerHTML 会把内容当 HTML 解析，可能被注入脚本（XSS）。'],
+    ['同步代码、Promise.then、setTimeout(0) 的执行顺序是？',['setTimeout → then → 同步','同步 → setTimeout → then','同步 → then → setTimeout','then → 同步 → setTimeout'],2,'同步代码先跑完，再跑微任务（Promise.then），最后才是宏任务（setTimeout）。'],
+    ['await 只能直接写在哪里？',['任何函数里','async 函数里（或模块顶层）','for 循环里','回调函数里'],1,'在普通函数里写 await 会报语法错误。'],
+    ['fetch 请求返回 404 时，会发生什么？',['Promise 被 reject，进入 catch','Promise 正常 resolve，res.ok 为 false','直接抛出 SyntaxError','页面自动刷新'],1,'只有网络错误才会 reject。HTTP 错误状态要自己检查 res.ok 或 res.status。']
+  ]);
+
+  /* ---------- 挑战：自动判题 ---------- */
+  const chEd=editors.find(e=>e.box.id==='jsChallengeEd');
+  const prelude=chEd.box.querySelector('template').innerHTML.replace(/<\/?script>/g,'');
+  const TESTS=[
+    ['total(cart) 返回 1696','total(cart) === 1696 && total([]) === 0'],
+    ['cheapItems(cart, 200) 返回 ["键盘", "鼠标"]','JSON.stringify(cheapItems(cart, 200)) === \'["键盘","鼠标"]\' && cheapItems(cart, 10).length === 0'],
+    ['formatPrice(12.5) 返回 "¥12.50"','formatPrice(12.5) === "¥12.50" && formatPrice(3) === "¥3.00" && formatPrice(0.1 + 0.2) === "¥0.30"'],
+    ['groupByCategory 按分类分组','JSON.stringify(groupByCategory(cart)) === JSON.stringify({ 外设: ["键盘", "鼠标"], 显示: ["显示器"] })'],
+    ['loadCartTotal() 异步返回 1696','(await loadCartTotal()) === 1696'],
+    ['没有修改原数组 cart','total(cart) === 1696 && (cheapItems(cart, 100), groupByCategory(cart), cart.length === 3 && cart[0].name === "键盘")']
+  ];
+  const ANSWER=`const cart = [
+  { name: "键盘", price: 199, qty: 1, category: "外设" },
+  { name: "鼠标", price: 99, qty: 2, category: "外设" },
+  { name: "显示器", price: 1299, qty: 1, category: "显示" },
+];
+
+// 1. reduce 求和
+function total(items) {
+  return items.reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+// 2. 先 filter 再 map
+function cheapItems(items, max) {
+  return items.filter((item) => item.price <= max).map((item) => item.name);
+}
+
+// 3. toFixed 保留两位小数
+function formatPrice(n) {
+  return "¥" + n.toFixed(2);
+}
+
+// 4. reduce 分组
+function groupByCategory(items) {
+  return items.reduce((groups, item) => {
+    (groups[item.category] ??= []).push(item.name);
+    return groups;
+  }, {});
+}
+
+// 5. async / await
+async function loadCartTotal() {
+  const res = await mockFetch("/api/cart");
+  const items = await res.json();
+  return total(items);
+}
+
+console.log(total(cart), cheapItems(cart, 200), formatPrice(12.5));
+console.log(groupByCategory(cart));
+loadCartTotal().then((t) => console.log("异步总价：", t));
+`;
+  const checksEl=view.querySelector('#jsChecks'), banner=view.querySelector('#jsDoneBanner'), state=view.querySelector('#jsTestState');
+  checksEl.innerHTML=TESTS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  let seq=0,timer=null;
+  function test(){
+    const my=++seq;state.textContent='测试运行中…';
+    FL.runTests(chEd.ta.value,TESTS.map(t=>t[1]),{prelude}).then(r=>{
+      if(my!==seq)return;
+      r.forEach((ok,i)=>checksEl.children[i].classList.toggle('done',ok));
+      const n=r.filter(Boolean).length;state.textContent='通过 '+n+' / '+r.length;
+      banner.hidden=n!==r.length;
+    });
+  }
+  chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,700);};
+  view.querySelector('#jsRunTests').addEventListener('click',test);
+  view.querySelector('#jsShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+  test();
 
   FL.tocSpy(view);
 })();
