@@ -571,6 +571,33 @@ img{max-width:100%}
 .v-eng .term-in input{flex:1;min-width:0;background:transparent;border:0;color:#E8ECF2;font:14px var(--f-mono);outline:none;padding:6px 0}
 .v-eng .git-quick{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;border-top:1px solid var(--line)}
 .v-eng .git-quick button{font:12px var(--f-mono);padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+
+/* ====================== 模块：后端与全栈 ====================== */
+.v-be{--accent:#2F7D32;--accent-ink:#FFFFFF;--accent-soft:#E2F2E3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-be{--accent:#7BD67F;--accent-ink:#0B2A0C;--accent-soft:#183A1A}}
+:root[data-theme="dark"] .v-be{--accent:#7BD67F;--accent-ink:#0B2A0C;--accent-soft:#183A1A}
+.v-be .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0;font-size:14px}
+.v-be .flow span{padding:8px 12px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-soft);font-weight:600}
+.v-be .flow b{color:var(--muted);font-weight:400}
+.v-be .tree{margin:16px 0;padding:14px 16px;border-radius:12px;background:var(--code-bg);color:var(--code-fg);font:13px/1.75 var(--f-mono);white-space:pre;overflow-x:auto}
+.v-be .tree i{font-style:normal;color:#8A94A6}
+/* JWT 解码 */
+.v-be .jwt{display:grid;gap:10px;padding:14px 16px}
+.v-be .jwt textarea{width:100%;min-height:76px;font:13px/1.5 var(--f-mono);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);resize:vertical;overflow-wrap:anywhere}
+.v-be .jwt-parts{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+@media (min-width:760px){.v-be .jwt-parts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.v-be .jwt-parts>div{min-width:0;border-radius:10px;border:1.5px solid var(--line);padding:8px 10px}
+.v-be .jwt-parts h5{margin:0 0 4px;font:600 12px var(--f-body)}
+.v-be .jwt-parts pre{margin:0;font:12.5px/1.55 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.v-be .jwt-parts .p0{border-color:#D9534F}.v-be .jwt-parts .p0 h5{color:#D9534F}
+.v-be .jwt-parts .p1{border-color:#8E5BD6}.v-be .jwt-parts .p1 h5{color:#8E5BD6}
+.v-be .jwt-parts .p2{border-color:#1F8FBF}.v-be .jwt-parts .p2 h5{color:#1F8FBF}
+.v-be .jwt p{margin:0;max-width:none;font-size:14px}
+/* 清单 */
+.v-be .plan{list-style:none;margin:16px 0;padding:0;display:grid;gap:6px}
+.v-be .plan label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font-size:15px}
+.v-be .plan input{margin-top:4px;accent-color:var(--accent);flex:none}
+.v-be .plan small{display:block;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
@@ -3519,6 +3546,435 @@ const api = import.meta.env.VITE_API_URL;</pre>
 </div>
 </section>
 
+<!-- ====================== 模块：后端与全栈 ====================== -->
+<section class="view lesson v-be" data-view="be" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#be-what"><span>01</span>后端做什么</a></li>
+      <li><a href="#be-node"><span>02</span>Node.js</a></li>
+      <li><a href="#be-express"><span>03</span>Express 写接口</a></li>
+      <li><a href="#be-middleware"><span>04</span>中间件与 REST</a></li>
+      <li><a href="#be-sql"><span>05</span>数据库与 SQL</a></li>
+      <li><a href="#be-orm"><span>06</span>在代码里用数据库</a></li>
+      <li><a href="#be-auth"><span>07</span>注册与登录</a></li>
+      <li><a href="#be-next"><span>08</span>Next.js 全栈</a></li>
+      <li><a href="#be-ship"><span>09</span>上线与毕业项目</a></li>
+      <li><a href="#be-quiz"><span>10</span>自测</a></li>
+      <li><a href="#be-challenge"><span>11</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第七站</p>
+      <h1><span class="lt">app.listen()</span> 后端与全栈</h1>
+      <p class="lede">最后一站，把前端连上自己写的服务器和数据库。你会用 Node.js 和 Express 写接口、用 SQL 存取数据、实现登录，再用 Next.js 把前后端放进同一个项目并部署上线。页面里的 Express 和 SQL 都是真的能运行的练习环境。</p>
+      <ul class="goals">
+        <li>用 Express 写出一套增删改查的 REST 接口</li>
+        <li>会写常用的 SQL，知道怎么在代码里安全地查数据库</li>
+        <li>理解注册登录的流程，能用 Next.js 做一个完整的全栈应用</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="be-what">
+      <div class="chap-head"><span class="chap-num">01</span><h2>后端做什么</h2></div>
+      <p class="sub">前端负责展示和交互，后端负责前端不能做、也不该做的事：保存数据、校验权限、处理业务、对接其他服务。</p>
+      <div class="flow"><span>浏览器（React）</span><b>— HTTP 请求 →</b><span>API 服务器（Node.js）</span><b>— SQL →</b><span>数据库</span></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>为什么不能都在前端做</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td>数据要多人共享</td><td>localStorage 只在自己的浏览器里，别人看不到</td></tr>
+          <tr><td>前端代码谁都能看、都能改</td><td>权限判断、价格计算放前端，用户改一下就绕过了</td></tr>
+          <tr><td>密钥不能暴露</td><td>数据库密码、支付密钥只能放在服务器上</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">为什么选 Node.js</span><p>后端语言很多（Java、Go、Python、PHP），Node.js 的好处是<b>和前端同一门语言</b>，学完 JavaScript 就能直接写。npm 生态也是共用的。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="be-node">
+      <div class="chap-head"><span class="chap-num">02</span><h2>Node.js：在浏览器之外运行 JS</h2></div>
+      <p class="sub">Node.js 让 JS 能在电脑和服务器上运行。语言完全一样，只是环境不同：没有 <code class="i">document</code> 和 <code class="i">window</code>，但可以读写文件、监听端口、连数据库。</p>
+      <div class="reader" id="beNode">
+        <div class="reader-bar"><span class="ed-title">server.js<small>不用任何框架的最简服务器</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <pre class="tree">node server.js          <i># 运行</i>
+node --watch server.js  <i># 改代码后自动重启（Node 18.11 以上）</i></pre>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th></th><th>浏览器里的 JS</th><th>Node.js</th></tr></thead>
+        <tbody>
+          <tr><td>全局对象</td><td>window、document</td><td>process、global</td></tr>
+          <tr><td>能做</td><td>操作页面、请求接口</td><td>读写文件、开服务器、连数据库</td></tr>
+          <tr><td>读环境变量</td><td>不能（构建时注入）</td><td><code class="i">process.env.DATABASE_URL</code></td></tr>
+          <tr><td>模块</td><td><code class="i">&lt;script type="module"&gt;</code></td><td>import（package.json 写 "type": "module"）或 require</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="be-express">
+      <div class="chap-head"><span class="chap-num">03</span><h2>Express：几行代码写出接口</h2></div>
+      <p class="sub">原生写法要自己解析网址和正文，很繁琐。Express 是最经典的 Node.js 框架，用 <code class="i">app.get(路径, 处理函数)</code> 定义接口。下面是一个在页面里模拟运行的 Express：改代码，点“运行”启动服务器，再用右边的请求面板发请求。</p>
+      <div class="editor" data-mode="express">
+        <div class="ed-bar"><span class="ed-title">server.js</span><small class="cat-badge">改完点“运行”重启服务器</small></div>
+        <template>GET /api/hello
+GET /api/hello?name=Jim
+GET /api/users/2
+GET /api/users/9
+POST /api/echo {"msg": "你好，后端"}</template>
+<textarea data-code>const express = require("express");
+const app = express();
+app.use(express.json()); // 解析 JSON 请求正文，没有它 req.body 是 undefined
+
+// GET /api/hello?name=Jim → 查询参数在 req.query
+app.get("/api/hello", (req, res) => {
+  const name = req.query.name || "陌生人";
+  res.json({ message: `你好，${name}！`, time: new Date().toLocaleTimeString() });
+});
+
+const users = [
+  { id: 1, name: "Jim" },
+  { id: 2, name: "Lily" },
+];
+
+// 路径参数：/api/users/2 → req.params.id 是字符串 "2"
+app.get("/api/users/:id", (req, res) => {
+  const user = users.find((u) => u.id === Number(req.params.id));
+  if (!user) return res.status(404).json({ error: "用户不存在" });
+  res.json(user);
+});
+
+// POST 的正文在 req.body
+app.post("/api/echo", (req, res) => {
+  console.log("收到正文：", req.body);
+  res.status(201).json({ youSent: req.body });
+});
+
+app.listen(3000, () => console.log("服务器已启动：http://localhost:3000"));</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>从哪里拿数据</th><th>例子</th><th>读取</th></tr></thead>
+        <tbody>
+          <tr><td>路径参数</td><td><code class="i">/api/users/2</code></td><td><code class="i">req.params.id</code></td></tr>
+          <tr><td>查询参数</td><td><code class="i">/api/todos?done=true</code></td><td><code class="i">req.query.done</code>（都是字符串）</td></tr>
+          <tr><td>请求正文</td><td>POST / PATCH 的 JSON</td><td><code class="i">req.body</code>（需要 express.json()）</td></tr>
+          <tr><td>请求头</td><td>Authorization</td><td><code class="i">req.get("authorization")</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>返回</th><th>写法</th></tr></thead>
+        <tbody>
+          <tr><td>JSON（最常用）</td><td><code class="i">res.json(data)</code></td></tr>
+          <tr><td>带状态码</td><td><code class="i">res.status(201).json(data)</code></td></tr>
+          <tr><td>只有状态码</td><td><code class="i">res.sendStatus(204)</code></td></tr>
+          <tr><td>文本或 HTML</td><td><code class="i">res.send("ok")</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">每个请求都要有回应</span><p>处理函数里忘了 <code class="i">res.json</code> 或 <code class="i">res.send</code>，前端就会一直转圈等到超时。提前返回时记得写 <code class="i">return res.status(...)</code>，否则后面的代码还会继续执行。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="be-middleware">
+      <div class="chap-head"><span class="chap-num">04</span><h2>中间件与 REST 设计</h2></div>
+      <p class="sub">中间件是请求到达处理函数之前经过的一串“关卡”，可以记录日志、解析正文、检查登录。调用 <code class="i">next()</code> 放行，直接 <code class="i">res.status(...)</code> 就是拦下。</p>
+      <div class="editor" data-mode="express">
+        <div class="ed-bar"><span class="ed-title">middleware.js</span><small class="cat-badge">看日志面板的输出顺序</small></div>
+        <template>GET /api/public
+GET /api/me
+GET /api/me Authorization: Bearer secret-token
+GET /api/oops</template>
+<textarea data-code>const express = require("express");
+const app = express();
+
+// 1. 日志中间件：所有请求都经过
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`→ ${req.method} ${req.path}`);
+  next(); // 放行，交给下一个
+  console.log(`← ${res.statusCode}，用时 ${Date.now() - start}ms`);
+});
+
+// 2. 鉴权中间件：只用在需要登录的接口上
+function requireAuth(req, res, next) {
+  const auth = req.get("authorization");
+  if (auth !== "Bearer secret-token") {
+    return res.status(401).json({ error: "请先登录" }); // 拦下，不调用 next
+  }
+  req.user = { id: 7, name: "Jim" }; // 把信息挂到 req 上传给后面
+  next();
+}
+
+app.get("/api/public", (req, res) => res.json({ msg: "谁都能看" }));
+app.get("/api/me", requireAuth, (req, res) => res.json(req.user));
+
+// 3. 代码出错时，Express 返回 500
+app.get("/api/oops", (req, res) => {
+  const user = undefined;
+  res.json({ name: user.name }); // TypeError
+});
+
+app.listen(3000);</textarea>
+      </div>
+      <h3>REST 接口设计约定</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>操作</th><th>方法 + 路径</th><th>成功</th><th>常见错误</th></tr></thead>
+        <tbody>
+          <tr><td>列表（可筛选、分页）</td><td>GET /api/todos?done=true&amp;page=2</td><td>200</td><td></td></tr>
+          <tr><td>详情</td><td>GET /api/todos/:id</td><td>200</td><td>404</td></tr>
+          <tr><td>新建</td><td>POST /api/todos</td><td>201</td><td>400 / 422 校验失败</td></tr>
+          <tr><td>修改部分字段</td><td>PATCH /api/todos/:id</td><td>200</td><td>404、403 无权限</td></tr>
+          <tr><td>删除</td><td>DELETE /api/todos/:id</td><td>204</td><td>404</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="dots">
+        <li>路径用名词复数（/todos），动作交给 HTTP 方法，不要写 /getTodos、/deleteTodo。</li>
+        <li>错误统一返回 <code class="i">{ "error": "说明" }</code>，前端处理起来简单。</li>
+        <li>前端的校验只为体验，后端必须再校验一次。</li>
+      </ul>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="be-sql">
+      <div class="chap-head"><span class="chap-num">05</span><h2>数据库与 SQL</h2></div>
+      <p class="sub">服务器重启后内存里的数组就没了，所以数据要存进数据库。最常用的是关系型数据库（PostgreSQL、MySQL、SQLite），数据存在一张张表里，用 SQL 语言操作。下面是一个真正能执行 SQL 的练习库，已经有 <code class="i">users</code> 和 <code class="i">todos</code> 两张表。</p>
+      <div class="editor" data-mode="sql">
+        <div class="ed-bar"><span class="ed-title">query.sql</span><small class="cat-badge">一次可以写多条，用分号隔开</small></div>
+<textarea data-code>-- 查询：所有未完成的待办，按 id 倒序
+SELECT id, title, done FROM todos WHERE done = false ORDER BY id DESC;
+
+-- 联表：每条待办属于哪个用户
+SELECT t.title, u.name
+FROM todos t
+JOIN users u ON t.user_id = u.id;
+
+-- 统计：每个用户有几条待办
+SELECT u.name, COUNT(*) AS todo_count
+FROM todos t JOIN users u ON t.user_id = u.id
+GROUP BY u.name;
+
+-- 试试增删改，再查一次看看变化：
+-- INSERT INTO todos (user_id, title, done) VALUES (2, '学 SQL', false);
+-- UPDATE todos SET done = true WHERE id = 2;
+-- DELETE FROM todos WHERE id = 1;</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>操作</th><th>SQL</th><th>对应接口</th></tr></thead>
+        <tbody>
+          <tr><td>建表</td><td><code class="i">CREATE TABLE todos (id INTEGER PRIMARY KEY, title TEXT NOT NULL, done BOOLEAN DEFAULT false)</code></td><td></td></tr>
+          <tr><td>查</td><td><code class="i">SELECT * FROM todos WHERE id = 1</code></td><td>GET</td></tr>
+          <tr><td>增</td><td><code class="i">INSERT INTO todos (title) VALUES ('学 SQL')</code></td><td>POST</td></tr>
+          <tr><td>改</td><td><code class="i">UPDATE todos SET done = true WHERE id = 1</code></td><td>PATCH</td></tr>
+          <tr><td>删</td><td><code class="i">DELETE FROM todos WHERE id = 1</code></td><td>DELETE</td></tr>
+          <tr><td>排序、分页</td><td><code class="i">ORDER BY id DESC LIMIT 10 OFFSET 20</code></td><td>列表分页</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">别忘了 WHERE</span><p><code class="i">UPDATE</code> 和 <code class="i">DELETE</code> 不写 WHERE 会作用于整张表的每一行。在上面的练习库里随便试，点“还原代码”再运行就恢复了；真实数据库可没有这个按钮。</p></div>
+      <div class="tip"><span class="lbl">表之间的关系</span><p><code class="i">todos.user_id</code> 存的是 <code class="i">users.id</code>，这叫<b>外键</b>：一个用户有多条待办（一对多）。用 JOIN 把它们连起来查。</p></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="be-orm">
+      <div class="chap-head"><span class="chap-num">06</span><h2>在代码里用数据库</h2></div>
+      <p class="sub">在 Node.js 里有两种常见做法：直接写 SQL，或者用 ORM 以对象的方式操作。不管哪种，<b>永远不要把用户输入直接拼进 SQL</b>。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th></th><th>代码</th></tr></thead>
+        <tbody>
+          <tr><td>危险：拼接字符串</td><td><code class="i">db.query("SELECT * FROM users WHERE email = '" + email + "'")</code><br>用户输入 <code class="i">' OR '1'='1</code> 就能查出所有用户，这就是 <b>SQL 注入</b></td></tr>
+          <tr><td>安全：参数化查询</td><td><code class="i">db.query("SELECT * FROM users WHERE email = $1", [email])</code><br>数据库把参数当纯数据处理，不会当成 SQL 执行</td></tr>
+        </tbody>
+      </table></div>
+      <h3>用 Prisma（最流行的 Node.js ORM）</h3>
+      <pre class="tree" data-hl>// prisma/schema.prisma 里定义表结构，然后：
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+app.get("/api/todos", async (req, res) =&gt; {
+  const todos = await prisma.todo.findMany({
+    where: { userId: req.user.id },
+    orderBy: { id: "desc" },
+  });
+  res.json(todos);
+});
+
+app.post("/api/todos", async (req, res) =&gt; {
+  const todo = await prisma.todo.create({
+    data: { title: req.body.title, userId: req.user.id },
+  });
+  res.status(201).json(todo);
+});</pre>
+      <div class="tip"><span class="lbl">选哪个数据库</span><p>学习和小项目：<b>SQLite</b>（一个文件，零配置）。正式项目：<b>PostgreSQL</b>，可以用 Supabase、Neon 等平台的免费额度，拿到一个 <code class="i">DATABASE_URL</code> 放进环境变量即可。</p></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="be-auth">
+      <div class="chap-head"><span class="chap-num">07</span><h2>注册与登录</h2></div>
+      <p class="sub">登录要解决两件事：<b>证明你是你</b>（核对密码），以及<b>之后的请求怎么记住你</b>（会话或令牌）。</p>
+      <ol class="steps">
+        <li><b>注册：</b>前端发送邮箱和密码。后端用 <code class="i">bcrypt.hash(password, 10)</code> 把密码变成不可逆的哈希再存库。<b>数据库里绝不能存明文密码</b>。</li>
+        <li><b>登录：</b>后端按邮箱查出用户，用 <code class="i">bcrypt.compare(输入的密码, 存的哈希)</code> 核对。</li>
+        <li><b>记住身份：</b>核对通过后，生成一个会话 ID 放进 HttpOnly Cookie，或者签发一个 JWT 令牌。</li>
+        <li><b>之后的请求：</b>浏览器自动带 Cookie，或前端在请求头加 <code class="i">Authorization: Bearer 令牌</code>。后端的鉴权中间件验证后放行（第 04 节的 requireAuth）。</li>
+      </ol>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th></th><th>Session + Cookie</th><th>JWT</th></tr></thead>
+        <tbody>
+          <tr><td>存在哪</td><td>服务器存会话，浏览器只存一个 ID</td><td>信息都在令牌里，服务器不用存</td></tr>
+          <tr><td>退出登录</td><td>删掉服务器上的会话即可</td><td>令牌在过期前一直有效，要另外处理</td></tr>
+          <tr><td>适合</td><td>传统网站、同域的全栈应用（推荐新手）</td><td>多个服务之间、移动 App</td></tr>
+        </tbody>
+      </table></div>
+      <h3>看看 JWT 里有什么</h3>
+      <p>JWT 是用点分成三段的字符串。前两段只是 Base64 编码，<b>谁都能解开</b>，所以不能放密码等敏感信息；第三段是用服务器密钥算出的签名，篡改内容后签名就对不上了。</p>
+      <div class="lab">
+        <div class="jwt" id="beJwt">
+          <textarea aria-label="JWT 令牌" spellcheck="false"></textarea>
+          <div class="jwt-parts"><div class="p0"><h5>Header 头部</h5><pre data-h></pre></div><div class="p1"><h5>Payload 内容</h5><pre data-p></pre></div><div class="p2"><h5>Signature 签名</h5><pre data-s></pre></div></div>
+          <p data-say aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="tip"><span class="lbl">省事的做法</span><p>自己实现登录容易出安全问题。实际项目可以用现成方案：Next.js 用 <b>Auth.js</b>（支持 GitHub、Google 登录），或者 <b>Supabase Auth</b>、<b>Clerk</b> 这类服务。理解上面的原理就够用了。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="be-next">
+      <div class="chap-head"><span class="chap-num">08</span><h2>Next.js：一个项目搞定前后端</h2></div>
+      <p class="sub">Next.js 基于 React，在同一个项目里既写页面又写接口，不用分别部署，也没有跨域问题。它是现在 React 全栈开发的首选。</p>
+      <pre class="tree">npx create-next-app@latest my-todo   <i># 一路回车，选 App Router</i>
+
+my-todo/
+├── app/
+│   ├── layout.jsx               <i># 所有页面共用的外壳</i>
+│   ├── page.jsx                 <i># 首页  →  /</i>
+│   ├── todos/
+│   │   ├── page.jsx             <i># →  /todos</i>
+│   │   └── [id]/page.jsx        <i># →  /todos/123（动态路由）</i>
+│   └── api/
+│       └── todos/route.js       <i># 后端接口  →  GET / POST /api/todos</i>
+├── lib/db.js                    <i># 数据库连接</i>
+├── .env.local                   <i># DATABASE_URL 等，不提交</i>
+└── package.json</pre>
+      <h3>后端接口：route.js</h3>
+      <pre class="tree" data-hl>// app/api/todos/route.js
+import { prisma } from "@/lib/db";
+
+export async function GET() {
+  const todos = await prisma.todo.findMany();
+  return Response.json(todos);
+}
+
+export async function POST(request) {
+  const { title } = await request.json();
+  if (!title) return Response.json({ error: "title 不能为空" }, { status: 400 });
+  const todo = await prisma.todo.create({ data: { title } });
+  return Response.json(todo, { status: 201 });
+}</pre>
+      <h3>页面：服务端组件直接读数据库</h3>
+      <pre class="tree" data-hl>// app/todos/page.jsx（默认是服务端组件，在服务器上运行）
+import { prisma } from "@/lib/db";
+import AddTodo from "./AddTodo"; // 需要交互的部分写成客户端组件
+
+export default async function TodosPage() {
+  const todos = await prisma.todo.findMany(); // 不需要 useEffect 和 fetch
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;我的待办&lt;/h1&gt;
+      &lt;AddTodo /&gt;
+      &lt;ul&gt;{todos.map((t) =&gt; &lt;li key={t.id}&gt;{t.title}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/main&gt;
+  );
+}
+
+// app/todos/AddTodo.jsx 文件第一行写 "use client"，
+// 里面就可以用 useState、onClick，和 React 模块学的一样</pre>
+      <div class="tip"><span class="lbl">服务端组件 vs 客户端组件</span><p>默认都是服务端组件：在服务器渲染，可以直接查数据库、读密钥，发给浏览器的 JS 更少。需要 useState、事件、浏览器 API 时，在文件顶部加 <code class="i">"use client"</code>。还可以用 <b>Server Actions</b>：在表单里直接调用服务器函数，连 API 都不用写。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="be-ship">
+      <div class="chap-head"><span class="chap-num">09</span><h2>上线与毕业项目</h2></div>
+      <p class="sub">一周学完，最好的巩固方式是从头到尾做一个自己的全栈应用并上线。下面的清单按顺序做完，你就有了第一个作品。勾选会保存在这个浏览器里。</p>
+      <ul class="plan" id="bePlan"></ul>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>部分</th><th>推荐</th></tr></thead>
+        <tbody>
+          <tr><td>全栈框架 + 托管</td><td>Next.js + Vercel</td></tr>
+          <tr><td>数据库</td><td>Supabase 或 Neon 的 PostgreSQL（免费额度足够练习）</td></tr>
+          <tr><td>ORM</td><td>Prisma 或 Drizzle</td></tr>
+          <tr><td>登录</td><td>Auth.js（GitHub 登录最简单）</td></tr>
+          <tr><td>样式</td><td>Tailwind CSS，或者继续用你学的 CSS</td></tr>
+          <tr><td>独立的 Node 后端</td><td>Render、Railway、云服务器</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="be-quiz">
+      <div class="chap-head"><span class="chap-num">10</span><h2>自测：10 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">10</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="be-challenge">
+      <div class="chap-head"><span class="chap-num">11</span><h2>动手挑战：写一套待办 REST API</h2></div>
+      <p class="sub">用 Express 补全待办事项的增删改查接口。这正是浏览器与网络那一站里你调用过的接口，现在轮到你来实现它。修改后自动发请求测试，也可以点“运行”用请求面板自己试。</p>
+      <ul class="checks" id="beChecks"></ul>
+      <div class="editor" id="beChallengeEd" data-mode="express">
+        <div class="ed-bar"><span class="ed-title">server.js</span><span class="ed-tools"><button class="chip" type="button" id="beShowAnswer">看参考答案</button></span></div>
+        <template>GET /api/todos
+GET /api/todos/1
+GET /api/todos/99
+POST /api/todos {"title": "学 SQL"}
+POST /api/todos {"title": ""}
+PATCH /api/todos/1 {"done": true}
+GET /api/todos?done=true
+DELETE /api/todos/2</template>
+<textarea data-code data-store="felearn-be-challenge">const express = require("express");
+const app = express();
+app.use(express.json());
+
+// 先用数组代替数据库
+let todos = [
+  { id: 1, title: "学 Node", done: false },
+  { id: 2, title: "学 Express", done: false },
+];
+let nextId = 3;
+
+// 1. GET /api/todos：返回全部待办
+//    带上 ?done=true 时只返回已完成的（req.query.done 是字符串）
+app.get("/api/todos", (req, res) => {
+  // TODO
+});
+
+// 2. GET /api/todos/:id：返回一条；找不到返回 404 和 { error: "..." }
+
+// 3. POST /api/todos：正文 { title }；title 为空或只有空格返回 400
+//    成功返回 201 和新待办 { id, title, done: false }
+
+// 4. PATCH /api/todos/:id：正文里有 done 就更新，返回更新后的待办；找不到 404
+
+// 5. DELETE /api/todos/:id：成功返回 204（没有正文）；找不到 404
+
+app.listen(3000, () => console.log("服务器已启动：http://localhost:3000"));</textarea>
+      </div>
+      <div class="test-bar"><button class="btn" type="button" id="beRunTests">重新跑测试</button><span class="cat-badge" id="beTestState"></span></div>
+      <div id="beDoneBanner" class="done-banner" hidden>全部通过！🎉 从 HTML 到数据库接口，一周全栈的七站你都走完了。下一步：照着第 09 节的清单，做一个属于你自己的全栈项目并上线。</div>
+      <footer class="end">后端与全栈 · FeLearn 一周全栈计划。推荐继续阅读：Express 中文文档 expressjs.com/zh-cn、Next.js 官方教程 nextjs.org/learn（Dashboard 课程涵盖数据库、登录和部署）。</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
@@ -3528,7 +3984,7 @@ const MODULES = [
   { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: true },
   { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: true },
   { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: true },
-  { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
+  { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: true },
 ];
 </script>
 
@@ -3890,8 +4346,7 @@ const FL = (function(){
     react:'https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',
     reactDom:'https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',
     babel:'https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js',
-    sqlJs:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js',
-    sqlWasm:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/'
+    alasql:'https://cdn.jsdelivr.net/npm/alasql@4.17.3/dist/alasql.min.js'
   };
   // 预览里的“控制台”：接管 console.*，把输出和报错显示在页面上
   const CONSOLE='<style>#__fl_con{margin-top:12px;border:1px solid #d5dbe4;border-radius:8px;overflow:hidden;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}'
@@ -3904,7 +4359,7 @@ const FL = (function(){
     +'if(v instanceof Promise)return "Promise {…}";if(d>3)return Array.isArray(v)?"[…]":"{…}";if(Array.isArray(v))return "["+v.map(function(x){return f(x,d+1)}).join(", ")+"]";'
     +'if(v instanceof Map)return "Map("+v.size+") {"+Array.from(v).map(function(e){return f(e[0],d+1)+" => "+f(e[1],d+1)}).join(", ")+"}";if(v instanceof Set)return "Set("+v.size+") {"+Array.from(v).map(function(x){return f(x,d+1)}).join(", ")+"}";'
     +'try{var k=Object.keys(v);return (v.constructor&&v.constructor!==Object&&v.constructor.name?v.constructor.name+" ":"")+"{"+k.map(function(x){return x+": "+f(v[x],d+1)}).join(", ")+"}";}catch(e){return String(v);}}'
-    +'function add(c,a){var d=document.createElement("div");d.className=c;d.textContent=Array.prototype.map.call(a,function(x){return f(x)}).join(" ");el().appendChild(d);}'
+    +'function add(c,a){var o=c!=="n"&&el().querySelector(".n");if(o)o.remove();var d=document.createElement("div");d.className=c;d.textContent=Array.prototype.map.call(a,function(x){return f(x)}).join(" ");el().appendChild(d);}'
     +'["log","info","debug","table"].forEach(function(m){console[m]=function(){add("",arguments)}});console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'
     +'window.addEventListener("error",function(e){add("e",["❌ "+(e.error&&e.error.name?e.error.name+": "+e.error.message:e.message)+(e.lineno?"（第 "+e.lineno+" 行附近）":"")]);});'
     +'window.addEventListener("unhandledrejection",function(e){add("e",["❌ 未处理的 Promise 错误：",e.reason]);});'
@@ -5426,6 +5881,277 @@ ReactDOM.createRoot(document.getElementById("root")).render(<TodoApp />);
   function reset(){s=fresh();out.innerHTML='';print('<span class="dim">练习终端已就绪。项目里有 index.html、style.css、app.js 三个文件。\n先输入 git init 试试。提交类的快捷按钮只会填进输入框，回车前可以改说明。</span>');render();}
   view.querySelector('#engReset').addEventListener('click',reset);
   reset();
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：后端与全栈 ====================== */
+/* 页面里运行的迷你 Express：只实现学习用到的部分。整个函数会被 toString() 放进沙箱 iframe 执行 */
+function felearnExpress(){
+  var routes=[];
+  var TEXT={200:'OK',201:'Created',204:'No Content',400:'Bad Request',401:'Unauthorized',403:'Forbidden',404:'Not Found',422:'Unprocessable Entity',500:'Internal Server Error'};
+  function compile(path){var keys=[];var src=String(path).replace(/\/+$/,'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/:(\w+)/g,function(_,k){keys.push(k);return '([^/]+)';});return {re:new RegExp('^'+src+'/?$'),keys:keys};}
+  function express(){
+    routes.length=0;
+    var app={};
+    ['get','post','put','patch','delete'].forEach(function(m){app[m]=function(path){var fns=[].slice.call(arguments,1);routes.push({method:m.toUpperCase(),m:compile(path),fns:fns});return app;};});
+    app.all=function(path){var fns=[].slice.call(arguments,1);routes.push({method:'ALL',m:compile(path),fns:fns});return app;};
+    app.use=function(a){var fns=[].slice.call(arguments,1);if(typeof a==='function'){fns.unshift(a);a='';}routes.push({method:'USE',prefix:String(a).replace(/\/+$/,''),fns:fns});return app;};
+    app.listen=function(port,cb){setTimeout(function(){if(typeof cb==='function')cb();},0);return app;};
+    return app;
+  }
+  express.json=function(){return function jsonParser(req,res,next){
+    if(req.rawBody&&/json/i.test(req.get('content-type')||'')){try{req.body=JSON.parse(req.rawBody);}catch(e){return res.status(400).json({error:'正文不是合法的 JSON'});}}
+    else if(req.body===undefined)req.body={};
+    next();};};
+  function cors(){return function(req,res,next){res.set('Access-Control-Allow-Origin','*');next();};}
+  window.require=function(n){if(n==='express')return express;if(n==='cors')return cors;throw new Error('练习环境里没有模块 "'+n+'"，只支持 express 和 cors');};
+  window.__STATUS=TEXT;
+  window.__req=function(method,url,body,headers){return new Promise(function(resolve){
+    method=String(method).toUpperCase();var h={};Object.keys(headers||{}).forEach(function(k){h[k.toLowerCase()]=String(headers[k]);});
+    var raw=body==null?'':(typeof body==='string'?body:JSON.stringify(body));
+    if(raw&&!h['content-type'])h['content-type']='application/json';
+    var qi=url.indexOf('?'),path=qi<0?url:url.slice(0,qi),query={};
+    if(qi>=0)new URLSearchParams(url.slice(qi+1)).forEach(function(v,k){query[k]=v;});
+    var req={method:method,url:url,path:path,originalUrl:url,params:{},query:query,headers:h,body:undefined,rawBody:raw,get:function(k){return h[String(k).toLowerCase()];}};
+    req.header=req.get;
+    var res={statusCode:200,headers:{},headersSent:false,
+      status:function(c){this.statusCode=c;return this;},
+      set:function(k,v){this.headers[k]=v;return this;},
+      json:function(o){this.set('Content-Type','application/json; charset=utf-8');return this.end(o===undefined?'':JSON.stringify(o));},
+      send:function(x){if(x!==null&&typeof x==='object')return this.json(x);if(typeof x==='number'){this.statusCode=x;return this.end('');}if(x!==undefined)this.set('Content-Type','text/html; charset=utf-8');return this.end(x==null?'':String(x));},
+      sendStatus:function(c){this.statusCode=c;return this.end(c===204?'':(TEXT[c]||String(c)));},
+      end:function(b){if(this.headersSent){console.warn('⚠️ 同一个请求回应了两次（res.json / send 调用了不止一次），第二次被忽略。是不是忘了 return？');return this;}
+        this.headersSent=true;var r=b||'',data=r;if(/json/.test(this.headers['Content-Type']||'')&&r){try{data=JSON.parse(r);}catch(e){}}
+        var self=this;setTimeout(function(){resolve({status:self.statusCode,headers:self.headers,body:data,raw:r});},0);return this;}};
+    req.res=res;
+    var stack=[];
+    routes.forEach(function(r){
+      if(r.method==='USE'){if(!r.prefix||path===r.prefix||path.indexOf(r.prefix+'/')===0)r.fns.forEach(function(f){stack.push({f:f,params:{}});});return;}
+      if(r.method!==method&&r.method!=='ALL')return;
+      var m=path.match(r.m.re);if(!m)return;var p={};r.m.keys.forEach(function(k,i){p[k]=decodeURIComponent(m[i+1]);});
+      r.fns.forEach(function(f){stack.push({f:f,params:p});});
+    });
+    var i=0;
+    function fail(e){console.error('❌ 服务器报错：'+(e&&e.name?e.name+': '+e.message:String(e)));if(!res.headersSent)res.status(500).json({error:'Internal Server Error'});}
+    function next(err){
+      if(err)return fail(err);
+      if(res.headersSent)return;
+      var l=stack[i++];
+      if(!l){res.status(404).set('Content-Type','text/html; charset=utf-8').end('Cannot '+method+' '+path);return;}
+      req.params=l.params;
+      try{var r=l.f(req,res,next);if(r&&typeof r.then==='function')r.then(null,fail);}catch(e){fail(e);}
+    }
+    next();
+    setTimeout(function(){if(!res.headersSent){res.headersSent=true;console.warn('⚠️ '+method+' '+path+' 等了 3 秒还没有回应：处理函数里是不是忘了调用 res.json() 或 res.send()？');resolve({status:0,timeout:true,headers:{},body:'',raw:''});}},3000);
+  });};
+}
+
+(function(){
+  const {esc}=FL;
+  const view=document.querySelector('.v-be');
+
+  /* ---------- Express 模式：左边代码，右边请求面板 + 服务器日志 ---------- */
+  const PANEL_CSS='<style>body{font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1d2433;margin:10px}'
+    +'#rq{display:grid;gap:6px}#rq .l{display:flex;gap:6px}#rq select,#rq input,#rq textarea{font:13px ui-monospace,Menlo,Consolas,monospace;padding:6px 8px;border:1px solid #c9d1dc;border-radius:6px;min-width:0}'
+    +'#rq input{flex:1}#rq textarea{min-height:44px;resize:vertical}#rq button{font:600 13px system-ui,sans-serif;padding:6px 12px;border-radius:6px;border:0;background:#2F7D32;color:#fff;cursor:pointer}'
+    +'#pre{display:flex;flex-wrap:wrap;gap:4px}#pre button{background:#eef2f6;color:#1d2433;font:12px ui-monospace,monospace;font-weight:400;padding:4px 7px;border:1px solid #d5dbe4}'
+    +'#out{margin:8px 0 0;background:#18202e;color:#e8ecf2;border-radius:8px;padding:8px 10px;font:12.5px/1.55 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all;min-height:40px}'
+    +'#out .s2{color:#7edc9a;font-weight:600}#out .s4{color:#ffb38a;font-weight:600}#out .s5{color:#ff8f80;font-weight:600}#out .k{color:#9ecbff}#out .d{color:#8a94a6}'
+    +'h6{margin:0 0 4px;font:600 11px system-ui,sans-serif;letter-spacing:.06em;color:#6b7686}</style>';
+  const PANEL_HTML='<h6>发送请求</h6><div id="rq"><div class="l"><select id="m"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select><input id="u" value="/api" spellcheck="false"><button id="go" type="button">发送</button></div>'
+    +'<input id="hd" placeholder="请求头（可选），例如 Authorization: Bearer xxx" spellcheck="false"><textarea id="bd" placeholder="JSON 正文（可选）" spellcheck="false"></textarea><div id="pre"></div></div><pre id="out" class="d">点“发送”或下面的预设请求试试</pre>';
+  function panelScript(tpl){
+    const presets=tpl.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const m=l.match(/^(GET|POST|PUT|PATCH|DELETE)\s+(\S+)\s*(.*)$/);if(!m)return null;let hd='',bd=m[3];const a=bd.match(/^(Authorization:\s*\S+(?:\s+\S+)?)$/i);if(a){hd=a[1];bd='';}return [m[1],m[2],hd,bd];}).filter(Boolean);
+    return '<script>(function(){var P='+JSON.stringify(presets)+';function $(i){return document.getElementById(i)}'
+      +'function e(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}'
+      +'async function go(){var m=$("m").value,u=$("u").value.trim()||"/",b=$("bd").value.trim(),hs={},hv=$("hd").value.trim();if(hv){var i=hv.indexOf(":");if(i>0)hs[hv.slice(0,i).trim()]=hv.slice(i+1).trim();}'
+      +'if(b&&(m==="GET"||m==="DELETE"))b="";$("out").className="";$("out").textContent="请求中…";'
+      +'if(!window.__ready){$("out").innerHTML="<span class=s5>服务器没有启动：代码有错误，看下面的日志</span>";return;}'
+      +'var r=await __req(m,u,b||null,hs);if(r.timeout){$("out").innerHTML="<span class=s5>请求超时：服务器没有回应</span>";return;}'
+      +'var c=r.status<300?"s2":r.status<500?"s4":"s5",t="<span class=d>"+e(m+" "+u)+"</span>\\n<span class="+c+">"+r.status+" "+(__STATUS[r.status]||"")+"</span>\\n";'
+      +'Object.keys(r.headers).forEach(function(k){t+="<span class=k>"+e(k)+"</span>: "+e(r.headers[k])+"\\n"});'
+      +'t+=r.raw?"\\n"+e(typeof r.body==="object"?JSON.stringify(r.body,null,2):r.raw):"<span class=d>（没有正文）</span>";$("out").innerHTML=t;}'
+      +'$("go").onclick=go;$("u").onkeydown=function(ev){if(ev.key==="Enter")go()};'
+      +'P.forEach(function(p){var b=document.createElement("button");b.type="button";b.textContent=p[0]+" "+p[1]+(p[2]?" 🔑":"")+(p[3]?" {…}":"");b.onclick=function(){$("m").value=p[0];$("u").value=p[1];$("hd").value=p[2];$("bd").value=p[3];go()};$("pre").appendChild(b)});'
+      +'if(P[0]){$("m").value=P[0][0];$("u").value=P[0][1];}})();<\/script>';
+  }
+  FL.addMode('express',{label:'Express 代码区',manual:true,build:(c,tpl)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'+PANEL_CSS+'</head><body>'+PANEL_HTML+CONSOLE_LABEL+FL.CONSOLE+FL.BASE
+    +'<script>('+felearnExpress.toString()+')();<\/script><script>'+c.replace(/<\/script/gi,'<\\/script')+'\n;window.__ready=true;<\/script>'+panelScript(tpl)+'</body></html>'});
+  const CONSOLE_LABEL='<h6 style="margin-top:12px">服务器日志（console）</h6>';
+
+  /* ---------- SQL 模式：alasql 在沙箱里执行 ---------- */
+  const SEED="CREATE TABLE users (id INT PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, city TEXT);"
+    +"INSERT INTO users (name, email, city) VALUES ('Jim','jim@example.com','上海'),('Lily','lily@example.com','杭州'),('Tom','tom@example.com','上海');"
+    +"CREATE TABLE todos (id INT PRIMARY KEY AUTOINCREMENT, user_id INT, title TEXT, done BOOLEAN);"
+    +"INSERT INTO todos (user_id, title, done) VALUES (1,'学 HTML',true),(1,'学 React',false),(2,'学 CSS',true),(1,'学 SQL',false),(3,'学 Node',false);";
+  const SQL_CSS='<style>body{font:14px/1.5 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#1d2433;margin:10px}'
+    +'.q{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#6b7686;margin:12px 0 4px;white-space:pre-wrap}.q:first-child{margin-top:0}'
+    +'table{border-collapse:collapse;font:13px ui-monospace,Menlo,Consolas,monospace;max-width:100%}th,td{border:1px solid #d5dbe4;padding:4px 10px;text-align:left}th{background:#eef2f6;font-weight:600}'
+    +'.ok{color:#2F7D32}.err{color:#c0392b;white-space:pre-wrap;font:12.5px ui-monospace,monospace}.n{color:#6b7686;font-size:12px;margin-top:2px}</style>';
+  function sqlRunner(code){
+    return '<script>(function(){var out=document.getElementById("res");function e(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}'
+      +'if(!window.alasql){out.innerHTML="<p class=err>SQL 引擎没有加载成功，检查网络后再点“运行”。</p>";return;}'
+      +'var db=new alasql.Database();db.exec('+JSON.stringify(SEED)+');'
+      +'var src='+JSON.stringify(code)+';'
+      +'var lines=src.split("\\n").map(function(l){var i=l.indexOf("--");return i<0?l:l.slice(0,i)}).join("\\n");'
+      +'var parts=[],cur="",q=null;for(var i=0;i<lines.length;i++){var ch=lines[i];if(q){cur+=ch;if(ch===q)q=null;continue;}if(ch==="\'"||ch==="\\""){q=ch;cur+=ch;continue;}if(ch===";"){parts.push(cur);cur="";continue;}cur+=ch;}parts.push(cur);'
+      +'parts=parts.map(function(s){return s.trim()}).filter(Boolean);if(!parts.length){out.innerHTML="<p class=n>（没有要执行的 SQL）</p>";return;}'
+      +'var h="";parts.forEach(function(s){h+="<div class=q>› "+e(s.replace(/\\s+/g," "))+"</div>";try{var r=db.exec(s);'
+      +'if(Array.isArray(r)){if(!r.length){h+="<div class=n>（0 行）</div>";return;}var cols=Object.keys(r[0]);h+="<table><tr>"+cols.map(function(c){return "<th>"+e(c)+"</th>"}).join("")+"</tr>"+r.map(function(row){return "<tr>"+cols.map(function(c){var v=row[c];return "<td>"+e(v===undefined||v===null?"NULL":v)+"</td>"}).join("")+"</tr>"}).join("")+"</table><div class=n>"+r.length+" 行</div>";}'
+      +'else h+="<div class=ok>✓ 执行成功"+(typeof r==="number"?"，影响了 "+r+" 行":"")+"</div>";}catch(err){h+="<div class=err>✗ "+e(err.message)+"</div>";}});out.innerHTML=h;})();<\/script>';
+  }
+  const hlSql=s=>FL.esc(s).replace(/(--[^\n]*)|('(?:[^'\\]|\\.)*')|\b(SELECT|FROM|WHERE|AND|OR|NOT|ORDER BY|GROUP BY|BY|ORDER|GROUP|DESC|ASC|LIMIT|OFFSET|INSERT|INTO|VALUES|UPDATE|SET|DELETE|CREATE|TABLE|JOIN|LEFT|ON|AS|COUNT|SUM|AVG|MAX|MIN|DISTINCT|LIKE|IN|IS|NULL|PRIMARY|KEY|INTEGER|INT|TEXT|BOOLEAN|DEFAULT|HAVING|true|false)\b|\b(\d+)\b/gi,(m,c,str,kw,num)=>c?'<span class="t-com">'+c+'</span>':str?'<span class="t-val">'+str+'</span>':kw?'<span class="t-kw">'+kw+'</span>':'<span class="t-num">'+num+'</span>');
+  FL.addMode('sql',{hl:hlSql,label:'SQL 编辑区',manual:true,build:c=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'+SQL_CSS+'</head><body><div id="res">执行中…</div>'+FL.BASE+'<script src="'+FL.CDN.alasql+'"><\/script>'+sqlRunner(c)+'</body></html>'});
+
+  view.querySelectorAll('pre[data-hl]').forEach(p=>{p.innerHTML=FL.hlJs(p.textContent);});
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  FL.makeReader(view.querySelector('#beNode'),[
+    ['import http from "node:http";','引入 Node.js 自带的 http 模块，不用安装。'],
+    ['',''],
+    ['const server = http.createServer((req, res) => {','创建服务器。<b>每来一个请求</b>，这个函数就执行一次：req 是请求，res 用来回应。'],
+    ['  if (req.method === "GET" && req.url === "/api/hello") {','自己判断方法和路径，这就是最原始的“路由”。'],
+    ['    res.writeHead(200, { "Content-Type": "application/json" });','写状态码和响应头。'],
+    ['    res.end(JSON.stringify({ message: "你好" }));','写正文并结束这次响应。'],
+    ['  } else {',''],
+    ['    res.writeHead(404);','其他路径一律 404。'],
+    ['    res.end("Not Found");',''],
+    ['  }',''],
+    ['});',''],
+    ['',''],
+    ['server.listen(3000, () => console.log("http://localhost:3000"));','<b>监听 3000 端口</b>。运行后在浏览器打开 http://localhost:3000/api/hello 就能看到 JSON。']
+  ],true);
+
+  /* ---------- JWT 解码 ---------- */
+  const b64u=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const exp=Math.floor(Date.now()/1000)+7*86400;
+  const SAMPLE=b64u({alg:'HS256',typ:'JWT'})+'.'+b64u({sub:7,name:'Jim',role:'student',iat:exp-7*86400,exp})+'.'+'kM1n0x9TQh2c4bV6pZr8sLwE3yU7aJfD5gHq0iNoXc8';
+  const jw=view.querySelector('#beJwt'), jt=jw.querySelector('textarea');
+  const dec=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s))));};
+  function jwt(){
+    const p=jt.value.trim().split('.'), say=jw.querySelector('[data-say]');
+    const H=jw.querySelector('[data-h]'),Pl=jw.querySelector('[data-p]'),Sg=jw.querySelector('[data-s]');
+    if(p.length!==3){H.textContent=Pl.textContent=Sg.textContent='';say.textContent='JWT 应该是用两个点分开的三段。';return;}
+    try{const h=dec(p[0]),pl=dec(p[1]);H.textContent=JSON.stringify(h,null,2);Pl.textContent=JSON.stringify(pl,null,2);Sg.textContent=p[2];
+      const t=[];if(pl.sub!==undefined)t.push('sub 是用户 id：'+pl.sub);if(pl.exp)t.push('exp 过期时间：'+new Date(pl.exp*1000).toLocaleString('zh-CN')+(pl.exp*1000<Date.now()?'（已过期）':''));
+      say.textContent=(t.length?t.join('；')+'。':'')+'试着改一下中间那段的某个字符：内容变了，但签名不会跟着变，服务器验证时就会拒绝。';}
+    catch(e){H.textContent=Pl.textContent='';Sg.textContent=p[2]||'';say.textContent='解析失败：前两段不是合法的 Base64 编码的 JSON。';}
+  }
+  jt.value=SAMPLE;jt.addEventListener('input',jwt);jwt();
+
+  /* ---------- 毕业项目清单 ---------- */
+  const PLAN=[
+    ['想一个小应用','待办、记账、读书笔记、打卡都行。列出 3 个核心功能就够了'],
+    ['create-next-app 建项目，推到 GitHub','工程化：Git 提交、.gitignore'],
+    ['设计数据表','比如 users 和 items，想清楚一对多的关系'],
+    ['连上数据库','Supabase 或 Neon 拿到 DATABASE_URL，放进 .env.local，配好 Prisma'],
+    ['写接口或 Server Actions','增删改查，后端校验输入、返回正确的状态码'],
+    ['写页面','列表、表单、加载和错误状态；用上 React 模块学的 state 和组件'],
+    ['加登录','Auth.js 的 GitHub 登录；每个人只能看到自己的数据'],
+    ['部署到 Vercel','填好环境变量，拿到线上网址'],
+    ['用手机打开测一遍','响应式布局、Lighthouse 跑个分'],
+    ['写 README，发给朋友试用','这就是你的第一个全栈作品']
+  ];
+  const plan=view.querySelector('#bePlan'), KEY='felearn-be-plan';
+  let done={};try{done=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  plan.innerHTML=PLAN.map((p,i)=>'<li><label><input type="checkbox" data-i="'+i+'"'+(done[i]?' checked':'')+'><span>'+(i+1)+'. '+esc(p[0])+'<small>'+esc(p[1])+'</small></span></label></li>').join('');
+  plan.addEventListener('change',e=>{const i=e.target.dataset.i;if(i===undefined)return;done[i]=e.target.checked;try{localStorage.setItem(KEY,JSON.stringify(done));}catch(err){}});
+
+  FL.makeQuiz(view.querySelector('#be-quiz'),[
+    ['为什么权限判断不能只放在前端？',['前端太慢','前端代码用户可以查看和修改，能被绕过','前端不支持 if','浏览器不允许'],1,'前端判断只为体验，真正的权限校验必须在后端。'],
+    ['Express 中，/api/users/:id 里的 id 从哪里读？',['req.query.id','req.body.id','req.params.id','req.id'],2,'路径参数在 req.params，查询参数在 req.query，正文在 req.body。'],
+    ['没有 app.use(express.json())，POST 的 req.body 是？',['解析好的对象','undefined','字符串','报错'],1,'Express 默认不解析正文，需要 JSON 解析中间件。'],
+    ['中间件里不调用 next() 也不回应，会怎样？',['自动放行','请求一直挂着，前端等到超时','返回 200','返回 404'],1,'每个请求都必须被回应，或者交给下一个处理。'],
+    ['新建资源成功，最合适的状态码是？',['200','201','204','302'],1,'201 Created；删除成功常用 204。'],
+    ['下面哪条 SQL 会删除整张表的所有行？',['DELETE FROM todos WHERE id = 1','DELETE FROM todos','SELECT * FROM todos','UPDATE todos SET done = true WHERE id = 1'],1,'没有 WHERE 的 DELETE 和 UPDATE 作用于所有行。'],
+    ['防止 SQL 注入的正确做法是？',['把输入转成大写','参数化查询或 ORM','前端校验','用 GET 代替 POST'],1,'参数化查询让数据库把输入当数据，而不是当 SQL 执行。'],
+    ['数据库里应该怎么保存用户密码？',['明文','Base64 编码','用 bcrypt 这类算法哈希后保存','加密后放 localStorage'],2,'哈希不可逆，就算数据库泄露也拿不到原密码。Base64 只是编码，能直接解开。'],
+    ['JWT 的 payload 部分？',['是加密的，可以放密码','只是 Base64 编码，谁都能解开','只有服务器能看到','每次请求都会变'],1,'签名保证不被篡改，但内容是公开的，不要放敏感信息。'],
+    ['Next.js App Router 中，app/api/todos/route.js 导出的 GET 函数对应？',['页面 /todos','接口 GET /api/todos','数据库表','构建脚本'],1,'route.js 是后端接口，导出的函数名就是 HTTP 方法。']
+  ]);
+
+  /* ---------- 挑战：用迷你 Express 判题 ---------- */
+  const chEd=editors.find(e=>e.box.id==='beChallengeEd');
+  const PRELUDE='('+felearnExpress.toString()+')();';
+  const TESTS=[
+    ['GET /api/todos 返回全部待办','(r = await __req("GET", "/api/todos"), r.status === 200 && Array.isArray(r.body) && r.body.length === 2)'],
+    ['GET /api/todos/:id 返回一条，找不到时 404','(await __req("GET", "/api/todos/2")).body?.title === "学 Express" && (await __req("GET", "/api/todos/99")).status === 404'],
+    ['POST 新建返回 201，空标题返回 400','(async () => { const bad = await __req("POST", "/api/todos", { title: "  " }); const ok = await __req("POST", "/api/todos", { title: "学 SQL" }); const all = await __req("GET", "/api/todos"); return bad.status === 400 && ok.status === 201 && ok.body?.title === "学 SQL" && ok.body.done === false && typeof ok.body.id === "number" && all.body.length === 3; })()'],
+    ['PATCH 更新 done，找不到时 404','(async () => { const r = await __req("PATCH", "/api/todos/1", { done: true }); const again = await __req("GET", "/api/todos/1"); const miss = await __req("PATCH", "/api/todos/99", { done: true }); return r.status === 200 && r.body?.done === true && again.body?.done === true && miss.status === 404; })()'],
+    ['GET /api/todos?done=true 只返回已完成的','(async () => { const r = await __req("GET", "/api/todos?done=true"); return r.status === 200 && Array.isArray(r.body) && r.body.length === 1 && r.body[0].id === 1; })()'],
+    ['DELETE 成功返回 204，再删一次 404','(async () => { const r = await __req("DELETE", "/api/todos/2"); const again = await __req("DELETE", "/api/todos/2"); const all = await __req("GET", "/api/todos"); return r.status === 204 && again.status === 404 && all.body.length === 2; })()']
+  ];
+  const ANSWER=`const express = require("express");
+const app = express();
+app.use(express.json());
+
+let todos = [
+  { id: 1, title: "学 Node", done: false },
+  { id: 2, title: "学 Express", done: false },
+];
+let nextId = 3;
+
+// 找不到时统一返回 404
+function findTodo(req, res) {
+  const todo = todos.find((t) => t.id === Number(req.params.id));
+  if (!todo) res.status(404).json({ error: "找不到这条待办" });
+  return todo;
+}
+
+app.get("/api/todos", (req, res) => {
+  if (req.query.done === "true") return res.json(todos.filter((t) => t.done));
+  if (req.query.done === "false") return res.json(todos.filter((t) => !t.done));
+  res.json(todos);
+});
+
+app.get("/api/todos/:id", (req, res) => {
+  const todo = findTodo(req, res);
+  if (todo) res.json(todo);
+});
+
+app.post("/api/todos", (req, res) => {
+  const title = (req.body.title || "").trim();
+  if (!title) return res.status(400).json({ error: "title 不能为空" });
+  const todo = { id: nextId++, title, done: false };
+  todos.push(todo);
+  res.status(201).json(todo);
+});
+
+app.patch("/api/todos/:id", (req, res) => {
+  const todo = findTodo(req, res);
+  if (!todo) return;
+  if (typeof req.body.done === "boolean") todo.done = req.body.done;
+  if (typeof req.body.title === "string") todo.title = req.body.title.trim();
+  res.json(todo);
+});
+
+app.delete("/api/todos/:id", (req, res) => {
+  const todo = findTodo(req, res);
+  if (!todo) return;
+  todos = todos.filter((t) => t !== todo);
+  res.sendStatus(204);
+});
+
+app.listen(3000, () => console.log("服务器已启动：http://localhost:3000"));
+`;
+  const checksEl=view.querySelector('#beChecks'), banner=view.querySelector('#beDoneBanner'), state=view.querySelector('#beTestState');
+  checksEl.innerHTML=TESTS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  let seq=0,timer=null;
+  function test(){
+    const my=++seq;state.textContent='测试运行中…';
+    FL.runTests(chEd.ta.value,TESTS.map(t=>t[1]),{prelude:PRELUDE,timeout:8000}).then(r=>{
+      if(my!==seq)return;
+      r.forEach((ok,i)=>checksEl.children[i].classList.toggle('done',ok));
+      const n=r.filter(Boolean).length;state.textContent='通过 '+n+' / '+r.length;banner.hidden=n!==r.length;
+    });
+  }
+  chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,700);};
+  view.querySelector('#beRunTests').addEventListener('click',test);
+  view.querySelector('#beShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+  test();
 
   FL.tocSpy(view);
 })();
