@@ -252,7 +252,7 @@ img{max-width:100%}
 .lesson .code pre{position:absolute;inset:0;pointer-events:none;color:var(--code-fg);overflow:hidden}
 .lesson .code textarea{position:relative;display:block;width:100%;min-height:100px;resize:none;background:transparent;color:transparent;caret-color:#FFFFFF;outline:none;overflow:hidden;-webkit-text-fill-color:transparent}
 .lesson .code textarea::selection{background:rgba(114,214,202,.32)}
-.lesson pre,.lesson code,.lesson textarea,.lesson .rl{font-variant-ligatures:none}
+.lesson pre,.lesson code,.lesson textarea,.lesson .rl{font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0}
 .lesson .chip.run{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .lesson .t-kw{color:#FF9EC4}.lesson .t-num{color:#F5C46B}.lesson .t-fn{color:#8EC5FF}
 .lesson .t-tag{color:var(--c-tag)} .lesson .t-attr{color:var(--c-attr)} .lesson .t-val{color:var(--c-val)} .lesson .t-com{color:var(--c-com);font-style:italic} .lesson .t-doc{color:var(--c-doc)} .lesson .t-p{color:var(--c-com)}
@@ -367,7 +367,7 @@ img{max-width:100%}
 .v-css{--accent:#2A62D6;--accent-ink:#FFFFFF;--accent-soft:#E2EAFB}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-css{--accent:#7DA2FF;--accent-ink:#0A1430;--accent-soft:#16233F}}
 :root[data-theme="dark"] .v-css{--accent:#7DA2FF;--accent-ink:#0A1430;--accent-soft:#16233F}
-.v-css code.i.wrap{white-space:normal}
+.lesson code.i.wrap{white-space:normal;overflow-wrap:anywhere}
 .v-css ol.steps{margin:12px 0;padding-left:1.4em}
 .v-css ol.steps li{margin:4px 0}
 .v-css .tpl-view{margin:12px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
@@ -460,6 +460,62 @@ img{max-width:100%}
 .v-js .order-res span.ok{background:var(--ok-soft);color:var(--ok)}
 .v-js .order-res span.no{background:var(--bad-soft);color:var(--bad)}
 .lesson .test-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+
+/* ====================== 模块：浏览器与网络 ====================== */
+.v-net{--accent:#0E7A74;--accent-ink:#FFFFFF;--accent-soft:#DDF1EF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-net{--accent:#3FC7BC;--accent-ink:#04201E;--accent-soft:#123331}}
+:root[data-theme="dark"] .v-net{--accent:#3FC7BC;--accent-ink:#04201E;--accent-soft:#123331}
+/* 步骤条 */
+.lesson .stepper{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.lesson .st-dots{display:flex;gap:4px;padding:12px 14px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:thin}
+.lesson .st-dots button{flex:none;font:600 12px/1 var(--f-mono);min-width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--muted)}
+.lesson .st-dots button.done{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.lesson .st-dots button[aria-current="step"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.lesson .st-body{padding:16px 18px;display:grid;gap:8px;min-height:190px;align-content:start}
+.lesson .st-body .k{font:600 12px/1.4 var(--f-mono);color:var(--accent);letter-spacing:.06em}
+.lesson .st-body h4{margin:0;font:700 20px/1.35 var(--f-body)}
+.lesson .st-body p{margin:0;max-width:none}
+.lesson .st-body .where{font-size:14px;color:var(--muted)}
+.lesson .st-nav{display:flex;justify-content:space-between;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+/* 状态码 */
+.v-net .codes{display:flex;flex-wrap:wrap;gap:6px;padding:14px}
+.v-net .codes button{font:600 14px var(--f-mono);padding:8px 10px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.v-net .codes button[data-c="2"]{border-color:color-mix(in srgb,var(--ok) 50%,transparent);color:var(--ok)}
+.v-net .codes button[data-c="3"]{border-color:color-mix(in srgb,var(--teal) 50%,transparent);color:var(--teal)}
+.v-net .codes button[data-c="4"]{border-color:color-mix(in srgb,var(--accent) 30%,var(--bad) 40%);color:var(--bad)}
+.v-net .codes button[data-c="5"]{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.v-net .codes button[aria-pressed="true"]{box-shadow:0 0 0 3px color-mix(in srgb,currentColor 25%,transparent)}
+/* 请求模拟器 */
+.lesson .sim{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.lesson .sim-form{display:grid;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.lesson .sim-line{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lesson .sim-line select,.lesson .sim-line input,.lesson .sim-form textarea{font:14px var(--f-mono);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
+.lesson .sim-line input{flex:1 1 200px}
+.lesson .sim-form textarea{width:100%;min-height:64px;resize:vertical}
+.lesson .sim-form label{font-size:13px;color:var(--muted)}
+.lesson .sim-presets{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:13px;color:var(--muted)}
+.lesson .sim-presets button{font:12px var(--f-mono);padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.lesson .sim-out{display:grid;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.lesson .sim-out{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.lesson .sim-out>div{min-width:0;display:flex;flex-direction:column}.lesson .sim-out pre{flex:1}
+.lesson .sim-out h5{margin:0;padding:8px 14px;font:600 12px/1.4 var(--f-mono);letter-spacing:.06em;color:var(--muted);background:var(--bg);border-top:1px solid var(--line)}
+.lesson .sim-out pre{margin:0;padding:12px 14px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;min-height:120px}
+.lesson .sim-note{margin:0;padding:10px 16px;font-size:14px;border-top:1px solid var(--line);max-width:none}
+.lesson .h-m{color:var(--c-tag);font-weight:600}.lesson .h-k{color:var(--c-attr)}.lesson .h-s2{color:#5CCB8A;font-weight:600}.lesson .h-s4{color:#FF8F66;font-weight:600}.lesson .h-s5{color:#FF7A70;font-weight:600}
+/* 同源比较、存储 */
+.v-net .origin{display:grid;gap:8px;padding:14px 16px}
+.v-net .origin input{font:14px var(--f-mono);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.v-net .o-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.v-net .o-parts div{border-radius:8px;padding:6px 8px;background:var(--bg);border:1px solid var(--line);font:12.5px/1.5 var(--f-mono);overflow-wrap:anywhere}
+.v-net .o-parts div b{display:block;font:600 11px var(--f-body);color:var(--muted)}
+.v-net .o-parts div.ok{border-color:var(--ok);background:var(--ok-soft)}
+.v-net .o-parts div.no{border-color:var(--bad);background:var(--bad-soft)}
+.v-net .o-verdict{margin:0;font-size:15px;max-width:none}
+.v-net .stor{display:grid;gap:10px;padding:14px 16px}
+.v-net .stor .sim-line input{flex:1 1 120px}
+.v-net .stor table{width:100%;border-collapse:collapse;font:13px var(--f-mono)}
+.v-net .stor td,.v-net .stor th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.v-net .stor th{font:600 11px var(--f-body);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -2254,13 +2310,318 @@ console.log(total(cart), cheapItems(cart, 200), formatPrice(12.5));</textarea>
 </div>
 </section>
 
+<!-- ====================== 模块：浏览器与网络 ====================== -->
+<section class="view lesson v-net" data-view="net" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#net-journey"><span>01</span>从 URL 到页面</a></li>
+      <li><a href="#net-http"><span>02</span>HTTP 报文</a></li>
+      <li><a href="#net-codes"><span>03</span>方法与状态码</a></li>
+      <li><a href="#net-sim"><span>04</span>请求模拟器</a></li>
+      <li><a href="#net-headers"><span>05</span>请求头与缓存</a></li>
+      <li><a href="#net-storage"><span>06</span>浏览器存储</a></li>
+      <li><a href="#net-cors"><span>07</span>同源与跨域</a></li>
+      <li><a href="#net-security"><span>08</span>安全基础</a></li>
+      <li><a href="#net-devtools"><span>09</span>开发者工具与性能</a></li>
+      <li><a href="#net-quiz"><span>10</span>自测</a></li>
+      <li><a href="#net-challenge"><span>11</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第四站</p>
+      <h1><span class="lt">GET /</span> 浏览器与网络</h1>
+      <p class="lede">前端和后端之间隔着一张网。这一页讲清楚：在地址栏敲下网址后发生了什么、HTTP 请求和响应长什么样、状态码怎么读、数据存在哪里、跨域为什么会报错。这些是前后端协作时的“共同语言”。</p>
+      <ul class="goals">
+        <li>说清楚从输入网址到看到页面的全过程</li>
+        <li>读懂任何一个 HTTP 请求和响应</li>
+        <li>遇到 CORS、401、404 知道往哪查</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="net-journey">
+      <div class="chap-head"><span class="chap-num">01</span><h2>从输入网址到看到页面</h2></div>
+      <p class="sub">这是前端面试第一高频题，也是理解整个 Web 的主线。用下面的按钮一步步走一遍。</p>
+      <div class="stepper" id="netJourney">
+        <div class="st-dots" role="tablist" aria-label="步骤"></div>
+        <div class="st-body" aria-live="polite"></div>
+        <div class="st-nav"><button class="chip" type="button" data-prev>← 上一步</button><button class="btn" type="button" data-next>下一步 →</button></div>
+      </div>
+      <div class="tip"><span class="lbl">一句话版</span><p>DNS 把域名换成 IP → 建立 TCP 连接（HTTPS 再加一层 TLS 加密）→ 发 HTTP 请求 → 服务器返回 HTML → 浏览器解析 HTML 和 CSS、执行 JS → 计算布局 → 画到屏幕上。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="net-http">
+      <div class="chap-head"><span class="chap-num">02</span><h2>HTTP 请求和响应长什么样</h2></div>
+      <p class="sub">HTTP 本质上就是按固定格式写的两段文字：浏览器发一段<b>请求</b>，服务器回一段<b>响应</b>。点开每一行看含义。</p>
+      <div class="reader" id="netReq">
+        <div class="reader-bar"><span class="ed-title">请求 Request<small>浏览器 → 服务器</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="reader" id="netRes">
+        <div class="reader-bar"><span class="ed-title">响应 Response<small>服务器 → 浏览器</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="tip"><span class="lbl">结构</span><p>两者结构一样：<b>第一行</b>（请求行 / 状态行）+ <b>若干头部</b>（键: 值）+ <b>一个空行</b> + <b>正文</b>（可以没有）。GET 请求一般没有正文，参数放在网址的 <code class="i">?</code> 后面。</p></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="net-codes">
+      <div class="chap-head"><span class="chap-num">03</span><h2>请求方法与状态码</h2></div>
+      <p class="sub">方法说明“想干什么”，状态码说明“结果如何”。设计和调用 REST 接口时，这两样就是双方的约定。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>方法</th><th>含义</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>读取数据，不应该修改任何东西</td><td><code class="i">GET /api/todos</code></td></tr>
+          <tr><td>POST</td><td>新建一条数据，或提交一个动作（登录）</td><td><code class="i">POST /api/todos</code></td></tr>
+          <tr><td>PUT</td><td>整条替换</td><td><code class="i">PUT /api/todos/3</code></td></tr>
+          <tr><td>PATCH</td><td>只改其中几个字段</td><td><code class="i">PATCH /api/todos/3</code></td></tr>
+          <tr><td>DELETE</td><td>删除</td><td><code class="i">DELETE /api/todos/3</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>状态码：点一个看含义</h3>
+      <p>第一位数字就是分类：<b>2</b> 成功，<b>3</b> 重定向，<b>4</b> 客户端（请求方）的错，<b>5</b> 服务器的错。</p>
+      <div class="lab" id="netCodes">
+        <div class="codes"></div>
+        <div class="lab-body"><p data-what aria-live="polite"></p><p data-todo class="cat-badge" style="font-size:14px"></p></div>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="net-sim">
+      <div class="chap-head"><span class="chap-num">04</span><h2>请求模拟器：亲手调一个 API</h2></div>
+      <p class="sub">下面是一个运行在页面里的模拟“待办事项”后端，接口设计和你第六天要写的一模一样。选方法、填路径和正文，点发送，看完整的请求和响应。</p>
+      <div class="sim" id="netSim">
+        <div class="sim-form">
+          <div class="sim-line">
+            <select aria-label="请求方法" data-m><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select>
+            <input data-p value="/api/todos" aria-label="路径" spellcheck="false">
+            <button class="btn" type="button" data-send>发送</button>
+          </div>
+          <div class="sim-presets"><span>试试：</span></div>
+          <label>请求头（每行一个，可选）<textarea data-h spellcheck="false"></textarea></label>
+          <label>请求正文（JSON，可选）<textarea data-b spellcheck="false"></textarea></label>
+        </div>
+        <div class="sim-out">
+          <div><h5>请求 REQUEST</h5><pre data-req></pre></div>
+          <div><h5>响应 RESPONSE</h5><pre data-res></pre></div>
+        </div>
+        <p class="sim-note" data-note aria-live="polite"></p>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>接口</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>GET /api/todos</td><td>列出所有待办</td></tr>
+          <tr><td>GET /api/todos/:id</td><td>查一条，没有就 404</td></tr>
+          <tr><td>POST /api/todos</td><td>新建，正文 <code class="i">{"title": "..."}</code>，成功返回 201</td></tr>
+          <tr><td>PATCH /api/todos/:id</td><td>修改，比如 <code class="i">{"done": true}</code></td></tr>
+          <tr><td>DELETE /api/todos/:id</td><td>删除，成功返回 204（没有正文）</td></tr>
+          <tr><td>GET /api/profile</td><td>需要登录：请求头带 <code class="i">Authorization: Bearer abc123</code>，否则 401</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="net-headers">
+      <div class="chap-head"><span class="chap-num">05</span><h2>常用请求头与缓存</h2></div>
+      <p class="sub">头部是请求和响应的“附加说明”。下面这些是写全栈项目时一定会碰到的。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>头部</th><th>方向</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>Content-Type</td><td>双向</td><td>正文是什么格式：<code class="i">application/json</code>、<code class="i">text/html</code>、<code class="i">multipart/form-data</code>（上传文件）</td></tr>
+          <tr><td>Accept</td><td>请求</td><td>希望服务器返回什么格式</td></tr>
+          <tr><td>Authorization</td><td>请求</td><td>身份凭证，常见 <code class="i">Bearer &lt;token&gt;</code></td></tr>
+          <tr><td>Cookie / Set-Cookie</td><td>请求 / 响应</td><td>服务器用 Set-Cookie 让浏览器存一小段数据，之后浏览器每次请求同一站点都自动带上 Cookie。登录状态常靠它</td></tr>
+          <tr><td>Cache-Control</td><td>响应</td><td>能缓存多久：<code class="i">max-age=31536000</code> 缓存一年，<code class="i">no-store</code> 不缓存</td></tr>
+          <tr><td>ETag / If-None-Match</td><td>响应 / 请求</td><td>内容指纹。浏览器带上旧指纹来问，没变就返回 <b>304</b>，省去重新下载</td></tr>
+          <tr><td>Location</td><td>响应</td><td>重定向去哪，或新建资源的地址</td></tr>
+          <tr><td>Access-Control-Allow-Origin</td><td>响应</td><td>允许哪些网站跨域读取，见第 07 节</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">缓存套路</span><p>Vite 打包出来的文件名带哈希（<code class="i">index-3f9a2c.js</code>），内容一变名字就变，所以可以放心设置“缓存一年”。而 <code class="i">index.html</code> 不缓存或短缓存，保证用户每次都能拿到最新的文件名。</p></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="net-storage">
+      <div class="chap-head"><span class="chap-num">06</span><h2>浏览器存储</h2></div>
+      <p class="sub">数据存在浏览器里，刷新页面也不会丢。下面这个面板操作的是<b>真实的</b> localStorage，存进去以后刷新页面再回来看看。</p>
+      <div class="lab">
+        <div class="stor" id="netStore">
+          <div class="sim-line"><input data-k placeholder="键，例如 theme" aria-label="键" spellcheck="false"><input data-v placeholder="值，例如 dark" aria-label="值" spellcheck="false"></div>
+          <div class="sim-line"><button class="chip" type="button" data-set>setItem 存</button><button class="chip" type="button" data-get>getItem 取</button><button class="chip" type="button" data-del>removeItem 删</button><button class="chip" type="button" data-clear>清空演示数据</button></div>
+          <pre class="lab-code" data-code></pre>
+          <table><thead><tr><th>键（只显示本演示的）</th><th>值</th></tr></thead><tbody data-list></tbody></table>
+        </div>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>方式</th><th>容量</th><th>有效期</th><th>会自动发给服务器吗</th><th>适合存</th></tr></thead>
+        <tbody>
+          <tr><td>Cookie</td><td>约 4KB</td><td>可设置过期时间</td><td>会，每次请求都带</td><td>登录会话 ID（配合 HttpOnly）</td></tr>
+          <tr><td>localStorage</td><td>约 5MB</td><td>永久，手动删才没</td><td>不会</td><td>主题、语言、草稿</td></tr>
+          <tr><td>sessionStorage</td><td>约 5MB</td><td>关掉标签页就没</td><td>不会</td><td>一次性的表单步骤</td></tr>
+          <tr><td>IndexedDB</td><td>很大</td><td>永久</td><td>不会</td><td>离线应用的大量结构化数据</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">只能存字符串</span><p>localStorage 只存字符串，存对象要先 <code class="i">JSON.stringify</code>，取出来再 <code class="i">JSON.parse</code>。另外它能被页面上的任何 JS 读到，<b>不要</b>把密码或敏感令牌放进去。</p></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="net-cors">
+      <div class="chap-head"><span class="chap-num">07</span><h2>同源策略与跨域 CORS</h2></div>
+      <p class="sub">浏览器规定：一个网页里的 JS 默认只能读取<b>同源</b>接口的响应。协议、域名、端口三者完全一样才叫同源。输入两个网址比一比。</p>
+      <div class="lab">
+        <div class="origin" id="netOrigin">
+          <input data-a value="http://localhost:5173/index.html" aria-label="网页地址" spellcheck="false">
+          <input data-b value="http://localhost:3000/api/todos" aria-label="接口地址" spellcheck="false">
+          <div class="o-parts"></div>
+          <p class="o-verdict" aria-live="polite"></p>
+          <div class="sim-presets"><span>换一组：</span></div>
+        </div>
+      </div>
+      <h3>跨域时浏览器怎么做</h3>
+      <ol class="steps">
+        <li>前端 <code class="i">localhost:5173</code> 用 fetch 请求后端 <code class="i">localhost:3000</code>，端口不同，跨域了。</li>
+        <li>如果是“非简单请求”（比如带 JSON 正文的 POST、带 Authorization 头），浏览器先自动发一个 <b>OPTIONS 预检请求</b>，问后端“允许吗？”</li>
+        <li>后端在响应头里写 <code class="i wrap">Access-Control-Allow-Origin: http://localhost:5173</code>（以及允许的方法和头），浏览器才放行。</li>
+        <li>没有这个头，请求其实已经到了服务器，但浏览器<b>拦下响应</b>不给 JS 看，控制台出现红色的 CORS 报错。</li>
+      </ol>
+      <div class="tip"><span class="lbl">怎么解决</span><p>CORS 是<b>后端</b>要配的：Express 里装 <code class="i">cors</code> 中间件即可。开发时也可以在 Vite 里配置代理，让前端请求同源的 <code class="i">/api</code>，由开发服务器转发到后端。用 Next.js 把前后端放在同一个项目里，就根本不跨域。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="net-security">
+      <div class="chap-head"><span class="chap-num">08</span><h2>安全基础：XSS、CSRF 与 HTTPS</h2></div>
+      <p class="sub">运行下面的代码，然后分别点两个按钮。输入框里那段“评论”其实是一段攻击代码。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">XSS 演示</span></div>
+        <template><input id="msg" style="width:100%" value='&lt;img src=x onerror="document.body.style.background=&apos;#fdd&apos;;console.error(&apos;攻击脚本被执行了！它能读到你的 Cookie 和页面数据&apos;)"&gt;'>
+<p><button id="bad">用 innerHTML 显示</button> <button id="good">用 textContent 显示</button></p>
+<div id="out" style="border:1px dashed #999;padding:8px;min-height:2em"></div></template>
+<textarea data-code>const msg = document.querySelector("#msg");
+const out = document.querySelector("#out");
+
+document.querySelector("#bad").onclick = () => {
+  // 危险：把用户输入当 HTML 解析，里面的事件属性会被执行
+  out.innerHTML = msg.value;
+};
+
+document.querySelector("#good").onclick = () => {
+  // 安全：当纯文本显示，尖括号原样出现
+  out.textContent = msg.value;
+};</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>攻击</th><th>怎么发生</th><th>怎么防</th></tr></thead>
+        <tbody>
+          <tr><td>XSS 跨站脚本</td><td>把别人提交的内容当 HTML 插进页面，里面藏的脚本被执行，可以偷走登录凭证</td><td>用 textContent；React 默认会转义；后端也要过滤；登录 Cookie 设 HttpOnly 让 JS 读不到</td></tr>
+          <tr><td>CSRF 跨站请求伪造</td><td>你登录了 A 网站，又打开了恶意网站 B，B 偷偷向 A 发请求，浏览器自动带上 A 的 Cookie</td><td>Cookie 设 <code class="i">SameSite=Lax</code>；重要操作加 CSRF Token；改数据只用 POST / PUT / DELETE</td></tr>
+          <tr><td>中间人窃听</td><td>HTTP 是明文，公共 Wi-Fi 上能被看到和篡改</td><td>全站 HTTPS。Vercel、Netlify 等平台默认自动配好</td></tr>
+          <tr><td>SQL 注入</td><td>把用户输入直接拼进 SQL 语句</td><td>用参数化查询或 ORM（后端模块会讲）</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">核心原则</span><p>永远不要信任来自用户的数据。前端校验只为体验，后端必须再校验一次。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="net-devtools">
+      <div class="chap-head"><span class="chap-num">09</span><h2>开发者工具与性能</h2></div>
+      <p class="sub">按 F12（Mac 是 Cmd + Option + I）打开。前端每天都在用它，下面是最常用的几个面板。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>面板</th><th>用来做什么</th></tr></thead>
+        <tbody>
+          <tr><td>Elements</td><td>看 HTML 结构和 CSS，直接改样式试效果，查样式为什么不生效</td></tr>
+          <tr><td>Console</td><td>看报错和 console.log，直接执行 JS</td></tr>
+          <tr><td>Network</td><td>看每个请求：地址、方法、状态码、请求头、响应内容、耗时。接口调不通先来这里</td></tr>
+          <tr><td>Application</td><td>看和改 Cookie、localStorage、sessionStorage</td></tr>
+          <tr><td>Sources</td><td>打断点、单步调试 JS</td></tr>
+          <tr><td>Lighthouse</td><td>给页面的性能、无障碍、SEO 打分并给出改进建议</td></tr>
+        </tbody>
+      </table></div>
+      <h3>性能：三个核心指标</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>指标</th><th>衡量什么</th><th>目标</th></tr></thead>
+        <tbody>
+          <tr><td>LCP</td><td>最大的内容（大图、标题）多久显示出来</td><td>2.5 秒内</td></tr>
+          <tr><td>INP</td><td>点击、输入后页面多快有反应</td><td>200 毫秒内</td></tr>
+          <tr><td>CLS</td><td>页面加载时内容有没有乱跳</td><td>0.1 以下</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="dots">
+        <li>图片：用合适的尺寸和 WebP / AVIF 格式，首屏以外的图片加 <code class="i">loading="lazy"</code>，写上宽高避免页面跳动。</li>
+        <li>JS：按路由拆分代码（框架和 Vite 自动做），少引入大而全的库。</li>
+        <li>缓存：带哈希的静态文件长缓存，接口数据按需缓存。</li>
+        <li>CDN：静态文件放到离用户近的节点，Vercel 等平台默认就有。</li>
+      </ul>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="net-quiz">
+      <div class="chap-head"><span class="chap-num">10</span><h2>自测：10 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">10</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="net-challenge">
+      <div class="chap-head"><span class="chap-num">11</span><h2>动手挑战：调通待办接口</h2></div>
+      <p class="sub">用 <code class="i">fetch</code> 调用第 04 节那个模拟后端，补全 5 个函数。这里的 fetch 已经被换成模拟版本，行为和真实浏览器一致。每次修改后自动跑测试。</p>
+      <ul class="checks" id="netChecks"></ul>
+      <div class="editor" id="netChallengeEd" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">api.js</span><span class="ed-tools"><button class="chip" type="button" id="netShowAnswer">看参考答案</button></span></div>
+        <template></template>
+<textarea data-code data-store="felearn-net-challenge">// 1. GET /api/todos，返回解析后的数组
+async function getTodos() {
+  // TODO
+}
+
+// 2. POST /api/todos，正文是 JSON：{ title }
+//    记得带上请求头 Content-Type: application/json，返回新建的那条待办
+async function addTodo(title) {
+  // TODO
+}
+
+// 3. GET /api/todos/:id，找到返回那条待办，状态码不是 2xx 时返回 null
+async function getTodo(id) {
+  // TODO
+}
+
+// 4. DELETE /api/todos/:id，删除成功（状态码 204）返回 true，否则 false
+async function deleteTodo(id) {
+  // TODO
+}
+
+// 5. GET /api/profile，请求头带上 Authorization: Bearer <token>，返回解析后的用户信息
+async function getProfile(token) {
+  // TODO
+}
+
+getTodos().then((list) => console.log("待办：", list));</textarea>
+      </div>
+      <div class="test-bar"><button class="btn" type="button" id="netRunTests">重新跑测试</button><span class="cat-badge" id="netTestState"></span></div>
+      <div id="netDoneBanner" class="done-banner" hidden>全部通过。你已经能按 REST 约定调用接口、处理状态码和身份令牌了，下一站是前端框架 React。</div>
+      <footer class="end">浏览器与网络 · FeLearn 一周全栈计划。想深入了解 HTTP，推荐 MDN 中文的 HTTP 文档：developer.mozilla.org/zh-CN/docs/Web/HTTP</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
   { id: "html5", title: "HTML5 核心速通", short: "HTML5", c: "--html", day: "D1", desc: "页面骨架、语义化标签、表单，每个示例都能边改边看。", ready: true },
   { id: "css", title: "CSS 样式与布局", short: "CSS", c: "--css", day: "D1–D2", desc: "选择器、优先级、盒模型、Flex 与 Grid、响应式，带练习场和挑战。", ready: true },
   { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
-  { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: false },
+  { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: true },
   { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: false },
   { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: false },
   { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
@@ -3547,6 +3908,296 @@ loadCartTotal().then((t) => console.log("异步总价：", t));
   chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,700);};
   view.querySelector('#jsRunTests').addEventListener('click',test);
   view.querySelector('#jsShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+  test();
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：浏览器与网络 ====================== */
+/* 模拟的待办 API：请求模拟器、网络挑战、后端模块都用它。纯函数，可以 toString() 后放进沙箱 iframe 里运行 */
+function felearnApi(state, method, path, headers, bodyText) {
+  const json = (status, data, extra) => ({ status, headers: Object.assign({ 'Content-Type': 'application/json; charset=utf-8' }, extra || {}), body: data === undefined ? '' : JSON.stringify(data, null, 2) });
+  const h = {}; Object.keys(headers || {}).forEach(k => { h[k.toLowerCase()] = headers[k]; });
+  const url = path.split('?')[0].replace(/\/+$/, '') || '/';
+  const m = url.match(/^\/api\/todos(?:\/(\d+))?$/);
+  if (url === '/api/profile') {
+    if (method !== 'GET') return json(405, { error: '只支持 GET' }, { Allow: 'GET' });
+    if (h.authorization !== 'Bearer abc123') return json(401, { error: '未登录或令牌无效' }, { 'WWW-Authenticate': 'Bearer' });
+    return json(200, { id: 7, name: 'Jim', email: 'jim@example.com' });
+  }
+  if (!m) return json(404, { error: '没有这个接口：' + url });
+  const id = m[1] ? Number(m[1]) : null;
+  let body = null;
+  if (bodyText && bodyText.trim()) {
+    if (!/application\/json/.test(h['content-type'] || '')) return json(415, { error: '请求头缺少 Content-Type: application/json' });
+    try { body = JSON.parse(bodyText); } catch (e) { return json(400, { error: '正文不是合法的 JSON' }); }
+  }
+  const find = () => state.todos.find(t => t.id === id);
+  if (id === null) {
+    if (method === 'GET') return json(200, state.todos);
+    if (method === 'POST') {
+      if (!body || typeof body.title !== 'string' || !body.title.trim()) return json(400, { error: 'title 不能为空' });
+      const todo = { id: state.nextId++, title: body.title.trim(), done: false };
+      state.todos.push(todo);
+      return json(201, todo, { Location: '/api/todos/' + todo.id });
+    }
+    return json(405, { error: '这个地址只支持 GET 和 POST' }, { Allow: 'GET, POST' });
+  }
+  const todo = find();
+  if (!todo) return json(404, { error: '找不到 id 为 ' + id + ' 的待办' });
+  if (method === 'GET') return json(200, todo);
+  if (method === 'PUT' || method === 'PATCH') {
+    if (!body) return json(400, { error: '缺少请求正文' });
+    if (method === 'PUT' && typeof body.title !== 'string') return json(400, { error: 'PUT 要提供完整数据，至少有 title' });
+    if ('title' in body) todo.title = String(body.title);
+    if ('done' in body) todo.done = !!body.done;
+    return json(200, todo);
+  }
+  if (method === 'DELETE') { state.todos = state.todos.filter(t => t !== todo); return { status: 204, headers: {}, body: '' }; }
+  return json(405, { error: '不支持的方法' });
+}
+function felearnApiState() { return { todos: [{ id: 1, title: '学 HTML', done: true }, { id: 2, title: '学 CSS', done: false }], nextId: 3 }; }
+const FELEARN_STATUS = { 200: 'OK', 201: 'Created', 204: 'No Content', 301: 'Moved Permanently', 302: 'Found', 304: 'Not Modified', 400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed', 409: 'Conflict', 415: 'Unsupported Media Type', 422: 'Unprocessable Entity', 429: 'Too Many Requests', 500: 'Internal Server Error', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout' };
+
+(function(){
+  const {esc}=FL;
+  const view=document.querySelector('.v-net');
+  // 沙箱里的 fetch：调用同一个 felearnApi，并记下每个请求供测试检查
+  const PRELUDE='const felearnApi='+felearnApi.toString()+';const felearnApiState='+felearnApiState.toString()+';'
+    +'window.__api=felearnApiState();window.__reqs=[];'
+    +'window.fetch=async function(url,opt){opt=opt||{};var m=(opt.method||"GET").toUpperCase(),h={};var src=opt.headers||{};if(typeof Headers!=="undefined"&&src instanceof Headers){src.forEach(function(v,k){h[k]=v;});}else{Object.assign(h,src);}'
+    +'var body=typeof opt.body==="string"?opt.body:"";window.__reqs.push({url:url,method:m,headers:h,body:body});await new Promise(function(r){setTimeout(r,20);});'
+    +'var r=felearnApi(window.__api,m,String(url).replace(/^https?:\\/\\/[^/]+/,""),h,body);'
+    +'return {ok:r.status>=200&&r.status<300,status:r.status,headers:{get:function(k){var f=Object.keys(r.headers).find(function(x){return x.toLowerCase()===String(k).toLowerCase();});return f?r.headers[f]:null;}},json:async function(){if(!r.body)throw new SyntaxError("Unexpected end of JSON input（204 没有正文）");return JSON.parse(r.body);},text:async function(){return r.body;}};};';
+  // 挑战编辑器的“▶ 运行”也用模拟 fetch
+  view.querySelector('#netChallengeEd template').innerHTML='<script>'+PRELUDE+'<\/script>';
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  /* ---------- 步骤条 ---------- */
+  const STEPS=[
+    ['解析网址','你输入 https://shop.example.com/cart','浏览器先拆开网址：协议 https、域名 shop.example.com、路径 /cart。如果输入的不像网址，就交给搜索引擎。','地址栏'],
+    ['DNS 查询','域名 → IP 地址','计算机之间靠 IP 地址通信。浏览器依次查自己的缓存、操作系统缓存、路由器，最后问 DNS 服务器：shop.example.com 的 IP 是多少？得到类似 93.184.216.34 的地址。','Network 面板 → Timing → DNS Lookup'],
+    ['TCP 连接','三次握手','浏览器和服务器的 443 端口建立 TCP 连接：“我要连你”“好的我听到了”“那我开始了”。TCP 保证数据不丢、不乱序。','Timing → Initial connection'],
+    ['TLS 握手','HTTPS 加密','双方交换证书和密钥，之后所有内容都加密传输。地址栏的小锁就表示这一步成功了，证书由可信机构签发。','Timing → SSL；点地址栏小锁看证书'],
+    ['发送 HTTP 请求','GET /cart HTTP/2','浏览器发出请求：方法、路径、请求头（Cookie、浏览器信息、能接受的格式等）。','Network → 点一个请求 → Headers'],
+    ['服务器处理','后端干活','服务器上的程序（比如你第六天写的 Node.js）查数据库、拼数据，生成 HTML 或 JSON。中间可能还有 CDN、负载均衡、反向代理。','Timing → Waiting for server response（TTFB）'],
+    ['返回响应','200 OK + HTML','服务器返回状态码、响应头和 HTML 正文。浏览器根据 Cache-Control 等头决定要不要缓存。','Network → Response / Preview'],
+    ['解析 HTML','生成 DOM 树','浏览器从上往下读 HTML 生成 DOM。遇到 CSS、图片、JS 就再发请求去下载。普通 script 会暂停解析，所以要加 defer。','Elements 面板看到的就是 DOM'],
+    ['解析 CSS','生成 CSSOM','CSS 被解析成样式规则树，和 DOM 合并成“渲染树”：只包含要显示的元素和它们最终的样式。display: none 的元素不在里面。','Elements → Computed'],
+    ['布局 Layout','计算位置和大小','根据视口宽度、盒模型、Flex / Grid 规则，算出每个元素的确切位置和尺寸。修改宽高、增删元素都会触发重新布局（回流），代价较高。','Performance 面板 → Layout'],
+    ['绘制与合成','像素上屏','把每个元素画成像素，分图层合成后显示到屏幕上。transform 和 opacity 动画只需要重新合成，所以最流畅。','Performance 面板 → Paint / Composite'],
+    ['执行 JS、可交互','页面活了','defer 的脚本在 HTML 解析完后执行，绑定事件、请求接口、更新 DOM。之后每次 DOM 变化又会触发部分布局和绘制。','Console、Sources 面板']
+  ];
+  const stp=view.querySelector('#netJourney'), dots=stp.querySelector('.st-dots'), sbody=stp.querySelector('.st-body');
+  let si=0;
+  STEPS.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=i+1;b.title=s[0];b.setAttribute('aria-label','第 '+(i+1)+' 步：'+s[0]);b.addEventListener('click',()=>go(i));dots.append(b);});
+  function go(i){
+    si=Math.max(0,Math.min(STEPS.length-1,i));
+    const [t,sub,d,w]=STEPS[si];
+    dots.querySelectorAll('button').forEach((b,k)=>{b.classList.toggle('done',k<si);if(k===si)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
+    sbody.innerHTML='<span class="k">第 '+(si+1)+' / '+STEPS.length+' 步 · '+esc(sub)+'</span><h4>'+esc(t)+'</h4><p>'+esc(d)+'</p><p class="where">在开发者工具里看：'+esc(w)+'</p>';
+    stp.querySelector('[data-prev]').disabled=si===0;
+    const nx=stp.querySelector('[data-next]');nx.textContent=si===STEPS.length-1?'从头再来 ↺':'下一步 →';
+  }
+  stp.querySelector('[data-prev]').addEventListener('click',()=>go(si-1));
+  stp.querySelector('[data-next]').addEventListener('click',()=>go(si===STEPS.length-1?0:si+1));
+  go(0);
+
+  /* ---------- 报文逐行解读 ---------- */
+  FL.makeReader(view.querySelector('#netReq'),[
+    ['POST /api/todos HTTP/1.1','<b>请求行：</b>方法 POST（新建）、路径 /api/todos、协议版本。'],
+    ['Host: api.example.com','要访问哪个域名。一台服务器上可能跑着很多网站，靠它区分。'],
+    ['Content-Type: application/json','<b>正文格式</b>是 JSON。后端据此决定怎么解析正文，漏写这一行是最常见的“后端收不到数据”原因。'],
+    ['Authorization: Bearer eyJhbGciOi...','<b>身份凭证。</b>登录后拿到的令牌（token），证明“我是谁”。'],
+    ['Cookie: theme=dark; sid=8f2a...','浏览器自动带上的这个站点的 Cookie。'],
+    ['User-Agent: Mozilla/5.0 (Macintosh...)','浏览器和系统信息。'],
+    ['','<b>空行。</b>头部到此结束，下面是正文。'],
+    ['{"title": "学习 HTTP"}','<b>请求正文：</b>要新建的数据。GET 请求通常没有正文。']
+  ],true);
+  FL.makeReader(view.querySelector('#netRes'),[
+    ['HTTP/1.1 201 Created','<b>状态行：</b>201 表示“已创建”，比笼统的 200 更准确。'],
+    ['Content-Type: application/json; charset=utf-8','返回的正文是 UTF-8 编码的 JSON。'],
+    ['Location: /api/todos/3','新建的资源在哪个地址。'],
+    ['Cache-Control: no-store','不要缓存这个响应。'],
+    ['Access-Control-Allow-Origin: https://app.example.com','<b>CORS 头：</b>允许这个网站的 JS 读取响应（第 07 节）。'],
+    ['Set-Cookie: sid=8f2a...; HttpOnly; Secure; SameSite=Lax','让浏览器保存一个 Cookie。<b>HttpOnly</b>：JS 读不到，防 XSS 偷取；<b>Secure</b>：只走 HTTPS；<b>SameSite</b>：防 CSRF。'],
+    ['',' <b>空行。</b>'],
+    ['{"id": 3, "title": "学习 HTTP", "done": false}','<b>响应正文：</b>新建好的数据，带上了服务器生成的 id。']
+  ]);
+
+  /* ---------- 状态码 ---------- */
+  const CODES={
+    200:['请求成功，正文里就是你要的数据。','照常使用返回的数据。'],
+    201:['新建成功，常见于 POST。','可以用返回的数据（带 id）直接更新界面。'],
+    204:['成功了，但没有正文，常见于 DELETE。','不要调用 res.json()，会报错。'],
+    301:['永久搬家，响应头 Location 给出新地址。','浏览器会自动跳转，搜索引擎也会更新地址。'],
+    302:['临时跳转，比如未登录时跳到登录页。','fetch 默认会自动跟随跳转。'],
+    304:['内容没变，用你的缓存吧。','浏览器自动处理，Network 面板里能看到。'],
+    400:['请求格式不对：缺字段、类型错、JSON 写错。','把后端返回的错误信息提示给用户，检查请求正文。'],
+    401:['没登录，或者令牌过期、无效。','跳转到登录页，或者用刷新令牌换一个新的。'],
+    403:['登录了，但没有权限。','提示“无权访问”，不要再重试。'],
+    404:['找不到这个资源或接口。','检查路径拼写和 id；页面上显示“不存在”。'],
+    405:['这个地址不支持这种方法，比如对只读接口发了 DELETE。','检查请求方法。'],
+    409:['冲突，比如注册的邮箱已经存在。','提示用户换一个。'],
+    422:['格式没问题，但内容通不过校验，比如密码太短。','把每个字段的错误显示在表单旁边。'],
+    429:['请求太频繁，被限流了。','稍等再试，必要时做防抖。'],
+    500:['服务器内部出错，多半是后端代码有 bug。','提示“服务器开小差了”，把情况告诉后端（或者去看你自己的服务器日志）。'],
+    502:['网关收到了后端的错误响应，后端可能挂了。','稍后重试，检查后端服务是否在运行。'],
+    503:['服务暂时不可用：维护中或过载。','稍后重试。'],
+    504:['网关等后端太久，超时了。','检查后端是否有很慢的查询。']
+  };
+  const cbox=view.querySelector('#netCodes'), cl=cbox.querySelector('.codes');
+  Object.keys(CODES).forEach(c=>{const b=document.createElement('button');b.type='button';b.textContent=c;b.dataset.c=c[0];b.addEventListener('click',()=>code(c));cl.append(b);});
+  function code(c){
+    cl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.textContent===c)));
+    cbox.querySelector('[data-what]').innerHTML='<b>'+c+' '+FELEARN_STATUS[c]+'</b>：'+esc(CODES[c][0]);
+    cbox.querySelector('[data-todo]').textContent='前端怎么处理：'+CODES[c][1];
+  }
+  code('200');
+
+  /* ---------- 请求模拟器 ---------- */
+  const sim=view.querySelector('#netSim');
+  let api=felearnApiState();
+  const $=s=>sim.querySelector(s);
+  const PRE=[
+    ['列出全部','GET','/api/todos','',''],
+    ['查第 1 条','GET','/api/todos/1','',''],
+    ['查不存在的','GET','/api/todos/99','',''],
+    ['新建','POST','/api/todos','Content-Type: application/json','{\n  "title": "学习 HTTP"\n}'],
+    ['忘了 Content-Type','POST','/api/todos','','{"title": "没写请求头"}'],
+    ['标记完成','PATCH','/api/todos/2','Content-Type: application/json','{"done": true}'],
+    ['删除','DELETE','/api/todos/1','',''],
+    ['没带令牌','GET','/api/profile','',''],
+    ['带上令牌','GET','/api/profile','Authorization: Bearer abc123','']
+  ];
+  PRE.forEach(p=>{const b=document.createElement('button');b.type='button';b.textContent=p[0];b.addEventListener('click',()=>{$('[data-m]').value=p[1];$('[data-p]').value=p[2];$('[data-h]').value=p[3];$('[data-b]').value=p[4];send();});$('.sim-presets').append(b);});
+  const rst=document.createElement('button');rst.type='button';rst.textContent='↺ 重置数据';rst.addEventListener('click',()=>{api=felearnApiState();$('[data-note]').textContent='数据已重置为初始的两条待办。';});$('.sim-presets').append(rst);
+  const NOTE={200:'成功。',201:'新建成功，注意响应头 Location 和服务器生成的 id。',204:'删除成功，204 没有正文。',400:'请求内容不对，看响应正文里的错误说明。',401:'没带令牌或令牌错误。试试“带上令牌”。',404:'路径或 id 不存在。',405:'这个地址不支持这个方法，看响应头 Allow。',415:'有正文却没说明格式，后端不知道怎么解析。加一行 Content-Type: application/json 再试。'};
+  function send(){
+    const m=$('[data-m]').value, p=$('[data-p]').value.trim()||'/', ht=$('[data-h]').value, bt=$('[data-b]').value;
+    const headers={};ht.split('\n').forEach(l=>{const i=l.indexOf(':');if(i>0)headers[l.slice(0,i).trim()]=l.slice(i+1).trim();});
+    const send=bt.trim()&&m!=='GET'&&m!=='DELETE'?bt:'';
+    const r=felearnApi(api,m,p,headers,send);
+    const hk=(k,v)=>'<span class="h-k">'+esc(k)+'</span>: '+esc(v);
+    $('[data-req]').innerHTML='<span class="h-m">'+m+'</span> '+esc(p)+' HTTP/1.1\n'+hk('Host','api.felearn.dev')+'\n'+Object.keys(headers).map(k=>hk(k,headers[k])).join('\n')+(Object.keys(headers).length?'\n':'')+(send?'\n'+esc(send):'');
+    const cls=r.status<300?'h-s2':r.status<500?'h-s4':'h-s5';
+    $('[data-res]').innerHTML='HTTP/1.1 <span class="'+cls+'">'+r.status+' '+(FELEARN_STATUS[r.status]||'')+'</span>\n'+Object.keys(r.headers).map(k=>hk(k,r.headers[k])).join('\n')+(r.body?'\n\n'+esc(r.body):'');
+    $('[data-note]').innerHTML='<b>'+r.status+'</b>：'+(NOTE[r.status]||'');
+    if(send&&m!=='GET')$('[data-b]').value=send;
+  }
+  $('[data-send]').addEventListener('click',send);
+  $('[data-p]').addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+  send();
+
+  /* ---------- localStorage 演示 ---------- */
+  const st=view.querySelector('#netStore'), P='felearn-demo:';
+  const S=(()=>{try{const t='__t';localStorage.setItem(t,t);localStorage.removeItem(t);return localStorage;}catch(e){return null;}})();
+  const mem={};
+  const store={set:(k,v)=>S?S.setItem(P+k,v):(mem[k]=v),get:k=>S?S.getItem(P+k):(k in mem?mem[k]:null),del:k=>S?S.removeItem(P+k):delete mem[k],
+    all:()=>S?Object.keys(S).filter(k=>k.startsWith(P)).map(k=>[k.slice(P.length),S.getItem(k)]):Object.entries(mem)};
+  const K=st.querySelector('[data-k]'),V=st.querySelector('[data-v]'),code2=st.querySelector('[data-code]');
+  function list(){const rows=store.all();st.querySelector('[data-list]').innerHTML=rows.length?rows.map(([k,v])=>'<tr><td>'+esc(k)+'</td><td>'+esc(v)+'</td></tr>').join(''):'<tr><td colspan="2" class="empty">还没有数据</td></tr>';}
+  const say=(c,r)=>{code2.innerHTML=FL.hlJs(c)+(r!==undefined?'\n<span class="t-com">// → '+esc(String(r))+'</span>':'')+(S?'':'\n<span class="t-com">// 当前环境禁用了 localStorage，演示数据只保存在内存里</span>');};
+  st.querySelector('[data-set]').addEventListener('click',()=>{const k=K.value.trim()||'theme',v=V.value||'dark';store.set(k,v);say('localStorage.setItem("'+k+'", "'+v+'");');list();});
+  st.querySelector('[data-get]').addEventListener('click',()=>{const k=K.value.trim()||'theme';say('localStorage.getItem("'+k+'");',store.get(k));});
+  st.querySelector('[data-del]').addEventListener('click',()=>{const k=K.value.trim()||'theme';store.del(k);say('localStorage.removeItem("'+k+'");');list();});
+  st.querySelector('[data-clear]').addEventListener('click',()=>{store.all().forEach(([k])=>store.del(k));say('// 清空了本演示存的数据（真实项目里 localStorage.clear() 会清掉整个网站的数据）');list();});
+  say('// 填好键和值，点 setItem 存进去，刷新页面后点 getItem 取出来');list();
+
+  /* ---------- 同源比较 ---------- */
+  const og=view.querySelector('#netOrigin'), A=og.querySelector('[data-a]'), B=og.querySelector('[data-b]');
+  const parse=u=>{try{const x=new URL(u);return [x.protocol.replace(':',''),x.hostname,x.port||(x.protocol==='https:'?'443':x.protocol==='http:'?'80':'')];}catch(e){return null;}};
+  function cmp(){
+    const a=parse(A.value.trim()),b=parse(B.value.trim()), parts=og.querySelector('.o-parts'), v=og.querySelector('.o-verdict');
+    if(!a||!b){parts.innerHTML='';v.textContent='请输入完整的网址，例如 https://example.com/path';return;}
+    const N=['协议','域名','端口'];
+    parts.innerHTML=N.map((n,i)=>'<div class="'+(a[i]===b[i]?'ok':'no')+'"><b>'+n+'</b>'+esc(a[i])+(a[i]===b[i]?' = ':' ≠ ')+esc(b[i])+'</div>').join('');
+    const diff=N.filter((n,i)=>a[i]!==b[i]);
+    v.innerHTML=diff.length?'<b>跨域</b>（'+diff.join('、')+'不同）。浏览器会检查响应里的 Access-Control-Allow-Origin，后端没允许就拦截。':'<b>同源</b>，可以直接请求，不涉及 CORS。路径不同没关系。';
+  }
+  [['http://localhost:5173/','http://localhost:3000/api'],['https://a.com/page','https://a.com/api/user'],['https://a.com','http://a.com'],['https://a.com','https://api.a.com'],['https://a.com','https://a.com:443/x']].forEach(([x,y])=>{const b=document.createElement('button');b.type='button';b.textContent=x.replace(/^https?:\/\//,'')+' ↔ '+y.replace(/^https?:\/\//,'');b.addEventListener('click',()=>{A.value=x;B.value=y;cmp();});og.querySelector('.sim-presets').append(b);});
+  A.addEventListener('input',cmp);B.addEventListener('input',cmp);cmp();
+
+  /* ---------- 测验 ---------- */
+  FL.makeQuiz(view.querySelector('#net-quiz'),[
+    ['DNS 的作用是？',['加密传输的数据','把域名翻译成 IP 地址','压缩网页','缓存图片'],1,'计算机之间用 IP 地址通信，DNS 相当于“电话簿”。'],
+    ['新建一条数据，最合适的 HTTP 方法是？',['GET','POST','DELETE','HEAD'],1,'POST 新建，GET 读取，PUT / PATCH 修改，DELETE 删除。'],
+    ['状态码 401 和 403 的区别是？',['没区别','401 没登录，403 登录了但没权限','401 服务器错误，403 找不到','401 跨域，403 超时'],1,'401 是“你是谁？”，403 是“我知道你是谁，但你不能做这个”。'],
+    ['后端收不到 POST 的 JSON 正文，最可能漏了哪个请求头？',['Accept','Content-Type: application/json','Cache-Control','Host'],1,'没有 Content-Type，后端不知道正文是 JSON，就不会解析。'],
+    ['下面哪两个地址是同源的？',['http://a.com 和 https://a.com','https://a.com 和 https://api.a.com','https://a.com/x 和 https://a.com/y','http://localhost:3000 和 http://localhost:5173'],2,'协议、域名、端口都相同才同源，路径不算。'],
+    ['CORS 报错应该在哪里解决？',['前端加 try / catch','后端返回 Access-Control-Allow-Origin 等响应头','换个浏览器','清除缓存'],1,'是否允许跨域由服务器通过响应头声明，浏览器负责执行。开发时也可以用代理绕开。'],
+    ['哪种存储会在每次请求时自动发给服务器？',['localStorage','sessionStorage','Cookie','IndexedDB'],2,'Cookie 会自动附在同站点的请求上，所以适合存会话 ID，也因此要防 CSRF。'],
+    ['让 JS 读不到登录 Cookie，防止被 XSS 偷走，要设置？',['Secure','HttpOnly','Max-Age','Path'],1,'HttpOnly 的 Cookie 只在请求中发送，document.cookie 读不到。'],
+    ['状态码 304 表示？',['资源被删除','内容没变，用缓存','需要登录','服务器超时'],1,'浏览器带着 ETag 来问，服务器说没变，就不用重新下载。'],
+    ['为什么推荐用 transform 做动画，而不是改 top / left？',['写法更短','transform 只触发合成，不触发重新布局','top 已经被废弃','transform 兼容性更好'],1,'改位置尺寸会触发布局和绘制，transform / opacity 只需要合成，更流畅。']
+  ]);
+
+  /* ---------- 挑战：用模拟 fetch 判题 ---------- */
+  const chEd=editors.find(e=>e.box.id==='netChallengeEd');
+  const TESTS=[
+    ['getTodos() 返回 2 条待办','Array.isArray(await getTodos()) && (await getTodos()).length === 2'],
+    ['addTodo 用 POST 发 JSON，返回带 id 的新待办','(async () => { const t = await addTodo("学 CORS"); const r = __reqs.find(x => x.method === "POST"); return t && t.id === 3 && t.title === "学 CORS" && r && /json/i.test(Object.entries(r.headers).find(([k]) => k.toLowerCase() === "content-type")?.[1] || ""); })()'],
+    ['getTodo(1) 返回一条，getTodo(99) 返回 null','(await getTodo(1))?.title === "学 HTML" && (await getTodo(99)) === null'],
+    ['deleteTodo 用 DELETE，成功 true、不存在 false','(await deleteTodo(2)) === true && (await deleteTodo(2)) === false && __reqs.some(x => x.method === "DELETE")'],
+    ['getProfile 带上 Bearer 令牌','(await getProfile("abc123"))?.name === "Jim"']
+  ];
+  const ANSWER=`// 1. GET
+async function getTodos() {
+  const res = await fetch("/api/todos");
+  return res.json();
+}
+
+// 2. POST JSON
+async function addTodo(title) {
+  const res = await fetch("/api/todos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  return res.json();
+}
+
+// 3. 检查 res.ok
+async function getTodo(id) {
+  const res = await fetch(\`/api/todos/\${id}\`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// 4. DELETE，204 没有正文，不要调用 res.json()
+async function deleteTodo(id) {
+  const res = await fetch(\`/api/todos/\${id}\`, { method: "DELETE" });
+  return res.status === 204;
+}
+
+// 5. 带令牌
+async function getProfile(token) {
+  const res = await fetch("/api/profile", {
+    headers: { Authorization: \`Bearer \${token}\` },
+  });
+  return res.json();
+}
+
+getTodos().then((list) => console.log("待办：", list));
+addTodo("学 CORS").then((t) => console.log("新建：", t));
+getProfile("abc123").then((u) => console.log("我是：", u));
+`;
+  const checksEl=view.querySelector('#netChecks'), banner=view.querySelector('#netDoneBanner'), state=view.querySelector('#netTestState');
+  checksEl.innerHTML=TESTS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  let seq=0,timer=null;
+  function test(){
+    const my=++seq;state.textContent='测试运行中…';
+    FL.runTests(chEd.ta.value,TESTS.map(t=>'(await new Promise(r=>setTimeout(r,60)), __api=felearnApiState(), __reqs=[], '+t[1]+')'),{prelude:PRELUDE,timeout:5000}).then(r=>{
+      if(my!==seq)return;
+      r.forEach((ok,i)=>checksEl.children[i].classList.toggle('done',ok));
+      const n=r.filter(Boolean).length;state.textContent='通过 '+n+' / '+r.length;banner.hidden=n!==r.length;
+    });
+  }
+  chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,700);};
+  view.querySelector('#netRunTests').addEventListener('click',test);
+  view.querySelector('#netShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
   test();
 
   FL.tocSpy(view);
