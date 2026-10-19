@@ -516,6 +516,23 @@ img{max-width:100%}
 .v-net .stor table{width:100%;border-collapse:collapse;font:13px var(--f-mono)}
 .v-net .stor td,.v-net .stor th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
 .v-net .stor th{font:600 11px var(--f-body);color:var(--muted)}
+
+/* ====================== 模块：前端框架 React ====================== */
+.v-fw{--accent:#1D6AA8;--accent-ink:#FFFFFF;--accent-soft:#E0EEF8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-fw{--accent:#6CC9F0;--accent-ink:#052233;--accent-soft:#12303F}}
+:root[data-theme="dark"] .v-fw{--accent:#6CC9F0;--accent-ink:#052233;--accent-soft:#12303F}
+.v-fw .vs{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin:18px 0}
+@media (min-width:760px){.v-fw .vs{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.v-fw .vs>div{min-width:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.v-fw .vs h5{margin:0;padding:8px 14px;font:600 13px/1.4 var(--f-body);border-bottom:1px solid var(--line)}
+.v-fw .vs pre{margin:0;padding:12px 14px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.v-fw .vs p{margin:0;padding:10px 14px;font-size:14px;max-width:none;color:var(--muted)}
+.v-fw .tree{margin:16px 0;padding:14px 16px;border-radius:12px;background:var(--code-bg);color:var(--code-fg);font:13px/1.75 var(--f-mono);white-space:pre;overflow-x:auto}
+.v-fw .tree i{font-style:normal;color:#8A94A6}
+/* 渲染流程 */
+.v-fw .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0;font-size:14px}
+.v-fw .flow span{padding:8px 12px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-soft);font-weight:600}
+.v-fw .flow b{color:var(--muted);font-weight:400}
 </style>
 </head>
 <body>
@@ -2615,6 +2632,573 @@ getTodos().then((list) => console.log("待办：", list));</textarea>
 </div>
 </section>
 
+<!-- ====================== 模块：前端框架 React ====================== -->
+<section class="view lesson v-fw" data-view="fw" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#fw-why"><span>01</span>为什么要框架</a></li>
+      <li><a href="#fw-jsx"><span>02</span>JSX</a></li>
+      <li><a href="#fw-props"><span>03</span>组件与 props</a></li>
+      <li><a href="#fw-state"><span>04</span>state 与事件</a></li>
+      <li><a href="#fw-list"><span>05</span>列表与条件渲染</a></li>
+      <li><a href="#fw-form"><span>06</span>表单</a></li>
+      <li><a href="#fw-effect"><span>07</span>useEffect 与请求</a></li>
+      <li><a href="#fw-lift"><span>08</span>组件通信</a></li>
+      <li><a href="#fw-hooks"><span>09</span>更多 Hooks</a></li>
+      <li><a href="#fw-project"><span>10</span>项目与路由</a></li>
+      <li><a href="#fw-sheet"><span>11</span>速查表</a></li>
+      <li><a href="#fw-quiz"><span>12</span>自测</a></li>
+      <li><a href="#fw-challenge"><span>13</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第五站</p>
+      <h1><span class="lt">&lt;App /&gt;</span> 前端框架 React</h1>
+      <p class="lede">用原生 JS 写复杂界面，很快就会陷在“改了数据又要手动改一堆 DOM”里。React 换了一个思路：你只描述“数据是这样时，界面长这样”，剩下的交给它。这一页的每个例子都是真正运行的 React 18，改完点“运行”就能看到效果。</p>
+      <ul class="goals">
+        <li>会写组件，用 props 传数据、用 state 管理变化</li>
+        <li>会做列表、表单和数据请求</li>
+        <li>知道一个真实 React 项目的结构，能接上 Next.js 做全栈</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="fw-why">
+      <div class="chap-head"><span class="chap-num">01</span><h2>为什么要用框架</h2></div>
+      <p class="sub">同样做一个计数器，看看两种写法的差别。</p>
+      <div class="vs">
+        <div><h5>原生 JS：命令式，一步步告诉浏览器怎么改</h5><pre data-hl>let count = 0;
+const btn = document.querySelector("#btn");
+const text = document.querySelector("#text");
+
+btn.addEventListener("click", () => {
+  count++;
+  text.textContent = count;        // 手动同步界面
+  if (count > 5) text.style.color = "red"; // 每个地方都要记得改
+});</pre><p>数据和界面要手动保持一致，功能一多就容易漏改。</p></div>
+        <div><h5>React：声明式，描述界面应该长什么样</h5><pre data-hl>function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      &lt;span style={{ color: count &gt; 5 ? "red" : "inherit" }}&gt;
+        {count}
+      &lt;/span&gt;
+    &lt;/button&gt;
+  );
+}</pre><p>只改数据（state），React 自动算出界面要变哪里。</p></div>
+      </div>
+      <div class="flow"><span>state 变了</span><b>→</b><span>组件函数重新执行</span><b>→</b><span>得到新的界面描述</span><b>→</b><span>React 对比新旧差异</span><b>→</b><span>只更新变化的 DOM</span></div>
+      <div class="tip"><span class="lbl">核心公式</span><p><b>UI = f(state)</b>。界面是数据的函数。记住这一句，React 的大部分设计都能想通。</p></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>框架</th><th>特点</th><th>全栈搭档</th></tr></thead>
+        <tbody>
+          <tr><td>React</td><td>生态最大，招聘需求最多，本计划的默认选择</td><td>Next.js</td></tr>
+          <tr><td>Vue</td><td>上手平缓，模板语法接近 HTML，国内很流行</td><td>Nuxt</td></tr>
+          <tr><td>Svelte</td><td>编译时框架，代码量少，运行快</td><td>SvelteKit</td></tr>
+          <tr><td>Angular</td><td>大而全，适合大型企业项目</td><td>自带</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="fw-jsx">
+      <div class="chap-head"><span class="chap-num">02</span><h2>JSX：在 JS 里写界面</h2></div>
+      <p class="sub">JSX 看起来像 HTML，其实是 JS。花括号 <code class="i">{ }</code> 里可以放任何 JS 表达式。改一改 <code class="i">user</code> 再点运行。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">App.jsx</span><small class="cat-badge">改完点“运行”</small></div>
+<textarea data-code>const user = { name: "Jim", day: 5, avatar: "🧑‍💻" };
+
+function App() {
+  const today = new Date().toLocaleDateString("zh-CN");
+  return (
+    // 只能返回一个根元素，不想多套一层 div 可以用空标签 <></>
+    <>
+      <h1 className="title">{user.avatar} 你好，{user.name}！</h1>
+      <p>今天是 {today}，学习计划第 {user.day} 天。</p>
+      <p>还剩 {7 - user.day} 天，进度 {Math.round((user.day / 7) * 100)}%</p>
+      <progress value={user.day} max={7} />
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>JSX 规则</th><th>写法</th></tr></thead>
+        <tbody>
+          <tr><td>class 要写成 className</td><td><code class="i">&lt;div className="card"&gt;</code></td></tr>
+          <tr><td>for 要写成 htmlFor</td><td><code class="i">&lt;label htmlFor="email"&gt;</code></td></tr>
+          <tr><td>所有标签都要闭合</td><td><code class="i">&lt;img /&gt;</code>、<code class="i">&lt;input /&gt;</code>、<code class="i">&lt;br /&gt;</code></td></tr>
+          <tr><td>属性用驼峰命名</td><td><code class="i">onClick</code>、<code class="i">tabIndex</code></td></tr>
+          <tr><td>style 是对象</td><td><code class="i">style={{ fontSize: 16 }}</code>，外层花括号是 JS，内层是对象</td></tr>
+          <tr><td>组件名首字母大写</td><td><code class="i">&lt;UserCard /&gt;</code>，小写会被当成 HTML 标签</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="fw-props">
+      <div class="chap-head"><span class="chap-num">03</span><h2>组件与 props</h2></div>
+      <p class="sub">组件就是一个返回 JSX 的函数。props 是父组件传进来的参数，像 HTML 属性一样写。同一个组件传不同的 props，就能复用。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">CourseCard.jsx</span><small class="cat-badge">试着再加一张卡片</small></div>
+<textarea data-code>// 解构 props，还可以给默认值
+function CourseCard({ title, days, done = false, children }) {
+  return (
+    <div style={{ border: "1px solid #ccc", borderRadius: 10, padding: 12, marginBottom: 8 }}>
+      <h3 style={{ margin: 0 }}>
+        {done ? "✅" : "⏳"} {title}
+      </h3>
+      <p style={{ margin: "4px 0" }}>预计 {days} 天</p>
+      {/* children：写在组件标签中间的内容 */}
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div>
+      <CourseCard title="HTML5" days={1} done />
+      <CourseCard title="CSS" days={2} done />
+      <CourseCard title="React" days={1}>
+        <small>正在学习中……</small>
+      </CourseCard>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);</textarea>
+      </div>
+      <div class="tip"><span class="lbl">注意</span><p>props 是<b>只读</b>的，组件不能修改自己收到的 props。数字、布尔值、对象要用花括号传：<code class="i">days={1}</code>；只写属性名等于 <code class="i">true</code>。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="fw-state">
+      <div class="chap-head"><span class="chap-num">04</span><h2>state 与事件</h2></div>
+      <p class="sub"><code class="i">useState</code> 给组件一块“会触发重新渲染的记忆”。调用 setXxx 更新它，React 就会重新执行组件函数，界面随之更新。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">Counter.jsx</span><small class="cat-badge">打开控制台看渲染次数</small></div>
+<textarea data-code>const { useState } = React;
+
+function Counter() {
+  // [当前值, 更新函数] = useState(初始值)
+  const [count, setCount] = useState(0);
+  const [step, setStep] = useState(1);
+  console.log("渲染了，count =", count);
+
+  return (
+    <div>
+      <h2>{count}</h2>
+      <button onClick={() => setCount(count + step)}>+{step}</button>{" "}
+      <button onClick={() => setCount(count - step)}>-{step}</button>{" "}
+      <button onClick={() => setCount(0)}>归零</button>
+      <p>
+        步长：
+        <select value={step} onChange={(e) => setStep(Number(e.target.value))}>
+          <option value={1}>1</option>
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+        </select>
+      </p>
+      {count >= 20 && <p style={{ color: "crimson" }}>超过 20 啦！</p>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Counter />);</textarea>
+      </div>
+      <h3>三个新手必踩的坑</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>错误写法</th><th>为什么不行</th><th>正确写法</th></tr></thead>
+        <tbody>
+          <tr><td><code class="i">count = count + 1</code></td><td>直接改变量，React 不知道，界面不更新</td><td><code class="i">setCount(count + 1)</code></td></tr>
+          <tr><td><code class="i">onClick={setCount(1)}</code></td><td>渲染时就立刻执行了，还会无限循环</td><td><code class="i">onClick={() =&gt; setCount(1)}</code></td></tr>
+          <tr><td><code class="i">list.push(x); setList(list)</code></td><td>同一个数组，React 认为没变</td><td><code class="i">setList([...list, x])</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">基于旧值更新</span><p>连续多次更新时用函数写法：<code class="i">setCount(c =&gt; c + 1)</code>。它拿到的总是最新值。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="fw-list">
+      <div class="chap-head"><span class="chap-num">05</span><h2>列表渲染与条件渲染</h2></div>
+      <p class="sub">用数组的 <code class="i">map</code> 把数据变成一组元素，每个元素要有一个稳定且唯一的 <code class="i">key</code>。条件渲染就是普通的 JS：三元运算符和 <code class="i">&amp;&amp;</code>。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">FruitList.jsx</span></div>
+<textarea data-code>const { useState } = React;
+
+const FRUITS = [
+  { id: 1, name: "苹果", price: 6, stock: 10 },
+  { id: 2, name: "香蕉", price: 3, stock: 0 },
+  { id: 3, name: "芒果", price: 12, stock: 4 },
+  { id: 4, name: "草莓", price: 25, stock: 2 },
+];
+
+function App() {
+  const [onlyInStock, setOnlyInStock] = useState(false);
+  const shown = onlyInStock ? FRUITS.filter((f) => f.stock > 0) : FRUITS;
+
+  return (
+    <div>
+      <label>
+        <input type="checkbox" checked={onlyInStock} onChange={(e) => setOnlyInStock(e.target.checked)} />
+        只看有货
+      </label>
+      <ul>
+        {shown.map((f) => (
+          <li key={f.id}>
+            {f.name} ￥{f.price}{" "}
+            {f.stock === 0 ? <b style={{ color: "gray" }}>售罄</b> : f.stock < 5 && <b style={{ color: "orange" }}>仅剩 {f.stock}</b>}
+          </li>
+        ))}
+      </ul>
+      {shown.length === 0 && <p>什么也没有</p>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);</textarea>
+      </div>
+      <div class="tip warn"><span class="lbl">key 用什么</span><p>用数据自带的 id。不要用 <code class="i">Math.random()</code>（每次都变），列表会增删排序时也别用数组下标，否则输入框等状态会错位。</p></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="fw-form">
+      <div class="chap-head"><span class="chap-num">06</span><h2>表单：受控组件</h2></div>
+      <p class="sub">把输入框的值存在 state 里，<code class="i">value</code> 绑定 state，<code class="i">onChange</code> 更新 state。这样数据永远以 state 为准，校验和提交都很方便。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">SignupForm.jsx</span><small class="cat-badge">试着提交一次</small></div>
+<textarea data-code>const { useState } = React;
+
+function SignupForm() {
+  // 多个字段可以放在一个对象里
+  const [form, setForm] = useState({ email: "", password: "", plan: "free" });
+  const [msg, setMsg] = useState("");
+
+  // 用 name 属性统一处理所有输入框
+  function handleChange(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault(); // 阻止浏览器默认的整页提交
+    if (form.password.length < 6) return setMsg("密码至少 6 位");
+    setMsg("提交成功：" + JSON.stringify(form));
+  }
+
+  const tooShort = form.password.length > 0 && form.password.length < 6;
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <p><input name="email" type="email" required placeholder="邮箱" value={form.email} onChange={handleChange} /></p>
+      <p>
+        <input name="password" type="password" placeholder="密码" value={form.password} onChange={handleChange} />
+        {tooShort && <small style={{ color: "crimson" }}> 还差 {6 - form.password.length} 位</small>}
+      </p>
+      <p>
+        <select name="plan" value={form.plan} onChange={handleChange}>
+          <option value="free">免费版</option>
+          <option value="pro">专业版</option>
+        </select>
+      </p>
+      <button disabled={!form.email}>注册</button>
+      <p>{msg}</p>
+    </form>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<SignupForm />);</textarea>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="fw-effect">
+      <div class="chap-head"><span class="chap-num">07</span><h2>useEffect 与请求数据</h2></div>
+      <p class="sub">渲染应该是“纯计算”。请求接口、定时器、订阅这类“副作用”放进 <code class="i">useEffect</code>，它在界面画完之后执行。第二个参数（依赖数组）决定什么时候重新执行。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">UserPicker.jsx</span><small class="cat-badge">切换用户，看加载状态和控制台</small></div>
+<textarea data-code>const { useState, useEffect } = React;
+
+// 模拟后端接口：0.6 秒后返回数据，id 为 3 时报错
+function fakeFetchUser(id) {
+  return new Promise((resolve, reject) =>
+    setTimeout(() => {
+      if (id === 3) reject(new Error("用户不存在（404）"));
+      else resolve({ id, name: ["", "Jim", "Lily"][id], city: ["", "上海", "杭州"][id] });
+    }, 600)
+  );
+}
+
+function UserCard({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let ignore = false; // 防止旧请求晚回来覆盖新数据
+    setLoading(true);
+    setError("");
+    console.log("开始请求用户", userId);
+    fakeFetchUser(userId)
+      .then((data) => !ignore && setUser(data))
+      .catch((err) => !ignore && setError(err.message))
+      .finally(() => !ignore && setLoading(false));
+    return () => { ignore = true; }; // 清理函数：userId 变化或组件卸载时执行
+  }, [userId]); // 只有 userId 变化才重新请求
+
+  if (loading) return <p>加载中……</p>;
+  if (error) return <p style={{ color: "crimson" }}>出错了：{error}</p>;
+  return <p>👤 {user.name}，来自{user.city}</p>;
+}
+
+function App() {
+  const [id, setId] = useState(1);
+  return (
+    <div>
+      {[1, 2, 3].map((n) => (
+        <button key={n} onClick={() => setId(n)} disabled={n === id}>用户 {n}</button>
+      ))}
+      <UserCard userId={id} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>依赖数组</th><th>什么时候执行</th></tr></thead>
+        <tbody>
+          <tr><td>不写</td><td>每次渲染后都执行（很少需要）</td></tr>
+          <tr><td><code class="i">[]</code></td><td>只在组件第一次出现时执行一次，适合初始加载数据</td></tr>
+          <tr><td><code class="i">[userId]</code></td><td>第一次和每次 userId 变化时执行</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">实际项目</span><p>真实项目里把 <code class="i">fakeFetchUser</code> 换成 <code class="i wrap">fetch("/api/users/" + id).then(r =&gt; r.json())</code> 即可。数据请求多了以后，推荐用 TanStack Query 或 SWR 处理缓存和重试；用 Next.js 时还可以在服务端组件里直接请求。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="fw-lift">
+      <div class="chap-head"><span class="chap-num">08</span><h2>组件通信：状态提升</h2></div>
+      <p class="sub">两个兄弟组件要共享数据时，把 state 放到它们共同的父组件里，通过 props 往下传数据，再把“修改函数”也传下去。数据向下流，事件向上传。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">Shop.jsx</span></div>
+<textarea data-code>const { useState } = React;
+
+// 子组件只负责显示和“通知”，不自己存购物车
+function ProductList({ products, onAdd }) {
+  return (
+    <ul>
+      {products.map((p) => (
+        <li key={p.id}>
+          {p.name} ￥{p.price} <button onClick={() => onAdd(p)}>加入购物车</button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function CartSummary({ items }) {
+  const total = items.reduce((sum, p) => sum + p.price, 0);
+  return <p>🛒 共 {items.length} 件，合计 ￥{total}</p>;
+}
+
+// 父组件持有 state
+function Shop() {
+  const [cart, setCart] = useState([]);
+  const products = [
+    { id: 1, name: "键盘", price: 299 },
+    { id: 2, name: "鼠标", price: 99 },
+  ];
+  return (
+    <div>
+      <CartSummary items={cart} />
+      <ProductList products={products} onAdd={(p) => setCart([...cart, p])} />
+      <button onClick={() => setCart([])}>清空</button>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Shop />);</textarea>
+      </div>
+      <div class="tip"><span class="lbl">层级太深怎么办</span><p>一层层传 props 很麻烦时（比如登录用户、主题），用 <code class="i">createContext</code> + <code class="i">useContext</code> 让任意深的子组件直接读取。全局状态再复杂一些，可以用 Zustand 这样的小库。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="fw-hooks">
+      <div class="chap-head"><span class="chap-num">09</span><h2>更多 Hooks 与自定义 Hook</h2></div>
+      <p class="sub">以 use 开头的函数叫 Hook。只能在组件顶层调用，不能放在 if 或循环里。把重复的 Hook 逻辑抽出来，就是自定义 Hook。</p>
+      <div class="editor" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">hooks.jsx</span><small class="cat-badge">刷新预览后主题会保留</small></div>
+<textarea data-code>const { useState, useEffect, useRef, useMemo } = React;
+
+// 自定义 Hook：和 useState 一样用，但会记在 localStorage 里
+function useLocalStorage(key, initial) {
+  const [value, setValue] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(key)) ?? initial; } catch { return initial; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+  }, [key, value]);
+  return [value, setValue];
+}
+
+function App() {
+  const [dark, setDark] = useLocalStorage("demo-dark", false);
+  const [text, setText] = useState("");
+  const inputRef = useRef(null); // useRef：拿到真实 DOM，或存不触发渲染的值
+
+  // useMemo：只有 text 变化时才重新计算
+  const stats = useMemo(() => ({ chars: text.length, words: text.trim() ? text.trim().split(/\s+/).length : 0 }), [text]);
+
+  return (
+    <div style={{ background: dark ? "#222" : "#fff", color: dark ? "#eee" : "#222", padding: 12, borderRadius: 8 }}>
+      <button onClick={() => setDark(!dark)}>{dark ? "☀️ 浅色" : "🌙 深色"}</button>{" "}
+      <button onClick={() => inputRef.current.focus()}>聚焦输入框</button>
+      <p><textarea ref={inputRef} value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="随便写点什么" /></p>
+      <p>{stats.chars} 个字符，{stats.words} 个单词</p>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>Hook</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td>useState</td><td>组件自己的数据</td></tr>
+          <tr><td>useEffect</td><td>副作用：请求、订阅、定时器、同步到外部</td></tr>
+          <tr><td>useRef</td><td>拿 DOM 元素；存一个改了也不需要重新渲染的值</td></tr>
+          <tr><td>useContext</td><td>读取上层提供的共享数据</td></tr>
+          <tr><td>useMemo / useCallback</td><td>缓存计算结果 / 函数，用于性能优化，不要一开始就到处加</td></tr>
+          <tr><td>useReducer</td><td>状态逻辑复杂时，用“动作 → 新状态”的方式集中管理</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="fw-project">
+      <div class="chap-head"><span class="chap-num">10</span><h2>真实项目：结构与路由</h2></div>
+      <p class="sub">上面的例子都写在一个文件里。真实项目用 Vite 创建，每个组件一个文件，用 import / export 连起来。</p>
+      <pre class="tree">npm create vite@latest my-app -- --template react
+cd my-app && npm install && npm run dev
+
+my-app/
+├── index.html          <i># 唯一的 HTML，里面只有 &lt;div id="root"&gt;</i>
+├── package.json        <i># 依赖和脚本</i>
+├── vite.config.js
+└── src/
+    ├── main.jsx        <i># 入口：createRoot(...).render(&lt;App /&gt;)</i>
+    ├── App.jsx         <i># 根组件，放路由</i>
+    ├── components/     <i># 可复用的小组件：Button、TodoItem</i>
+    ├── pages/          <i># 页面级组件：Home、Login、TodoPage</i>
+    ├── hooks/          <i># 自定义 Hook：useAuth、useTodos</i>
+    └── api/            <i># 封装 fetch：todos.js</i></pre>
+      <h3>多页面：React Router</h3>
+      <pre class="tree" data-hl>import { BrowserRouter, Routes, Route, Link, useParams } from "react-router-dom";
+
+function TodoDetail() {
+  const { id } = useParams(); // 读取网址里的 :id
+  return &lt;h2&gt;第 {id} 条待办&lt;/h2&gt;;
+}
+
+export default function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;nav&gt;&lt;Link to="/"&gt;首页&lt;/Link&gt; &lt;Link to="/todos/1"&gt;待办 1&lt;/Link&gt;&lt;/nav&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/todos/:id" element={&lt;TodoDetail /&gt;} /&gt;
+        &lt;Route path="*" element={&lt;p&gt;404 页面不存在&lt;/p&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}</pre>
+      <div class="tip"><span class="lbl">下一步：Next.js</span><p>Next.js 是基于 React 的全栈框架：<b>文件即路由</b>（<code class="i">app/todos/[id]/page.jsx</code> 就是 <code class="i">/todos/:id</code>），还能在同一个项目里写后端接口。第七站会用它把前后端串起来。</p></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="fw-sheet">
+      <div class="chap-head"><span class="chap-num">11</span><h2>速查表</h2></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>想做什么</th><th>写法</th></tr></thead>
+        <tbody>
+          <tr><td>定义组件</td><td><code class="i">function Card({ title }) { return &lt;h3&gt;{title}&lt;/h3&gt;; }</code></td></tr>
+          <tr><td>状态</td><td><code class="i">const [v, setV] = useState(初始值)</code></td></tr>
+          <tr><td>更新数组：添加</td><td><code class="i">setList([...list, item])</code></td></tr>
+          <tr><td>更新数组：删除</td><td><code class="i">setList(list.filter(x =&gt; x.id !== id))</code></td></tr>
+          <tr><td>更新数组：修改一项</td><td><code class="i">setList(list.map(x =&gt; x.id === id ? { ...x, done: !x.done } : x))</code></td></tr>
+          <tr><td>更新对象</td><td><code class="i">setForm({ ...form, email: v })</code></td></tr>
+          <tr><td>事件</td><td><code class="i">onClick={() =&gt; doSomething(id)}</code></td></tr>
+          <tr><td>受控输入框</td><td><code class="i">&lt;input value={v} onChange={e =&gt; setV(e.target.value)} /&gt;</code></td></tr>
+          <tr><td>列表</td><td><code class="i">{list.map(x =&gt; &lt;li key={x.id}&gt;{x.name}&lt;/li&gt;)}</code></td></tr>
+          <tr><td>条件</td><td><code class="i">{ok ? &lt;A /&gt; : &lt;B /&gt;}</code>、<code class="i">{show &amp;&amp; &lt;A /&gt;}</code></td></tr>
+          <tr><td>加载时请求</td><td><code class="i">useEffect(() =&gt; { fetch(...) }, [])</code></td></tr>
+          <tr><td>动态 class</td><td><code class="i">className={done ? "item done" : "item"}</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="fw-quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：10 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">10</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="fw-challenge">
+      <div class="chap-head"><span class="chap-num">13</span><h2>动手挑战：React 待办清单</h2></div>
+      <p class="sub">把学到的 state、列表、表单、事件组合起来，做一个完整的待办清单。代码修改后自动检查（第一次需要加载 React，稍等几秒），也可以点“运行”自己试用。</p>
+      <ul class="checks" id="fwChecks"></ul>
+      <div class="editor" id="fwChallengeEd" data-mode="react">
+        <div class="ed-bar"><span class="ed-title">TodoApp.jsx</span><span class="ed-tools"><button class="chip" type="button" id="fwShowAnswer">看参考答案</button></span></div>
+<textarea data-code data-store="felearn-fw-challenge">const { useState } = React;
+
+const INITIAL = [
+  { id: 1, title: "学 JSX", done: true },
+  { id: 2, title: "学 useState", done: false },
+];
+
+// 要求：
+// 1. 用 <ul> 渲染 todos，每条是一个 <li>，里面有标题文字
+// 2. 一个 <input> 加一个“添加”按钮：点按钮添加新待办（空白内容不添加），添加后清空输入框
+// 3. 每条 <li> 里有一个 <input type="checkbox">，勾选后切换 done；done 的 <li> 加上 className="done"
+// 4. 每条 <li> 里有一个“删除”按钮
+// 5. 页面上有 <p id="left">，显示“还剩 N 项未完成”
+function TodoApp() {
+  const [todos, setTodos] = useState(INITIAL);
+  const [text, setText] = useState("");
+
+  return (
+    <div>
+      <h2>我的待办</h2>
+      {/* TODO：在这里完成 */}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<TodoApp />);</textarea>
+      </div>
+      <div class="test-bar"><button class="btn" type="button" id="fwRunTests">重新跑测试</button><span class="cat-badge" id="fwTestState"></span></div>
+      <div id="fwDoneBanner" class="done-banner" hidden>全部通过！你已经用 React 写出了一个完整的交互应用。下一站是工程化：把它变成一个真正能上线的项目。</div>
+      <footer class="end">前端框架 React · FeLearn 一周全栈计划。官方中文文档 zh-hans.react.dev 的“快速入门”和“井字棋教程”非常适合接着练。</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
@@ -2622,7 +3206,7 @@ const MODULES = [
   { id: "css", title: "CSS 样式与布局", short: "CSS", c: "--css", day: "D1–D2", desc: "选择器、优先级、盒模型、Flex 与 Grid、响应式，带练习场和挑战。", ready: true },
   { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
   { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: true },
-  { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: false },
+  { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: true },
   { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: false },
   { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
 ];
@@ -2955,7 +3539,7 @@ const FL = (function(){
     +'document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h.charAt(0)==="#"){e.preventDefault();var id=h.slice(1),t=id&&document.getElementById(id);if(t){t.scrollIntoView({behavior:"smooth"});toast("页内跳转：滚动到 id=\\""+id+"\\" 的元素");}else{toast(id?"找不到 id=\\""+id+"\\" 的元素":"href=\\"#\\" 是空链接，常用作占位");}return;}e.preventDefault();toast("点击后浏览器会跳转到："+h+(a.target==="_blank"?"\\n（target=\\"_blank\\"：在新标签页打开）":""));});'
     +'document.addEventListener("submit",function(e){e.preventDefault();var f=e.target,fd=new FormData(f),l=[];fd.forEach(function(v,k){l.push("  "+k+" = "+(typeof v==="string"?v:v.name));});var m=(f.getAttribute("method")||"get").toUpperCase(),a=f.getAttribute("action")||"(当前页面)";toast("✓ 校验通过！浏览器将发送请求：\\n"+m+" "+a+"\\n"+(l.length?l.join("\\n"):"  （没有任何带 name 的字段，后端什么也收不到）"));});'
     +'var last=0;function send(extra){var b=document.body;if(!b)return;var cs=getComputedStyle(b);var h=Math.ceil(b.scrollHeight+parseFloat(cs.marginTop)+parseFloat(cs.marginBottom));if(extra)h+=90;if(h!==last){last=h;parent.postMessage({__flH:h},"*");}}'
-    +'window.addEventListener("load",function(){send()});if(window.ResizeObserver)new ResizeObserver(function(){send()}).observe(document.body);send();'
+    +'window.addEventListener("load",function(){send()});if(window.ResizeObserver)new ResizeObserver(function(){send()}).observe(document.body);var q=0;new MutationObserver(function(){if(!q){q=1;setTimeout(function(){q=0;send();},30);}}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});send();'
     +'})();<\/script>';
   const OUTLINE = '<style>body *{outline:1px dashed rgba(200,66,26,.55);outline-offset:-1px}'
     +['header','nav','main','article','section','aside','footer','figure','form'].map(t=>t+'::before{content:"<'+t+'>";display:block;font:600 10px/1.5 ui-monospace,monospace;color:#c8421a}').join('')
@@ -3012,7 +3596,7 @@ const FL = (function(){
     js:{hl:hlJs,label:'JavaScript 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+t+CONSOLE+BASE+'<script>'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'},
     react:{hl:hlJs,label:'React 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+(t||'<div id="root"></div>')+CONSOLE+BASE
       +'<script src="'+CDN.react+'"><\/script><script src="'+CDN.reactDom+'"><\/script><script src="'+CDN.babel+'"><\/script>'
-      +'<script>if(!window.Babel)console.error("React 运行库没有加载成功，检查一下网络后再点“运行”。");<\/script>'
+      +'<script>if(!window.Babel)console.error("React 运行库没有加载成功，检查一下网络后再点“运行”。");(function(w){console.warn=function(m){if(String(m).indexOf("in-browser Babel")<0)w.apply(console,arguments)}})(console.warn);<\/script>'
       +'<script type="text/babel" data-presets="react">'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'}
   };
   function addMode(name,m){modes[name]=Object.assign({hl:hlJs,label:'代码编辑区'},m);}
@@ -4199,6 +4783,130 @@ getProfile("abc123").then((u) => console.log("我是：", u));
   view.querySelector('#netRunTests').addEventListener('click',test);
   view.querySelector('#netShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
   test();
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：前端框架 React ====================== */
+(function(){
+  const {esc}=FL;
+  const view=document.querySelector('.v-fw');
+  view.querySelectorAll('pre[data-hl]').forEach(p=>{p.innerHTML=FL.hlJs(p.textContent);});
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  FL.makeQuiz(view.querySelector('#fw-quiz'),[
+    ['React 的核心思想可以概括为？',['UI = f(state)，界面由数据决定','用 jQuery 操作 DOM','所有代码写在 HTML 里','后端渲染页面'],0,'你只描述“数据是什么样时界面长什么样”，由 React 负责更新 DOM。'],
+    ['JSX 里给元素加 CSS 类名要写？',['class','className','cssClass','styleName'],1,'class 是 JS 的关键字，所以 JSX 里用 className。'],
+    ['下面哪个写法能让界面跟着更新？',['count = count + 1','setCount(count + 1)','this.count++','document.count = 1'],1,'只有调用 state 的更新函数，React 才知道要重新渲染。'],
+    ['onClick={handleClick(id)} 有什么问题？',['没问题','渲染时就会立即执行，而不是点击时','id 传不进去','React 不支持 onClick'],1,'要传一个函数：onClick={() => handleClick(id)}。'],
+    ['往数组 state 里加一项，正确的是？',['list.push(x); setList(list)','setList([...list, x])','list[list.length] = x','setList(list.concat)'],1,'要给 React 一个新数组，它通过比较引用判断是否变化。'],
+    ['列表渲染时 key 最好用？',['Math.random()','数组下标','数据本身的唯一 id','不写也行'],2,'key 要稳定且唯一，让 React 正确对应每一项。'],
+    ['useEffect(fn, []) 中的 fn 什么时候执行？',['每次渲染后','只在组件首次挂载后执行一次','从不执行','点击时'],1,'空依赖数组表示没有依赖会变化，所以只执行一次，常用于初始加载数据。'],
+    ['两个兄弟组件需要共享同一份数据，应该？',['各自存一份再同步','把 state 提升到共同的父组件','用全局变量','用 localStorage'],1,'状态提升：父组件持有 state，通过 props 向下传数据和修改函数。'],
+    ['props 可以在子组件里直接修改吗？',['可以','不可以，props 是只读的','只有对象能改','只能改一次'],1,'要修改，需要父组件传一个回调函数下来，由父组件改自己的 state。'],
+    ['下面哪个不能在 if 语句里调用？',['console.log','useState','JSON.parse','Math.max'],1,'Hooks 必须在组件顶层按固定顺序调用。']
+  ]);
+
+  /* ---------- 挑战：沙箱里加载 React 和 Babel，编译后用 DOM 检查 ---------- */
+  const chEd=editors.find(e=>e.box.id==='fwChallengeEd');
+  const C=FL.CDN;
+  const HTML='<div id="root"></div><script src="'+C.react+'"><\/script><script src="'+C.reactDom+'"><\/script><script src="'+C.babel+'"><\/script>';
+  const PRELUDE='window.$=function(s){return document.querySelector(s)};window.$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};'
+    +'window.tick=function(ms){return new Promise(function(r){setTimeout(r,ms||40)})};'
+    +'window.type=function(el,v){Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(el,v);el.dispatchEvent(new Event("input",{bubbles:true}));};'
+    +'window.btn=function(root,t){return Array.prototype.slice.call((root||document).querySelectorAll("button")).find(function(b){return b.textContent.indexOf(t)>-1})};'
+    +'window.textInput=function(){return Array.prototype.slice.call(document.querySelectorAll("input")).find(function(i){return i.type!=="checkbox"})};'
+    +'window.addItem=async function(v){type(textInput(),v);await tick();btn(document,"添加").click();await tick();};';
+  const TESTS=[
+    ['用 <li> 显示初始的两条待办',
+     '(await tick(300), $$("li").length === 2 && $$("li")[0].textContent.includes("学 JSX") && $$("li")[1].textContent.includes("学 useState"))'],
+    ['能添加新待办，添加后输入框清空',
+     '(await addItem("学 useEffect"), $$("li").length === 3 && $$("li")[2].textContent.includes("学 useEffect") && textInput().value === "")'],
+    ['空白内容不会被添加',
+     '(await addItem("   "), $$("li").length === 3)'],
+    ['勾选复选框切换完成状态，完成的 <li> 有 done 类',
+     '(await (async () => { const li = $$("li")[1]; const cb = li.querySelector("input[type=checkbox]"); if (!cb || li.classList.contains("done")) return false; cb.click(); await tick(); const a = $$("li")[1].classList.contains("done"); $$("li")[0].querySelector("input[type=checkbox]").click(); await tick(); return a && !$$("li")[0].classList.contains("done"); })())'],
+    ['<p id="left"> 显示正确的未完成数量',
+     '(await (async () => { const n = () => ($("#left") || {}).textContent || ""; const a = n().includes("2"); await addItem("再加一条"); return a && n().includes("3"); })())'],
+    ['点“删除”可以删掉对应的那条',
+     '(await (async () => { const before = $$("li").length; const li = $$("li").find(l => l.textContent.includes("学 useEffect")); if (!li) return false; btn(li, "删除").click(); await tick(); return $$("li").length === before - 1 && !$$("li").some(l => l.textContent.includes("学 useEffect")); })())']
+  ];
+  const ANSWER=`const { useState } = React;
+
+const INITIAL = [
+  { id: 1, title: "学 JSX", done: true },
+  { id: 2, title: "学 useState", done: false },
+];
+
+function TodoApp() {
+  const [todos, setTodos] = useState(INITIAL);
+  const [text, setText] = useState("");
+
+  function add() {
+    const title = text.trim();
+    if (!title) return;
+    setTodos([...todos, { id: Date.now(), title, done: false }]);
+    setText("");
+  }
+
+  function toggle(id) {
+    setTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  }
+
+  function remove(id) {
+    setTodos(todos.filter((t) => t.id !== id));
+  }
+
+  const left = todos.filter((t) => !t.done).length;
+
+  return (
+    <div>
+      <h2>我的待办</h2>
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && add()}
+        placeholder="要做什么？"
+      />
+      <button onClick={add}>添加</button>
+      <ul>
+        {todos.map((t) => (
+          <li key={t.id} className={t.done ? "done" : ""}>
+            <input type="checkbox" checked={t.done} onChange={() => toggle(t.id)} />
+            <span style={{ textDecoration: t.done ? "line-through" : "none" }}>{t.title}</span>{" "}
+            <button onClick={() => remove(t.id)}>删除</button>
+          </li>
+        ))}
+      </ul>
+      <p id="left">还剩 {left} 项未完成</p>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<TodoApp />);
+`;
+  const checksEl=view.querySelector('#fwChecks'), banner=view.querySelector('#fwDoneBanner'), state=view.querySelector('#fwTestState');
+  checksEl.innerHTML=TESTS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  let seq=0,timer=null,started=false;
+  function test(){
+    const my=++seq;state.textContent='测试运行中…';
+    // 用 Babel 把 JSX 编译成普通 JS 再执行；编译出错时所有测试都不通过
+    const code='if(!window.Babel){throw new Error("React 运行库没有加载成功")}(0,eval)(Babel.transform('+JSON.stringify(chEd.ta.value)+',{presets:["react"]}).code);';
+    FL.runTests(code,TESTS.map(t=>t[1]),{html:HTML,prelude:PRELUDE,timeout:20000}).then(r=>{
+      if(my!==seq)return;
+      r.forEach((ok,i)=>checksEl.children[i].classList.toggle('done',ok));
+      const n=r.filter(Boolean).length;state.textContent='通过 '+n+' / '+r.length;banner.hidden=n!==r.length;
+    });
+  }
+  chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,900);};
+  view.querySelector('#fwRunTests').addEventListener('click',test);
+  view.querySelector('#fwShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+  // 挑战要加载 React，等用户打开这个模块再跑第一次
+  function maybeStart(){if(!started&&!view.hidden){started=true;test();}}
+  new MutationObserver(maybeStart).observe(view,{attributes:true,attributeFilter:['hidden']});
+  maybeStart();
 
   FL.tocSpy(view);
 })();
