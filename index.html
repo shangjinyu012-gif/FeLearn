@@ -533,6 +533,44 @@ img{max-width:100%}
 .v-fw .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0;font-size:14px}
 .v-fw .flow span{padding:8px 12px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-soft);font-weight:600}
 .v-fw .flow b{color:var(--muted);font-weight:400}
+
+/* ====================== 模块：工程化 ====================== */
+.v-eng{--accent:#6B4FBB;--accent-ink:#FFFFFF;--accent-soft:#ECE7FA}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-eng{--accent:#B39DFF;--accent-ink:#1A0F3D;--accent-soft:#272043}}
+:root[data-theme="dark"] .v-eng{--accent:#B39DFF;--accent-ink:#1A0F3D;--accent-soft:#272043}
+.v-eng .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0;font-size:14px}
+.v-eng .flow span{padding:8px 12px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-soft);font-weight:600}
+.v-eng .flow b{color:var(--muted);font-weight:400}
+.v-eng .tree{margin:16px 0;padding:14px 16px;border-radius:12px;background:var(--code-bg);color:var(--code-fg);font:13px/1.75 var(--f-mono);white-space:pre;overflow-x:auto}
+.v-eng .tree i{font-style:normal;color:#8A94A6}
+/* semver */
+.v-eng .sv{display:grid;gap:10px;padding:14px 16px}
+.v-eng .sv input{font:15px var(--f-mono);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:150px}
+.v-eng .sv-vers{display:flex;flex-wrap:wrap;gap:6px}
+.v-eng .sv-vers span{font:13px var(--f-mono);padding:5px 9px;border-radius:7px;border:1.5px solid var(--line);color:var(--muted);text-decoration:line-through}
+.v-eng .sv-vers span.ok{border-color:var(--ok);background:var(--ok-soft);color:var(--ok);text-decoration:none;font-weight:600}
+.v-eng .sv p{margin:0;max-width:none;font-size:14px}
+/* git 模拟器 */
+.v-eng .git{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin:20px 0}
+.v-eng .git-areas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.v-eng .git-areas>div{min-width:0;padding:10px 12px;border-right:1px solid var(--line)}
+.v-eng .git-areas>div:last-child{border-right:0}
+@media (max-width:560px){.v-eng .git-areas{grid-template-columns:repeat(2,minmax(0,1fr))}.v-eng .git-areas>div:nth-child(2){border-right:0}.v-eng .git-areas>div:last-child{grid-column:1/-1;border-top:1px solid var(--line)}}
+.v-eng .git-areas h5{margin:0 0 6px;font:600 12px/1.4 var(--f-body);color:var(--muted)}
+.v-eng .git-areas ul{list-style:none;margin:0;padding:0;display:grid;gap:4px;font:12.5px/1.45 var(--f-mono)}
+.v-eng .git-areas li{padding:3px 6px;border-radius:6px;background:var(--bg);overflow-wrap:anywhere}
+.v-eng .git-areas li.m{background:color-mix(in srgb,var(--bad) 14%,var(--bg));color:var(--bad)}
+.v-eng .git-areas li.s{background:var(--ok-soft);color:var(--ok)}
+.v-eng .git-areas li.c b{color:var(--accent)}
+.v-eng .git-areas li .br{display:inline-block;font-size:11px;padding:0 5px;border-radius:5px;background:var(--accent);color:var(--accent-ink);margin-right:4px}
+.v-eng .git-areas .empty{color:var(--muted);background:none}
+.v-eng .term{background:var(--code-bg);color:var(--code-fg);font:13px/1.6 var(--f-mono);padding:10px 14px;height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+.v-eng .term .cmd{color:#7FD1FF}.v-eng .term .err{color:#FF8F80}.v-eng .term .ok{color:#7EDC9A}.v-eng .term .dim{color:#8A94A6}
+.v-eng .term-in{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--code-bg);border-top:1px solid #2C3646}
+.v-eng .term-in span{color:#7EDC9A;font:13px var(--f-mono);flex:none}
+.v-eng .term-in input{flex:1;min-width:0;background:transparent;border:0;color:#E8ECF2;font:14px var(--f-mono);outline:none;padding:6px 0}
+.v-eng .git-quick{display:flex;flex-wrap:wrap;gap:4px;padding:10px 12px;border-top:1px solid var(--line)}
+.v-eng .git-quick button{font:12px var(--f-mono);padding:5px 8px;border-radius:7px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -3199,6 +3237,288 @@ ReactDOM.createRoot(document.getElementById("root")).render(<TodoApp />);</texta
 </div>
 </section>
 
+<!-- ====================== 模块：工程化 ====================== -->
+<section class="view lesson v-eng" data-view="eng" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#eng-what"><span>01</span>工程化是什么</a></li>
+      <li><a href="#eng-term"><span>02</span>终端基础</a></li>
+      <li><a href="#eng-npm"><span>03</span>npm 与 package.json</a></li>
+      <li><a href="#eng-vite"><span>04</span>Vite 开发与构建</a></li>
+      <li><a href="#eng-git"><span>05</span>Git 基础</a></li>
+      <li><a href="#eng-github"><span>06</span>GitHub 协作</a></li>
+      <li><a href="#eng-lint"><span>07</span>代码规范与 TypeScript</a></li>
+      <li><a href="#eng-env"><span>08</span>环境变量</a></li>
+      <li><a href="#eng-deploy"><span>09</span>部署上线</a></li>
+      <li><a href="#eng-quiz"><span>10</span>自测</a></li>
+      <li><a href="#eng-challenge"><span>11</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第六站</p>
+      <h1><span class="lt">$ npm run build</span> 工程化</h1>
+      <p class="lede">会写页面和组件之后，还要会“做项目”：装依赖、本地开发、打包、用 Git 管理版本、和别人协作、最后部署上线让所有人都能访问。这一页把这条流水线串起来，并带一个可以直接敲命令的 Git 练习终端。</p>
+      <ul class="goals">
+        <li>看懂 package.json，会用 npm 装依赖和跑脚本</li>
+        <li>用 Vite 创建、开发、打包一个 React 项目</li>
+        <li>用 Git 提交、开分支、合并，推到 GitHub 并部署上线</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="eng-what">
+      <div class="chap-head"><span class="chap-num">01</span><h2>工程化是什么</h2></div>
+      <p class="sub">简单说，就是用工具把“写代码到上线”这条路变得自动、可靠、能多人协作。</p>
+      <div class="flow"><span>npm 装依赖</span><b>→</b><span>Vite 本地开发</span><b>→</b><span>ESLint 检查</span><b>→</b><span>Git 提交</span><b>→</b><span>GitHub 协作</span><b>→</b><span>自动构建部署</span></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>问题</th><th>工程化的解法</th><th>工具</th></tr></thead>
+        <tbody>
+          <tr><td>别人写好的库怎么用、怎么升级</td><td>包管理</td><td>npm、pnpm</td></tr>
+          <tr><td>JSX、TypeScript 浏览器看不懂；文件太多加载慢</td><td>构建：编译、合并、压缩</td><td>Vite</td></tr>
+          <tr><td>代码风格乱、低级错误多</td><td>自动检查和格式化</td><td>ESLint、Prettier、TypeScript</td></tr>
+          <tr><td>改坏了想回退，多人改同一个项目</td><td>版本管理</td><td>Git、GitHub</td></tr>
+          <tr><td>怎么让别人访问到</td><td>部署、自动化</td><td>Vercel、Netlify、GitHub Actions</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="eng-term">
+      <div class="chap-head"><span class="chap-num">02</span><h2>终端基础</h2></div>
+      <p class="sub">前端工具基本都在终端里用。Mac 打开“终端”，Windows 推荐用 VS Code 自带的终端（快捷键 Ctrl + `）。先装好 <b>Node.js</b>（选 LTS 版本），npm 会一起装上。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>pwd</td><td>我现在在哪个目录</td></tr>
+          <tr><td>ls（Windows：dir）</td><td>列出当前目录的文件</td></tr>
+          <tr><td>cd my-app / cd .. / cd ~</td><td>进入目录 / 回上一级 / 回用户主目录</td></tr>
+          <tr><td>mkdir notes</td><td>新建目录</td></tr>
+          <tr><td>code .</td><td>用 VS Code 打开当前目录</td></tr>
+          <tr><td>node -v / npm -v</td><td>查看版本，确认装好了</td></tr>
+          <tr><td>Ctrl + C</td><td>停止正在运行的程序（比如开发服务器）</td></tr>
+          <tr><td>↑ 方向键 / Tab</td><td>翻出上一条命令 / 自动补全文件名</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="eng-npm">
+      <div class="chap-head"><span class="chap-num">03</span><h2>npm 与 package.json</h2></div>
+      <p class="sub">每个前端项目根目录都有一个 package.json，它是项目的“说明书”。点开每一行看含义。</p>
+      <div class="reader" id="engPkg">
+        <div class="reader-bar"><span class="ed-title">package.json</span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>npm install（npm i）</td><td>按 package.json 装好全部依赖，拿到别人的项目第一件事</td></tr>
+          <tr><td>npm i react-router-dom</td><td>装一个依赖，写进 dependencies</td></tr>
+          <tr><td>npm i -D eslint</td><td>装开发依赖（只在开发时用），写进 devDependencies</td></tr>
+          <tr><td>npm uninstall axios</td><td>卸载</td></tr>
+          <tr><td>npm run dev</td><td>运行 scripts 里的 dev 命令</td></tr>
+          <tr><td>npx create-vite</td><td>不安装，直接运行一个包里的命令</td></tr>
+          <tr><td>npm outdated / npm update</td><td>查看 / 更新过期的依赖</td></tr>
+        </tbody>
+      </table></div>
+      <h3>版本号怎么读：^ 和 ~</h3>
+      <p>版本号是 <b>主版本.次版本.补丁</b>。主版本变了通常有不兼容改动。输入一个范围，看看哪些版本会被安装。</p>
+      <div class="lab">
+        <div class="sv" id="engSemver">
+          <div class="sim-line"><input value="^18.2.0" aria-label="版本范围" spellcheck="false"><span class="sim-presets"></span></div>
+          <div class="sv-vers"></div>
+          <p data-say aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="tip warn"><span class="lbl">两个约定</span><p><b>node_modules 不提交到 Git</b>（太大，别人 npm install 就能重新生成）。<b>package-lock.json 要提交</b>，它锁定了每个依赖的确切版本，保证大家装出来的一样。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="eng-vite">
+      <div class="chap-head"><span class="chap-num">04</span><h2>Vite：开发与构建</h2></div>
+      <p class="sub">Vite 是现在最主流的前端构建工具：开发时启动快、改代码立即刷新；上线前把代码打包成浏览器能直接用的小文件。</p>
+      <pre class="tree">npm create vite@latest my-app -- --template react   <i># 创建项目</i>
+cd my-app
+npm install          <i># 装依赖</i>
+npm run dev          <i># 开发：打开 http://localhost:5173，改代码自动刷新</i>
+npm run build        <i># 打包：输出到 dist/ 目录</i>
+npm run preview      <i># 在本地预览打包结果</i></pre>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th></th><th>npm run dev（开发）</th><th>npm run build（生产）</th></tr></thead>
+        <tbody>
+          <tr><td>目的</td><td>写代码时快速看效果</td><td>给用户访问的最终版本</td></tr>
+          <tr><td>代码</td><td>按需实时编译，不压缩，方便调试</td><td>编译、合并、压缩、去掉没用到的代码</td></tr>
+          <tr><td>文件名</td><td>原样</td><td>带哈希：<code class="i">index-3f9a2c.js</code>，方便长期缓存</td></tr>
+          <tr><td>输出</td><td>内存中，不生成文件</td><td><code class="i">dist/</code> 目录，可以直接上传到任何静态服务器</td></tr>
+        </tbody>
+      </table></div>
+      <pre class="tree">dist/                        <i># 部署的就是这个目录</i>
+├── index.html
+└── assets/
+    ├── index-3f9a2c.js      <i># 所有 JS 打包压缩后的结果</i>
+    └── index-8b1d4e.css</pre>
+      <div class="tip"><span class="lbl">开发代理</span><p>前端在 5173 端口、后端在 3000 端口会跨域（见浏览器与网络第 07 节）。在 <code class="i">vite.config.js</code> 里加 <code class="i wrap">server: { proxy: { "/api": "http://localhost:3000" } }</code>，前端直接请求 <code class="i">/api/...</code> 即可。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="eng-git">
+      <div class="chap-head"><span class="chap-num">05</span><h2>Git 基础</h2></div>
+      <p class="sub">Git 记录项目的每一次修改，可以随时回退，也能多人并行开发。先理解三个区域，再到第 11 节的终端里亲手敲一遍。</p>
+      <div class="flow"><span>工作区：你正在改的文件</span><b>— git add →</b><span>暂存区：准备提交的改动</span><b>— git commit →</b><span>仓库：永久保存的历史</span></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>git init</td><td>把当前目录变成 Git 仓库（只做一次）</td></tr>
+          <tr><td>git status</td><td>看看现在有哪些改动、哪些已暂存。<b>最常用，不确定时就敲它</b></td></tr>
+          <tr><td>git add 文件 / git add .</td><td>把改动放进暂存区 / 放进全部改动</td></tr>
+          <tr><td>git commit -m "说明"</td><td>提交，生成一个历史版本</td></tr>
+          <tr><td>git log --oneline</td><td>看提交历史</td></tr>
+          <tr><td>git diff</td><td>看具体改了哪些行</td></tr>
+          <tr><td>git restore 文件</td><td>放弃工作区里对这个文件的修改</td></tr>
+          <tr><td>git switch -c 分支名</td><td>新建并切换到一个分支</td></tr>
+          <tr><td>git merge 分支名</td><td>把别的分支合并到当前分支</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">提交说明</span><p>一次提交只做一件事，说明写清楚做了什么，比如 <code class="i">feat: 添加待办删除功能</code>、<code class="i">fix: 修复空标题也能提交</code>。很多团队用 feat / fix / docs / refactor 这样的前缀。</p></div>
+      <h3>.gitignore：不要提交的文件</h3>
+      <pre class="tree">node_modules/
+dist/
+.env
+.env.local
+.DS_Store</pre>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="eng-github">
+      <div class="chap-head"><span class="chap-num">06</span><h2>GitHub 协作</h2></div>
+      <p class="sub">GitHub 是存放 Git 仓库的网站，也是团队协作和展示作品的地方。</p>
+      <pre class="tree"><i># 第一次：把本地仓库推到 GitHub 上新建的空仓库</i>
+git remote add origin https://github.com/你的用户名/my-app.git
+git push -u origin main
+
+<i># 之后每次</i>
+git pull             <i># 先拉取别人的改动</i>
+git push             <i># 再推送自己的提交</i>
+
+<i># 拿到别人的项目</i>
+git clone https://github.com/someone/project.git</pre>
+      <h3>团队常用流程：分支 + Pull Request</h3>
+      <ol class="steps">
+        <li>从 main 开一个功能分支：<code class="i">git switch -c feat/login</code></li>
+        <li>在分支上写代码、提交，推到 GitHub：<code class="i">git push -u origin feat/login</code></li>
+        <li>在 GitHub 上发起 <b>Pull Request</b>（PR），请同事审查代码，自动化检查（CI）同时运行</li>
+        <li>审查通过后合并进 main，部署平台自动上线新版本</li>
+      </ol>
+      <div class="tip"><span class="lbl">冲突不可怕</span><p>两个人改了同一个文件的同一处，合并时会出现冲突标记 <code class="i">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code class="i">=======</code> / <code class="i">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>。手动保留正确的内容、删掉标记，再 add 和 commit 即可。VS Code 会给出“接受当前 / 接受传入”的按钮。</p></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="eng-lint">
+      <div class="chap-head"><span class="chap-num">07</span><h2>代码规范与 TypeScript</h2></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>工具</th><th>做什么</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>ESLint</td><td>找出可能的错误和不好的写法</td><td>变量定义了没用、Hook 用在了 if 里、useEffect 漏了依赖</td></tr>
+          <tr><td>Prettier</td><td>统一格式：缩进、引号、分号、换行</td><td>保存时自动格式化，团队再也不用争论风格</td></tr>
+          <tr><td>TypeScript</td><td>给 JS 加上类型，写代码时就发现错误</td><td>把字符串传给需要数字的函数，编辑器直接标红</td></tr>
+        </tbody>
+      </table></div>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">为什么需要类型</span><small class="cat-badge">运行看看这个 bug</small></div>
+<textarea data-code>// 普通 JS：参数类型错了，运行时才发现，而且结果“看起来没报错”
+function addTax(price) {
+  return price * 1.1;
+}
+function total(a, b) {
+  return a + b;
+}
+
+const fromInput = "100"; // 输入框拿到的值永远是字符串
+console.log(addTax(fromInput)); // 110.00000000000001，碰巧对了
+console.log(total(fromInput, 20)); // "10020" ！字符串拼接
+
+// TypeScript 写法（需要构建工具编译，这里只能看不能运行）：
+// function total(a: number, b: number): number { return a + b; }
+// total(fromInput, 20);  // 编辑器立刻报错：string 不能赋给 number</textarea>
+      </div>
+      <div class="tip"><span class="lbl">建议</span><p>Vite 创建项目时可以直接选 <code class="i">react-ts</code> 模板。先学会写 JS，再逐步加类型，很多公司的新项目都默认用 TypeScript。VS Code 装好 ESLint 和 Prettier 插件，打开“保存时格式化”。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="eng-env">
+      <div class="chap-head"><span class="chap-num">08</span><h2>环境变量</h2></div>
+      <p class="sub">接口地址、密钥这类配置在开发和线上不一样，而且不该写死在代码里。放进 <code class="i">.env</code> 文件，并加进 .gitignore。</p>
+      <pre class="tree"><i># .env.local（Vite 项目）</i>
+VITE_API_URL=http://localhost:3000
+
+<i># 代码里读取</i>
+const api = import.meta.env.VITE_API_URL;</pre>
+      <div class="tip warn"><span class="lbl">前端没有秘密</span><p>Vite 只会把 <code class="i">VITE_</code> 开头的变量打包进前端代码，而<b>前端代码所有人都能看到</b>。数据库密码、第三方服务的私钥只能放在后端的环境变量里。部署平台都有填写环境变量的设置页面。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="eng-deploy">
+      <div class="chap-head"><span class="chap-num">09</span><h2>部署上线</h2></div>
+      <p class="sub">纯前端项目打包后就是一堆静态文件，放到任何静态托管上都能访问。最省事的是连上 GitHub 仓库，每次 push 自动构建部署。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>平台</th><th>适合</th><th>特点</th></tr></thead>
+        <tbody>
+          <tr><td>Vercel</td><td>React、Next.js 全栈项目</td><td>Next.js 官方平台，导入仓库即可部署，每个 PR 自动生成预览链接</td></tr>
+          <tr><td>Netlify</td><td>静态站点、Vite 项目</td><td>拖拽 dist 目录也能上线</td></tr>
+          <tr><td>GitHub Pages</td><td>个人主页、文档</td><td>免费，配合 GitHub Actions 自动发布</td></tr>
+          <tr><td>Render、Railway、云服务器</td><td>需要一直运行的 Node 后端和数据库</td><td>下一站的后端会用到</td></tr>
+        </tbody>
+      </table></div>
+      <h3>用 Vercel 部署 Vite 项目</h3>
+      <ol class="steps">
+        <li>把项目 push 到 GitHub。</li>
+        <li>用 GitHub 账号登录 vercel.com，点 Add New → Project，选择这个仓库。</li>
+        <li>框架会自动识别为 Vite：构建命令 <code class="i">npm run build</code>，输出目录 <code class="i">dist</code>。有环境变量就在这里填。</li>
+        <li>点 Deploy，一分钟左右得到 <code class="i">xxx.vercel.app</code> 的网址。之后每次 push 到 main 自动更新。</li>
+      </ol>
+      <div class="tip"><span class="lbl">单页应用刷新 404</span><p>用了 React Router 的项目，直接访问 <code class="i">/todos/1</code> 可能 404，因为服务器上没有这个文件。需要配置“所有路径都返回 index.html”（Vercel 的 rewrites、Netlify 的 _redirects）。用 Next.js 就没有这个问题。</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="eng-quiz">
+      <div class="chap-head"><span class="chap-num">10</span><h2>自测：10 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">10</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="eng-challenge">
+      <div class="chap-head"><span class="chap-num">11</span><h2>动手挑战：Git 练习终端</h2></div>
+      <p class="sub">这是一个模拟的 Git 终端，项目里已经有三个文件。在下面输入命令（或点快捷按钮），完成全部任务。用 <code class="i">edit 文件名</code> 模拟“修改了一个文件”，输入 <code class="i">help</code> 查看支持的命令。</p>
+      <ul class="checks" id="engChecks"></ul>
+      <div class="git" id="engGit">
+        <div class="git-areas">
+          <div><h5>工作区（有改动）</h5><ul data-work></ul></div>
+          <div><h5>暂存区</h5><ul data-stage></ul></div>
+          <div><h5>提交历史</h5><ul data-log></ul></div>
+        </div>
+        <div class="term" data-out aria-live="polite"></div>
+        <div class="term-in"><span data-prompt>~/my-app $</span><input data-in aria-label="输入 Git 命令" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="输入命令后按回车，例如 git init"></div>
+        <div class="git-quick"></div>
+      </div>
+      <div class="test-bar"><button class="btn ghost" type="button" id="engReset">重置终端</button><span class="cat-badge" id="engState"></span></div>
+      <div id="engDoneBanner" class="done-banner" hidden>全部完成！提交、分支、合并、推送，这就是每天写代码时的 Git 节奏。最后一站：后端与全栈。</div>
+      <footer class="end">工程化 · FeLearn 一周全栈计划。想系统学 Git，推荐免费的《Pro Git》中文版：git-scm.com/book/zh/v2，以及可视化练习网站 learngitbranching.js.org/?locale=zh_CN</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
@@ -3207,7 +3527,7 @@ const MODULES = [
   { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
   { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: true },
   { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: true },
-  { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: false },
+  { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: true },
   { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
 ];
 </script>
@@ -4907,6 +5227,205 @@ ReactDOM.createRoot(document.getElementById("root")).render(<TodoApp />);
   function maybeStart(){if(!started&&!view.hidden){started=true;test();}}
   new MutationObserver(maybeStart).observe(view,{attributes:true,attributeFilter:['hidden']});
   maybeStart();
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：工程化 ====================== */
+(function(){
+  const {esc}=FL;
+  const view=document.querySelector('.v-eng');
+  view.querySelectorAll('.editor').forEach(FL.makeEditor);
+
+  FL.makeReader(view.querySelector('#engPkg'),[
+    ['{',''],
+    ['  "name": "my-app",','项目名。发布到 npm 时就是包名。'],
+    ['  "private": true,','防止不小心把项目发布到 npm 公共仓库。'],
+    ['  "version": "0.1.0",','项目版本号。'],
+    ['  "type": "module",','让 Node.js 用 <b>import / export</b>（ES 模块）语法，而不是旧的 require。'],
+    ['  "scripts": {','<b>脚本命令。</b>用 <code class="i">npm run 名字</code> 执行。'],
+    ['    "dev": "vite",','<code class="i">npm run dev</code>：启动开发服务器。'],
+    ['    "build": "vite build",','<code class="i">npm run build</code>：打包到 dist/。'],
+    ['    "lint": "eslint .",','<code class="i">npm run lint</code>：检查代码。'],
+    ['    "preview": "vite preview"','本地预览打包结果。'],
+    ['  },',''],
+    ['  "dependencies": {','<b>运行依赖：</b>用户访问网页时需要的库，会被打包进去。'],
+    ['    "react": "^18.3.1",','<b>^</b> 表示允许安装 18.x.x 中最新的版本，但不会升到 19。'],
+    ['    "react-dom": "^18.3.1"',''],
+    ['  },',''],
+    ['  "devDependencies": {','<b>开发依赖：</b>只在开发和构建时用的工具，不进最终产物。'],
+    ['    "vite": "^5.4.0",',''],
+    ['    "eslint": "^9.9.0"',''],
+    ['  }',''],
+    ['}','']
+  ],true);
+
+  /* ---------- semver ---------- */
+  const sv=view.querySelector('#engSemver'), svIn=sv.querySelector('input');
+  const VERS=['17.0.2','18.0.0','18.2.0','18.2.5','18.3.1','19.0.0','19.1.0'];
+  const P=v=>v.split('.').map(Number);
+  const cmp=(a,b)=>{for(let i=0;i<3;i++){if(a[i]!==b[i])return a[i]-b[i];}return 0;};
+  function match(range,v){
+    const m=range.trim().match(/^(\^|~|>=|)\s*(\d+)\.(\d+)\.(\d+)$/); if(!m)return null;
+    const b=[+m[2],+m[3],+m[4]], x=P(v);
+    if(m[1]==='')return cmp(x,b)===0;
+    if(m[1]==='>=')return cmp(x,b)>=0;
+    if(cmp(x,b)<0)return false;
+    if(m[1]==='~')return x[0]===b[0]&&x[1]===b[1];
+    return b[0]>0?x[0]===b[0]:x[0]===0&&x[1]===b[1];
+  }
+  const SAY={'^':'^ 锁定主版本：可以升级次版本和补丁，不会升到下一个主版本。npm install 默认就是这种。','~':'~ 锁定主版本和次版本：只接受补丁更新，更保守。','':'不带符号：只要这一个确切版本。','>=':'>= 大于等于：包括不兼容的新主版本，风险较大，很少用。'};
+  function upd(){
+    const r=svIn.value, box=sv.querySelector('.sv-vers'), m=r.trim().match(/^(\^|~|>=|)/);
+    const ok=VERS.map(v=>match(r,v));
+    if(ok[0]===null){box.innerHTML='';sv.querySelector('[data-say]').textContent='格式示例：^18.2.0、~18.2.0、18.2.0、>=18.2.0';return;}
+    box.innerHTML=VERS.map((v,i)=>'<span class="'+(ok[i]?'ok':'')+'">'+v+'</span>').join('');
+    const best=VERS.filter((v,i)=>ok[i]).pop();
+    sv.querySelector('[data-say]').textContent=SAY[m[1]]+(best?' 现在会装 '+best+'。':'');
+  }
+  ['^18.2.0','~18.2.0','18.2.0','>=18.2.0'].forEach(r=>{const b=document.createElement('button');b.type='button';b.textContent=r;b.addEventListener('click',()=>{svIn.value=r;upd();});sv.querySelector('.sim-presets').append(b);});
+  svIn.addEventListener('input',upd);upd();
+
+  FL.makeQuiz(view.querySelector('#eng-quiz'),[
+    ['拿到别人的前端项目，第一步通常是？',['npm run build','npm install','git push','删除 package.json'],1,'先按 package.json 装好依赖，再 npm run dev。'],
+    ['哪个文件夹不应该提交到 Git？',['src','public','node_modules','.github'],2,'node_modules 体积巨大，可以随时用 npm install 重新生成。'],
+    ['"react": "^18.2.0" 允许安装哪个版本？',['17.0.2','18.3.1','19.0.0','都可以'],1,'^ 锁定主版本 18，允许更新的次版本和补丁。'],
+    ['ESLint 这类只在开发时用的工具，应该用哪个命令安装？',['npm i eslint','npm i -D eslint','npm run eslint','npx eslint'],1,'-D 写入 devDependencies，不会进入最终产物。'],
+    ['npm run build 的产物通常在哪里？',['src/','node_modules/','dist/','public/'],2,'Vite 默认输出到 dist，部署的就是这个目录。'],
+    ['git add 的作用是？',['创建仓库','把改动放进暂存区','上传到 GitHub','撤销修改'],1,'工作区 → add → 暂存区 → commit → 仓库。'],
+    ['新建并切换到 feat/login 分支？',['git branch -d feat/login','git switch -c feat/login','git merge feat/login','git checkout main'],1,'switch -c 新建并切换；老写法是 git checkout -b。'],
+    ['在 GitHub 上请同事审查并合并你的分支，用的是？',['Issue','Pull Request','Fork','Release'],1,'Pull Request 是代码审查和合并的入口。'],
+    ['数据库密码应该放在哪里？',['VITE_ 开头的前端环境变量','代码里写死','后端服务器的环境变量，且不提交到 Git','package.json'],2,'前端代码和 VITE_ 变量对所有人可见，密钥只能放后端。'],
+    ['用 React Router 的单页应用部署后，刷新子页面 404，原因是？',['代码有 bug','服务器上没有这个路径的文件，需要配置都返回 index.html','没装 React','浏览器缓存'],1,'路由是前端 JS 处理的，服务器需要把所有路径都交给 index.html。']
+  ]);
+
+  /* ---------- Git 模拟终端 ---------- */
+  const g=view.querySelector('#engGit'), out=g.querySelector('[data-out]'), inp=g.querySelector('[data-in]');
+  const TASKS=[
+    ['git init 初始化仓库',s=>s.init],
+    ['把三个文件 add 后提交第一次（commit）',s=>s.commits.some(c=>c.files.length===3)],
+    ['新建并切换到 feature 分支',s=>!!s.branches.feature&&s.ever.switchedFeature],
+    ['在 feature 分支上修改 app.js 并提交',s=>s.commits.some(c=>c.branch==='feature'&&c.changed.includes('app.js'))],
+    ['切回 main，把 feature 合并进来',s=>s.init&&s.branches.main&&s.branches.feature&&isAnc(s,s.branches.feature,s.branches.main)&&s.ever.merged],
+    ['git push 推送到 GitHub',s=>s.pushed&&s.remote===s.branches.main]
+  ];
+  function fresh(){return {init:false,files:{'index.html':1,'style.css':1,'app.js':1},index:{},commits:[],branches:{},head:'main',ever:{},pushed:false,remote:null,remoteSet:false};}
+  let s=fresh();
+  const checks=view.querySelector('#engChecks');
+  checks.innerHTML=TASKS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  const byId=id=>s.commits.find(c=>c.id===id);
+  function isAnc(st,a,b){const seen=new Set(),q=[b];while(q.length){const id=q.shift();if(!id||seen.has(id))continue;if(id===a)return true;seen.add(id);const c=st.commits.find(x=>x.id===id);if(c)q.push(...c.parents);}return false;}
+  const headId=()=>s.branches[s.head]||null;
+  const snap=()=>{const c=byId(headId());return c?c.snap:{};};
+  const hash=()=>Math.random().toString(16).slice(2,9);
+  function print(html){out.insertAdjacentHTML('beforeend',html+'\n');out.scrollTop=out.scrollHeight;}
+  function changes(){const sn=snap(),w=[],st=[];
+    Object.keys(s.files).forEach(f=>{const ix=f in s.index?s.index[f]:sn[f];if(ix!==s.files[f])w.push(f);if(ix!==undefined&&ix!==sn[f])st.push(f);});return {w,st};}
+  function render(){
+    const {w,st}=s.init?changes():{w:[],st:[]};
+    const li=(arr,c,empty)=>arr.length?arr.map(x=>'<li class="'+c+'">'+x+'</li>').join(''):'<li class="empty">'+empty+'</li>';
+    g.querySelector('[data-work]').innerHTML=s.init?li(w.map(esc),'m','干净，没有改动'):li([],'','还不是 Git 仓库');
+    g.querySelector('[data-stage]').innerHTML=li(st.map(esc),'s','空');
+    const order=[...s.commits].reverse();
+    g.querySelector('[data-log]').innerHTML=li(order.map(c=>{const brs=Object.keys(s.branches).filter(b=>s.branches[b]===c.id).map(b=>'<span class="br">'+(b===s.head?'HEAD → ':'')+esc(b)+'</span>').join('')+(s.remote===c.id?'<span class="br">origin</span>':'');return brs+'<b>'+c.id+'</b> '+esc(c.msg);}),'c','还没有提交');
+    g.querySelector('[data-prompt]').textContent='~/my-app'+(s.init?' ('+s.head+')':'')+' $';
+    let n=0;TASKS.forEach((t,i)=>{const ok=!!t[1](s);if(ok)n++;checks.children[i].classList.toggle('done',ok);});
+    view.querySelector('#engState').textContent='完成 '+n+' / '+TASKS.length;
+    view.querySelector('#engDoneBanner').hidden=n!==TASKS.length;
+  }
+  const HELP=['支持的命令：','  edit 文件名            模拟修改一个文件（index.html / style.css / app.js）','  git init','  git status','  git add 文件名 | git add .','  git commit -m "说明"','  git log --oneline','  git branch [新分支名]','  git switch 分支名 | git switch -c 新分支名（也支持 git checkout -b）','  git merge 分支名','  git remote add origin 地址','  git push','  clear                  清屏'].join('\n');
+  function run(line){
+    const raw=line.trim(); if(!raw)return;
+    print('<span class="cmd">$ '+esc(raw)+'</span>');
+    const err=t=>print('<span class="err">'+esc(t)+'</span>'), ok=t=>print('<span class="ok">'+esc(t)+'</span>'), dim=t=>print('<span class="dim">'+esc(t)+'</span>');
+    const args=(raw.match(/"[^"]*"|'[^']*'|\S+/g)||[]).map(a=>a.replace(/^["']|["']$/g,''));
+    if(args[0]==='clear'){out.innerHTML='';return;}
+    if(args[0]==='help'){dim(HELP);return;}
+    if(args[0]==='ls'){dim(Object.keys(s.files).join('  '));return;}
+    if(args[0]==='edit'){const f=args[1];if(!f||!(f in s.files))return err('没有这个文件。可以改：'+Object.keys(s.files).join('、'));s.files[f]++;return dim('（你修改并保存了 '+f+'）');}
+    if(args[0]!=='git')return err('不认识的命令：'+args[0]+'。输入 help 查看支持的命令。');
+    const sub=args[1];
+    if(!sub)return dim(HELP);
+    if(sub==='init'){if(s.init)return dim('已经是 Git 仓库了，不需要重复 init。');s.init=true;return ok('Initialized empty Git repository in ~/my-app/.git/');}
+    if(!s.init)return err('fatal: not a git repository（还不是 Git 仓库，先 git init）');
+    const {w,st}=changes();
+    switch(sub){
+      case 'status':{
+        dim('On branch '+s.head);
+        if(st.length)print('要提交的变更（暂存区）：\n'+st.map(f=>'  <span class="ok">'+esc(f)+'</span>').join('\n'));
+        if(w.length)print('还没暂存的变更（工作区）：\n'+w.map(f=>'  <span class="err">'+esc(f)+'</span>').join('\n')+'\n<span class="dim">  （用 git add 文件名 把它们放进暂存区）</span>');
+        if(!st.length&&!w.length)dim('nothing to commit, working tree clean');
+        return;}
+      case 'add':{
+        const t=args.slice(2); if(!t.length)return err('要指定文件，比如 git add app.js 或 git add .');
+        const list=t.includes('.')||t.includes('-A')?Object.keys(s.files):t;
+        for(const f of list){if(!(f in s.files))return err("fatal: pathspec '"+f+"' did not match any files");}
+        list.forEach(f=>{s.index[f]=s.files[f];});
+        return dim('（已放进暂存区：'+list.join('、')+'）');}
+      case 'commit':{
+        const mi=args.indexOf('-m'); const msg=mi>-1?args[mi+1]:'';
+        if(!msg)return err('请用 -m 写提交说明，例如 git commit -m "初始化项目"');
+        if(!st.length)return err(w.length?'没有暂存的改动。先 git add 再 commit。':'nothing to commit, working tree clean');
+        const sn=Object.assign({},snap(),s.index);
+        const c={id:hash(),msg,parents:headId()?[headId()]:[],snap:sn,branch:s.head,changed:st.slice(),files:Object.keys(sn)};
+        s.commits.push(c);s.branches[s.head]=c.id;s.index={};
+        return ok('['+s.head+' '+c.id+'] '+msg+'\n '+st.length+' file(s) changed');}
+      case 'log':{
+        if(!headId())return err("fatal: 当前分支 '"+s.head+"' 还没有任何提交");
+        const lines=[];let id=headId();while(id){const c=byId(id);lines.push(c.id+' '+c.msg);id=c.parents[0];}
+        return print('<span class="dim">'+esc(lines.join('\n'))+'</span>');}
+      case 'branch':{
+        const name=args[2];
+        if(!name){const bs=Object.keys(s.branches);if(!bs.length)return dim('（还没有提交，所以还没有分支）');return print(bs.map(b=>(b===s.head?'* <span class="ok">':'  ')+esc(b)+(b===s.head?'</span>':'')).join('\n'));}
+        if(!headId())return err('先提交一次，才能开分支。');
+        if(s.branches[name])return err("fatal: a branch named '"+name+"' already exists");
+        s.branches[name]=headId();return dim('（新建了分支 '+name+'，但还在 '+s.head+' 上。用 git switch '+name+' 切过去）');}
+      case 'switch': case 'checkout':{
+        const create=args[2]==='-c'||args[2]==='-b'; const name=create?args[3]:args[2];
+        if(!name)return err('要写分支名');
+        if(w.length||st.length)return err('error: 你有还没提交的改动，先 commit 再切换分支（真实 Git 里也可以用 git stash 暂存）');
+        if(create){if(!headId())return err('先提交一次，才能开分支。');if(s.branches[name])return err("fatal: a branch named '"+name+"' already exists");s.branches[name]=headId();}
+        else if(!s.branches[name])return err("fatal: invalid reference: "+name+"（没有这个分支，新建要加 -c）");
+        s.head=name;if(name==='feature')s.ever.switchedFeature=true;
+        const c=byId(headId());s.files=Object.assign({},s.files,c?c.snap:{});
+        return ok("Switched to "+(create?'a new ':'')+"branch '"+name+"'");}
+      case 'merge':{
+        const name=args[2]; if(!name||!s.branches[name])return err('merge: '+(name||'')+' - not something we can merge（没有这个分支）');
+        if(name===s.head)return err('不能把分支合并到自己。');
+        const other=s.branches[name], cur=headId();
+        if(isAnc(s,other,cur))return dim('Already up to date.');
+        if(isAnc(s,cur,other)){s.branches[s.head]=other;s.files=Object.assign({},s.files,byId(other).snap);s.ever.merged=true;return ok('Updating '+cur+'..'+other+'\nFast-forward（快进合并：直接把 '+s.head+' 指向 '+name+' 的最新提交）');}
+        const sn=Object.assign({},byId(cur).snap);const o=byId(other).snap;Object.keys(o).forEach(f=>{sn[f]=Math.max(sn[f]||0,o[f]);});
+        const c={id:hash(),msg:"Merge branch '"+name+"'",parents:[cur,other],snap:sn,branch:s.head,changed:[],files:Object.keys(sn)};
+        s.commits.push(c);s.branches[s.head]=c.id;s.files=Object.assign({},s.files,sn);s.ever.merged=true;
+        return ok("Merge made by the 'ort' strategy.（两个分支都有新提交，生成了一个合并提交）");}
+      case 'remote':{
+        if(args[2]==='add'&&args[3]&&args[4]){s.remoteSet=true;return dim('（已添加远程仓库 '+args[3]+'）');}
+        return s.remoteSet?dim('origin'):dim('（还没有远程仓库）');}
+      case 'push':{
+        if(!headId())return err('还没有任何提交，没有东西可推送。');
+        if(!s.remoteSet){s.remoteSet=true;dim('（练习环境自动帮你添加了远程仓库 origin → github.com/jim/my-app）');}
+        if(s.head!=='main')dim('提示：通常在 main 上推送合并后的结果；功能分支也可以推，用来发 Pull Request。');
+        if(s.head==='main')s.remote=headId();
+        s.pushed=s.pushed||s.head==='main';
+        return ok('To github.com:jim/my-app.git\n   '+s.head+' -> '+s.head);}
+      case 'diff': return w.length?print(w.map(f=>'<span class="dim">diff --git a/'+esc(f)+' b/'+esc(f)+'</span>\n<span class="err">- 旧的一行</span>\n<span class="ok">+ 新的一行</span>').join('\n')):dim('（工作区没有未暂存的改动）');
+      case 'restore':{const f=args[2];if(!f||!(f in s.files))return err('要写文件名');const ix=f in s.index?s.index[f]:snap()[f];if(ix===undefined)return err('这个文件还没被 Git 记录过');s.files[f]=ix;return dim('（已放弃 '+f+' 的修改）');}
+      default: return err("git: '"+sub+"' is not a git command（练习终端没有这个命令，输入 help 看看）");
+    }
+  }
+  const hist=[];let hi=0;
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){const v=inp.value;if(v.trim())hist.push(v);hi=hist.length;inp.value='';run(v);render();}
+    else if(e.key==='ArrowUp'&&hist.length){e.preventDefault();hi=Math.max(0,hi-1);inp.value=hist[hi];}
+    else if(e.key==='ArrowDown'&&hist.length){e.preventDefault();hi=Math.min(hist.length,hi+1);inp.value=hist[hi]||'';}
+  });
+  ['git init','git status','git add .','git commit -m "初始化项目"','git switch -c feature','edit app.js','git commit -m "feat: 新功能"','git switch main','git merge feature','git log --oneline','git push','help'].forEach(c=>{const b=document.createElement('button');b.type='button';b.textContent=c;b.addEventListener('click',()=>{if(c.includes('commit')){inp.value=c;inp.focus();return;}run(c);render();});g.querySelector('.git-quick').append(b);});
+  function reset(){s=fresh();out.innerHTML='';print('<span class="dim">练习终端已就绪。项目里有 index.html、style.css、app.js 三个文件。\n先输入 git init 试试。提交类的快捷按钮只会填进输入框，回车前可以改说明。</span>');render();}
+  view.querySelector('#engReset').addEventListener('click',reset);
+  reset();
 
   FL.tocSpy(view);
 })();
