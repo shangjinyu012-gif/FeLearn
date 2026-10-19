@@ -1,0 +1,3604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FeLearn 学习站</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&display=swap">
+<style>
+/*
+  FeLearn 学习站：一个页面，多个视图。
+  - 首页（#home）是前端全栈脑图 + 一周计划 + 知识模块入口。
+  - 每个知识模块是一个 <section class="view v-模块id" data-view="模块id">，样式都挂在 .v-模块id 下面，互不影响。
+  - 新增模块：1) 在页尾脚本的 MODULES 里把对应条目 ready 改成 true；
+              2) 复制一个 <section class="view"> 写内容，CSS 前缀用 .v-模块id；
+              3) 模块脚本包在 (function(){ ... })() 里，避免变量冲突。
+*/
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#18202E; --fg:var(--ink); --muted:#5B6577; --line:#DCE1E9;
+  --accent:#C8421A; --accent-ink:#FFFFFF; --accent-soft:#FBE8E0;
+  --teal:#0E7A74; --teal-soft:#DDF1EF;
+  --ok:#1D7A46; --ok-soft:#E1F3E8; --bad:#B42318; --bad-soft:#FCE6E4;
+  --paper:#FFFFFF; --chrome:#E8EBF0; --chrome-ink:#5B6577;
+  --code-bg:#1A2131; --code-fg:#E5E9F0; --code-line:#2A3346; --code-hover:#232C40;
+  --c-tag:#FF8F66; --c-attr:#72D6CA; --c-val:#C8A8FF; --c-com:#7D879A; --c-doc:#9AA4B8;
+  /* 知识主干配色（脑图与模块卡片共用） */
+  --html:#d2462a; --css:#2a62d6; --js:#a57d00; --net:#0f8a82; --fw:#7a45c9; --eng:#5d6676; --be:#2b8a3e;
+  --f-display:"Bricolage Grotesque","Noto Sans SC",system-ui,sans-serif;
+  --f-body:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans SC",monospace;
+  --f-serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --gutter-l:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131B; --surface:#151C27; --ink:#E3E7EE; --muted:#97A1B3; --line:#263042;
+    --accent:#FF7B4F; --accent-ink:#1A0D07; --accent-soft:#3A1F15;
+    --teal:#4CC3B8; --teal-soft:#123331;
+    --ok:#5CCB8A; --ok-soft:#14301F; --bad:#FF7A70; --bad-soft:#3A1715;
+    --chrome:#1F2734; --chrome-ink:#97A1B3;
+    --code-bg:#0A0F17; --code-line:#1F2837; --code-hover:#141B27;
+    --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131B; --surface:#151C27; --ink:#E3E7EE; --muted:#97A1B3; --line:#263042;
+  --accent:#FF7B4F; --accent-ink:#1A0D07; --accent-soft:#3A1F15;
+  --teal:#4CC3B8; --teal-soft:#123331;
+  --ok:#5CCB8A; --ok-soft:#14301F; --bad:#FF7A70; --bad-soft:#3A1715;
+  --chrome:#1F2734; --chrome-ink:#97A1B3;
+  --code-bg:#0A0F17; --code-line:#1F2837; --code-hover:#141B27;
+  --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;color:inherit}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+/* 站点顶栏 */
+.site-bar{border-bottom:1px solid var(--line);background:var(--bg);padding-top:env(safe-area-inset-top,0px)}
+.site-bar-in{max-width:1280px;margin:0 auto;padding:10px var(--gutter-r) 10px var(--gutter-l);display:flex;align-items:center;gap:16px;min-width:0}
+.brand{font:600 15px/1 var(--f-mono);letter-spacing:.02em;color:var(--ink);text-decoration:none;flex:none;display:flex;align-items:center;gap:8px}
+.brand i{width:10px;height:10px;border-radius:3px;background:var(--accent);display:inline-block}
+.site-nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.site-nav::-webkit-scrollbar{display:none}
+.site-nav a{white-space:nowrap;text-decoration:none;color:var(--muted);font-size:14px;line-height:1;padding:8px 12px;border-radius:999px;display:inline-flex;gap:6px;align-items:center}
+.site-nav a:hover{color:var(--ink);background:var(--surface)}
+.site-nav a[aria-current="page"]{color:var(--bg);background:var(--ink)}
+.site-nav a .dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--muted))}
+
+/* ====================== 首页：脑图 ====================== */
+.v-home{--accent:#2f5bd3;font-size:15px;line-height:1.6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-home{--accent:#7d9cff}}
+:root[data-theme="dark"] .v-home{--accent:#7d9cff}
+.v-home .wrap{max-width:1280px;margin:0 auto;padding-block:28px 56px;padding-left:var(--gutter-l);padding-right:var(--gutter-r);display:grid;gap:22px}
+.v-home header{display:grid;gap:8px}
+.v-home .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:500;margin:0}
+.v-home h1{font-family:var(--f-serif);font-weight:900;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0;text-wrap:balance}
+.v-home h2{font-family:var(--f-serif);font-weight:600;font-size:22px;margin:0}
+.v-home .lede{color:var(--muted);max-width:62ch;margin:0}
+
+/* 知识模块卡片 */
+.v-home .mods-sec{display:grid;gap:12px}
+.v-home .mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.v-home .mod{display:grid;gap:4px;align-content:start;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:12px 14px;min-width:0}
+.v-home a.mod:hover{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent)}
+.v-home .mod .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.v-home .mod b{font-size:15px}
+.v-home .mod .d{font:600 11px/1 var(--f-mono);color:var(--c);white-space:nowrap}
+.v-home .mod small{color:var(--muted);font-size:13px;line-height:1.5}
+.v-home .mod .st{font-size:12px;font-weight:500;color:var(--c)}
+.v-home .mod.soon{border-left-style:dashed;opacity:.7}
+.v-home .mod.soon .st{color:var(--muted)}
+
+.v-home .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.v-home .days{display:flex;flex-wrap:wrap;gap:6px}
+.v-home .chip,.v-home .btn{font:inherit;font-size:13px;cursor:pointer;border-radius:999px;padding:5px 12px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+.v-home .chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.v-home .chip .d{font-family:var(--f-mono);font-weight:600;margin-right:4px}
+.v-home .btn{border-radius:8px}
+.v-home .actions{display:flex;gap:6px}
+
+.v-home .detail{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:4px;min-height:76px}
+.v-home .detail .t{font-weight:700;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.v-home .detail .tag{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.v-home .detail p{margin:0;color:var(--muted);max-width:75ch}
+.v-home .detail .go{justify-self:start;margin-top:6px;font-size:14px;font-weight:500;text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--c,var(--accent));color:var(--c,var(--accent))}
+.v-home .detail .go:hover{background:color-mix(in srgb,var(--c,var(--accent)) 12%,transparent)}
+
+/* 思维导图 */
+.v-home .mapbox{overflow-x:auto;padding:8px 4px 16px;-webkit-overflow-scrolling:touch}
+.v-home .tree,.v-home .tree ul{list-style:none;margin:0;padding:0}
+.v-home .tree li{display:flex;align-items:center;position:relative;padding:3px 0 3px 22px}
+.v-home .tree>li{padding-left:0}
+.v-home .tree ul{position:relative;margin-left:22px;display:flex;flex-direction:column}
+.v-home .tree ul::before{content:"";position:absolute;left:-22px;top:50%;width:22px;border-top:1.5px solid var(--c,var(--line));opacity:.55}
+.v-home .tree ul>li::before{content:"";position:absolute;left:0;top:50%;width:22px;border-top:1.5px solid var(--c,var(--line));opacity:.55}
+.v-home .tree ul>li::after{content:"";position:absolute;left:0;top:0;bottom:0;border-left:1.5px solid var(--c,var(--line));opacity:.55}
+.v-home .tree ul>li:first-child::after{top:50%}
+.v-home .tree ul>li:last-child::after{bottom:50%}
+.v-home .tree ul>li:only-child::after{display:none}
+.v-home .tree li.collapsed>ul{display:none}
+.v-home .node{font:inherit;text-align:left;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--fg);border:1.5px solid color-mix(in srgb,var(--c,var(--line)) 55%,transparent);border-radius:8px;padding:4px 10px;font-size:14px;transition:opacity .2s,box-shadow .2s,transform .15s}
+.v-home .node:hover{box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--accent)) 18%,transparent)}
+.v-home .node.root{font-family:var(--f-serif);font-weight:900;font-size:20px;padding:12px 18px;background:var(--fg);color:var(--bg);border-color:var(--fg);border-radius:12px}
+.v-home .node.l1{font-weight:700;font-size:16px;padding:7px 14px;background:color-mix(in srgb,var(--c) 14%,var(--surface));border-color:var(--c)}
+.v-home .node.leaf{border-style:dashed;border-color:color-mix(in srgb,var(--c,var(--line)) 35%,transparent);font-size:13.5px}
+.v-home .node .day{font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--c,var(--muted))}
+.v-home .node.root .day{color:inherit;opacity:.7}
+.v-home .node .count{font-family:var(--f-mono);font-size:11px;border-radius:999px;padding:0 6px;background:color-mix(in srgb,var(--c,var(--muted)) 20%,transparent);color:var(--fg)}
+.v-home .node .mk{font-size:11px;font-weight:600;border-radius:4px;padding:1px 5px;background:var(--c);color:var(--surface)}
+.v-home .node.active{box-shadow:0 0 0 3px var(--c,var(--accent))}
+.v-home .tree.filtering .node.dim{opacity:.22}
+.v-home .tree.filtering .node.hit{box-shadow:0 0 0 2px var(--c,var(--accent))}
+
+/* 一周计划 */
+.v-home .week{display:grid;gap:12px}
+.v-home .weekgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.v-home .daycard{font:inherit;text-align:left;color:var(--fg);cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.v-home .daycard[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+.v-home .daycard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.v-home .daycard .n{font-family:var(--f-mono);font-weight:600;font-size:13px;color:var(--muted)}
+.v-home .daycard .h{font-weight:700}
+.v-home .daycard ul{margin:0;padding-left:18px;color:var(--muted);font-size:13.5px}
+.v-home .daycard .out{font-size:13px;border-top:1px dashed var(--line);padding-top:6px}
+.v-home .daycard .out b{font-weight:500;color:var(--fg)}
+.v-home .done{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);cursor:pointer}
+.v-home .done input{accent-color:var(--accent)}
+.v-home .daycard.isdone .h{text-decoration:line-through;text-decoration-color:var(--muted)}
+.v-home .hint{font-size:13px;color:var(--muted);margin:0}
+@media (prefers-reduced-motion: reduce){.v-home .node{transition:none}}
+
+/* ====================== 课程模块共用样式（.lesson） ====================== */
+
+.lesson .progress{position:fixed;left:0;top:env(safe-area-inset-top,0px);height:3px;width:0;background:var(--accent);z-index:20}
+
+.lesson .layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:56px;max-width:1160px;margin:0 auto;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+
+/* 目录 */
+.lesson .toc{min-width:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);align-self:start;padding-block:40px 24px;max-height:100vh;overflow:auto}
+.lesson .toc-title{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.lesson .toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.lesson .toc a{display:flex;gap:10px;align-items:baseline;padding:6px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.4}
+.lesson .toc a span{font:500 11px/1 var(--f-mono);color:var(--muted);opacity:.7;min-width:1.6em}
+.lesson .toc a:hover{color:var(--ink);background:var(--surface)}
+.lesson .toc a.active{color:var(--ink);background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.lesson .toc a.active span{color:var(--accent);opacity:1}
+@media (max-width:960px){
+  .lesson .layout{grid-template-columns:minmax(0,1fr);gap:0}
+  .lesson .toc{top:env(safe-area-inset-top,0px);z-index:8;background:var(--bg);padding-block:8px;max-height:none;overflow:visible;
+       margin-left:calc(-1 * var(--gutter-l));margin-right:calc(-1 * var(--gutter-r));padding-left:var(--gutter-l);padding-right:var(--gutter-r);border-bottom:1px solid var(--line)}
+  .lesson .toc-title{display:none}
+  .lesson .toc ol{flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:4px}
+  .lesson .toc ol::-webkit-scrollbar{display:none}
+  .lesson .toc a{white-space:nowrap;padding:6px 10px}
+}
+
+.lesson .content{min-width:0;max-width:820px;padding-block:40px 120px}
+
+/* 开篇 */
+.lesson .hero{padding-block:8px 32px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.lesson .eyebrow{font:600 12px/1.4 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+.lesson .hero h1{font:800 clamp(40px,7vw,68px)/1.02 var(--f-display);letter-spacing:-.02em;margin:0 0 18px;text-wrap:balance}
+.lesson .hero h1 .lt{color:var(--accent);font-family:var(--f-mono);font-weight:600;font-size:.62em;vertical-align:.12em}
+.lesson .lede{font-size:18px;color:var(--muted);max-width:62ch;margin:0 0 28px}
+.lesson .stack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lesson .layer{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface);min-width:0}
+.lesson .layer.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.lesson .layer b{display:block;font:700 15px/1.3 var(--f-body)}
+.lesson .layer small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:4px}
+.lesson .layer code{display:block;margin-top:10px;font:12px/1.5 var(--f-mono);color:var(--muted);overflow-wrap:anywhere}
+.lesson .layer .tag{display:inline-block;font:600 11px/1 var(--f-mono);padding:4px 7px;border-radius:5px;margin-bottom:8px;background:var(--accent-soft);color:var(--accent)}
+.lesson .layer:not(.on) .tag{background:var(--chrome);color:var(--chrome-ink)}
+@media (max-width:620px){.lesson .stack{grid-template-columns:minmax(0,1fr)}}
+.lesson .goals{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 0;padding:0;list-style:none}
+.lesson .goals li{font-size:14px;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.lesson .goals li::before{content:"✓ ";color:var(--ok);font-weight:700}
+
+/* 章节 */
+.lesson section.chap{padding-block:48px 8px}
+.lesson .chap-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.lesson .chap-num{font:600 13px/1 var(--f-mono);color:var(--accent);padding:6px 8px;border:1px solid var(--accent);border-radius:6px;flex:none;transform:translateY(-6px)}
+.lesson .chap h2{font:800 clamp(28px,4.2vw,38px)/1.15 var(--f-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.lesson .chap h3{font:700 19px/1.4 var(--f-body);margin:32px 0 8px;text-wrap:balance}
+.lesson .chap p,.lesson .chap li{max-width:66ch}
+.lesson .chap p{margin:10px 0}
+.lesson .sub{color:var(--muted);margin-top:4px!important}
+.lesson code.i{font:0.86em var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:5px;white-space:nowrap}
+.lesson .tip{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--teal-soft);border-radius:12px;padding:14px 16px;margin:18px 0}
+.lesson .tip .lbl{font:600 11px/1 var(--f-mono);letter-spacing:.06em;color:var(--teal);border:1px solid var(--teal);padding:5px 7px;border-radius:5px;margin-top:4px;white-space:nowrap}
+.lesson .tip p{margin:0;max-width:none}
+.lesson .tip.warn{background:var(--accent-soft)}
+.lesson .tip.warn .lbl{color:var(--accent);border-color:var(--accent)}
+.lesson ul.dots{padding-left:1.2em;margin:10px 0}
+.lesson ul.dots li{margin:4px 0}
+
+/* 表格 */
+.lesson .table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.lesson table.ref{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55}
+.lesson table.ref th,.lesson table.ref td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.lesson table.ref th{font:600 12px/1.4 var(--f-mono);letter-spacing:.05em;color:var(--muted);background:var(--bg)}
+.lesson table.ref tr:last-child td{border-bottom:0}
+.lesson table.ref td:first-child{font-family:var(--f-mono);font-size:13px;color:var(--accent);white-space:nowrap}
+
+/* 编辑器 */
+.lesson .editor{container-type:inline-size;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin:20px 0}
+.lesson .ed-bar{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;padding:8px 10px 8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lesson .ed-title{font:600 13px/1.4 var(--f-body)}
+.lesson .ed-title small{font-weight:400;color:var(--muted);margin-left:6px}
+.lesson .ed-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lesson .chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;line-height:1;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.lesson .chip:hover{border-color:var(--muted)}
+.lesson .chip input{margin:0;accent-color:var(--accent)}
+.lesson .ed-grid{display:grid;grid-template-columns:minmax(0,1fr)}
+@container (min-width:700px){.lesson .ed-grid{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}}
+.lesson .code{position:relative;background:var(--code-bg);min-width:0}
+.lesson .code:focus-within{box-shadow:inset 0 0 0 2px var(--accent)}
+.lesson .code pre,.lesson .code textarea{margin:0;padding:14px 16px;font:13px/1.7 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;tab-size:2;border:0;letter-spacing:0}
+.lesson .code pre{position:absolute;inset:0;pointer-events:none;color:var(--code-fg);overflow:hidden}
+.lesson .code textarea{position:relative;display:block;width:100%;min-height:100px;resize:none;background:transparent;color:transparent;caret-color:#FFFFFF;outline:none;overflow:hidden;-webkit-text-fill-color:transparent}
+.lesson .code textarea::selection{background:rgba(114,214,202,.32)}
+.lesson pre,.lesson code,.lesson textarea,.lesson .rl{font-variant-ligatures:none}
+.lesson .chip.run{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.lesson .t-kw{color:#FF9EC4}.lesson .t-num{color:#F5C46B}.lesson .t-fn{color:#8EC5FF}
+.lesson .t-tag{color:var(--c-tag)} .lesson .t-attr{color:var(--c-attr)} .lesson .t-val{color:var(--c-val)} .lesson .t-com{color:var(--c-com);font-style:italic} .lesson .t-doc{color:var(--c-doc)} .lesson .t-p{color:var(--c-com)}
+.lesson .pv{display:flex;flex-direction:column;background:var(--paper);min-width:0;border-top:1px solid var(--line)}
+@container (min-width:700px){.lesson .pv{border-top:0;border-left:1px solid var(--line)}}
+.lesson .pv-bar{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--chrome);color:var(--chrome-ink);font:12px/1 var(--f-mono)}
+.lesson .pv-bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.lesson .pv-bar span{margin-left:6px;padding:4px 10px;border-radius:6px;background:var(--surface);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lesson .pv iframe{display:block;width:100%;height:140px;border:0;background:var(--paper)}
+
+/* 逐行解读 */
+.lesson .reader{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--code-bg);margin:20px 0}
+.lesson .reader-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px 8px 14px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.lesson .reader ol{list-style:none;margin:0;padding:8px 0;counter-reset:ln}
+.lesson .reader li{counter-increment:ln;max-width:none}
+.lesson .rl{display:grid;grid-template-columns:2.6em minmax(0,1fr) auto;gap:8px;width:100%;text-align:left;background:none;border:0;padding:3px 14px 3px 6px;cursor:pointer;font:13px/1.7 var(--f-mono);color:var(--code-fg)}
+.lesson .rl::before{content:counter(ln);color:var(--c-com);text-align:right;opacity:.7}
+.lesson .rl .src{white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+.lesson .rl .more{color:var(--c-com);font-size:11px;opacity:0;transition:opacity .15s}
+.lesson .rl:hover{background:var(--code-hover)} .lesson .rl:hover .more{opacity:1}
+.lesson .reader li.open .rl{background:var(--code-line)}
+.lesson .reader li.open .rl .more{opacity:1;color:var(--c-tag)}
+.lesson .note{margin:2px 14px 10px 3.6em;padding:12px 14px;border-radius:10px;background:var(--surface);color:var(--ink);font:14px/1.7 var(--f-body)}
+.lesson .note b{color:var(--accent)}
+.lesson .note code{font:12.5px var(--f-mono);background:var(--bg);padding:1px 5px;border-radius:4px}
+@media (max-width:520px){.lesson .note{margin-left:14px}}
+
+/* 元素解剖 */
+.lesson .anatomy{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.lesson .ana-code{background:var(--code-bg);padding:26px 18px;font:clamp(14px,2.6vw,19px)/1.8 var(--f-mono);color:var(--code-fg);text-align:center;overflow-wrap:anywhere}
+.lesson .ana-code .pt{border-radius:5px;padding:2px 1px;cursor:pointer;transition:background .15s,box-shadow .15s}
+.lesson .ana-code .pt.hi{background:rgba(255,143,102,.18);box-shadow:0 0 0 1px rgba(255,143,102,.6)}
+.lesson .ana-legend{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.lesson .ana-legend button{font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.lesson .ana-legend button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.lesson .ana-info{padding:14px 16px;font-size:15px;min-height:4.6em}
+.lesson .ana-info b{color:var(--accent)}
+
+/* 语义化布局图 */
+.lesson .sem{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin:20px 0;align-items:start}
+@media (max-width:700px){.lesson .sem{grid-template-columns:minmax(0,1fr)}}
+.lesson .mock{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:10px;display:grid;gap:8px;font:600 12px/1.2 var(--f-mono)}
+.lesson .rg{border:1.5px dashed var(--line);border-radius:9px;padding:8px;cursor:pointer;color:var(--muted);transition:border-color .15s,background .15s;display:grid;gap:6px;align-content:start}
+.lesson .rg:hover{border-color:var(--muted)}
+.lesson .rg.on{border-color:var(--accent);border-style:solid;background:var(--accent-soft);color:var(--accent)}
+.lesson .rg .rg{background:var(--surface)}
+.lesson .rg .rg.on{background:var(--accent-soft)}
+.lesson .rg-row{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:8px}
+.lesson .bar{height:6px;border-radius:3px;background:var(--line);opacity:.8}
+.lesson .bar.s{width:60%}
+.lesson .sem-info{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;min-height:220px}
+.lesson .sem-info h4{font:700 20px/1.3 var(--f-mono);color:var(--accent);margin:0 0 6px}
+.lesson .sem-info p{margin:6px 0;font-size:15px}
+.lesson .sem-info .when{font-size:14px;color:var(--muted)}
+
+.lesson .compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+@media (max-width:620px){.lesson .compare{grid-template-columns:minmax(0,1fr)}}
+.lesson .cmp{border-radius:12px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.lesson .cmp h5{margin:0;padding:8px 12px;font:600 13px/1.4 var(--f-body);background:var(--surface)}
+.lesson .cmp.bad h5{color:var(--bad)} .lesson .cmp.good h5{color:var(--ok)}
+.lesson .cmp pre{margin:0;padding:12px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* 速查表 */
+.lesson .sheet-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 4px}
+.lesson .sheet-tools input[type=search]{flex:1 1 220px;min-width:0;font:15px var(--f-body);padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.lesson .cat{font-size:13px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.lesson .cat.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.lesson .cat-badge{font:500 11px/1 var(--f-body);color:var(--muted);white-space:nowrap}
+.lesson .empty{padding:20px;color:var(--muted);text-align:center}
+
+/* 测验 */
+.lesson .quiz-score{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:4;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:18px 0}
+@media (max-width:960px){.lesson .quiz-score{top:calc(env(safe-area-inset-top,0px) + 60px)}}
+.lesson .quiz-score b{font:700 22px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.lesson .meter{flex:1 1 160px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;min-width:100px}
+.lesson .meter i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.lesson .q{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:16px 18px;margin:12px 0}
+.lesson .chap .q-t{font-weight:700;margin:0 0 10px;display:flex;gap:10px}
+.lesson .q-t .qn{font:600 12px/1.9 var(--f-mono);color:var(--muted);flex:none}
+.lesson .q-t .qx{flex:1;min-width:0;overflow-wrap:anywhere}
+.lesson .q-t code{font:0.88em var(--f-mono);background:var(--bg);padding:1px 5px;border-radius:4px}
+.lesson .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.lesson .opts{grid-template-columns:minmax(0,1fr)}}
+.lesson .opt{text-align:left;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.lesson .opt code{font:13px var(--f-mono)}
+.lesson .opt:hover:not(:disabled){border-color:var(--muted)}
+.lesson .opt:disabled{cursor:default}
+.lesson .opt.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.lesson .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.lesson .chap .why{margin:10px 0 0;max-width:none;font-size:14px;color:var(--muted)}
+.lesson .why b{color:var(--ink)}
+.lesson .btn{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;padding:9px 14px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.lesson .btn.ghost{background:transparent;color:var(--accent)}
+
+/* 挑战 */
+.lesson .checks{list-style:none;margin:12px 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 16px}
+@media (max-width:620px){.lesson .checks{grid-template-columns:minmax(0,1fr)}}
+.lesson .checks li{display:flex;gap:10px;align-items:baseline;font-size:14px;max-width:none}
+.lesson .checks li::before{content:"";flex:none;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--muted);transform:translateY(2px)}
+.lesson .checks li.done{color:var(--ok)}
+.lesson .checks li.done::before{background:var(--ok);border-color:var(--ok);box-shadow:inset 0 0 0 2px var(--surface)}
+.lesson .checks code{font:12.5px var(--f-mono)}
+.lesson .done-banner{padding:12px 16px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+.lesson footer.end{border-top:1px solid var(--line);margin-top:56px;padding-top:24px;color:var(--muted);font-size:14px}
+.lesson .pv-stage{overflow-x:auto;background:var(--paper)}
+.lesson .pv-stage iframe{max-width:none}
+.lesson .chip input[type=range]{width:110px}
+.lesson .pv-w{font:12px/1 var(--f-mono);color:var(--muted);min-width:4.2em}
+
+/* ====================== 模块：CSS 样式与布局（只放本模块独有的组件） ====================== */
+.v-css{--accent:#2A62D6;--accent-ink:#FFFFFF;--accent-soft:#E2EAFB}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-css{--accent:#7DA2FF;--accent-ink:#0A1430;--accent-soft:#16233F}}
+:root[data-theme="dark"] .v-css{--accent:#7DA2FF;--accent-ink:#0A1430;--accent-soft:#16233F}
+.v-css code.i.wrap{white-space:normal}
+.v-css ol.steps{margin:12px 0;padding-left:1.4em}
+.v-css ol.steps li{margin:4px 0}
+.v-css .tpl-view{margin:12px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.v-css .tpl-view summary{cursor:pointer;padding:10px 14px;font-size:14px;font-weight:500}
+.v-css .tpl-view pre{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* 优先级计算器 */
+.v-css .spec{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;margin:16px 0;display:grid;gap:10px}
+.v-css .spec-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
+.v-css .spec-row label{font:600 13px/1 var(--f-mono);color:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:6px 8px}
+.v-css .spec-row input{min-width:0;font:14px var(--f-mono);padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.v-css .spec-n{display:flex;gap:4px}
+.v-css .spec-n span{display:grid;justify-items:center;min-width:56px;padding:4px 6px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-size:11px;line-height:1.3;color:var(--muted)}
+.v-css .spec-n b{font:700 18px/1.2 var(--f-mono);color:var(--ink)}
+.v-css .spec-row.win input{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+.v-css .spec-verdict{max-width:none;margin:0;font-size:15px}
+.v-css .spec-verdict b{color:var(--ok)}
+.v-css .spec-presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.v-css .spec-presets button{font:12.5px var(--f-mono);padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+@media (max-width:560px){
+  .v-css .spec-row{grid-template-columns:auto minmax(0,1fr)}
+  .v-css .spec-n{grid-column:1 / -1}
+  .v-css .spec-n span{flex:1;min-width:0}
+}
+
+/* 盒模型演示（颜色沿用浏览器开发者工具的配色，深浅色模式下都一样） */
+.v-css .bm{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.v-css .bm-ctrl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.v-css .bm-ctrl label{display:grid;grid-template-columns:5.6em minmax(0,1fr) 3.4em;gap:8px;align-items:center;font:13px var(--f-mono)}
+.v-css .bm-ctrl input[type=range]{width:100%;accent-color:var(--accent)}
+.v-css .bm-ctrl output{text-align:right;color:var(--muted)}
+.v-css .bm-sizing{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font:13px var(--f-mono);grid-column:1 / -1}
+.v-css .bm-sizing button{font:12.5px var(--f-mono);padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.v-css .bm-sizing button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.v-css .bm-stage{padding:22px 16px;overflow-x:auto;background:var(--bg);display:flex;justify-content:center}
+.v-css .bm-l{position:relative;width:max-content;color:#1d2433}
+.v-css .bm-l>span{position:absolute;top:1px;left:4px;font:600 10px/1.2 var(--f-mono);opacity:.75}
+.v-css .bm-m{background:#f9cc9d;outline:1px dashed #b97a3a}
+.v-css .bm-b{background:#fddd9b}
+.v-css .bm-p{background:#c3d08b}
+.v-css .bm-c{background:#8cb6c0;height:56px;display:grid;place-items:center;font:600 12px var(--f-mono);color:#1d2433;overflow:hidden}
+.v-css .bm-code{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap}
+.v-css .bm-sum{max-width:none;margin:0;padding:12px 16px;font-size:15px}
+.v-css .bm-sum b{color:var(--accent);font-family:var(--f-mono)}
+
+/* Flex 练习场 */
+.v-css .fx{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.v-css .fx-ctrl{display:grid;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.v-css .fx-g{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:8px;align-items:start}
+.v-css .fx-k{font:600 12.5px/2.2 var(--f-mono);color:var(--muted)}
+.v-css .fx-opts{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.v-css .fx-opts button{font:12.5px var(--f-mono);padding:5px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer}
+.v-css .fx-opts button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.v-css .fx-opts input[type=range]{width:140px;accent-color:var(--accent)}
+.v-css .fx-opts output{font:12.5px var(--f-mono);color:var(--muted)}
+.v-css .fx-opts label{display:inline-flex;gap:6px;align-items:center;font:12.5px var(--f-mono)}
+@media (max-width:560px){.v-css .fx-g{grid-template-columns:minmax(0,1fr);gap:2px}.v-css .fx-k{line-height:1.6}}
+.v-css .fx-tip{max-width:none;margin:0;padding:10px 16px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line);min-height:3.2em}
+.v-css .fx-tip b{color:var(--ink);font-family:var(--f-mono);font-weight:600}
+.v-css .fx-stage{padding:14px;background:var(--bg)}
+.v-css .fx-box{display:flex;height:220px;border:2px dashed var(--accent);border-radius:10px;padding:8px;overflow:auto;background:var(--surface)}
+.v-css .fx-box div{flex:none;min-width:48px;padding:0 12px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font:700 15px var(--f-mono);display:grid;place-items:center}
+.v-css .fx-box div.grow{flex:1;outline:3px solid var(--ok);outline-offset:-3px}
+.v-css .fx-code{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap}
+
+/* ====================== 模块：JavaScript 核心 ====================== */
+.v-js{--accent:#8A6700;--accent-ink:#FFFFFF;--accent-soft:#F6EDCF}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-js{--accent:#E8C14A;--accent-ink:#1E1700;--accent-soft:#2F2810}}
+:root[data-theme="dark"] .v-js{--accent:#E8C14A;--accent-ink:#1E1700;--accent-soft:#2F2810}
+/* 真假值、顺序题、数组实验台 */
+.lesson .lab{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;margin:20px 0}
+.lesson .lab-head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.lesson .lab-head button,.lesson .lab-opts button{font:12.5px var(--f-mono);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.lesson .lab-head button[aria-pressed="true"],.lesson .lab-opts button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.lesson .lab-head .sp{flex:1}
+.lesson .lab-body{padding:14px 16px;display:grid;gap:10px}
+.lesson .lab-body p{margin:0;max-width:none;font-size:15px}
+.lesson .lab-code{margin:0;padding:12px 16px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+.lesson .lab-out{margin:0;padding:12px 16px;background:var(--bg);font:12.5px/1.65 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere;border-top:1px solid var(--line)}
+.v-js .tf{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px}
+.v-js .tf button{font:14px var(--f-mono);padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink);min-width:64px}
+.v-js .tf button.t{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.v-js .tf button.f{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.v-js .tf button small{display:block;font:600 11px var(--f-body)}
+.v-js .order-pick{display:flex;flex-wrap:wrap;gap:8px}
+.v-js .order-pick button{font:13px var(--f-mono);padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer;color:var(--ink)}
+.v-js .order-pick button:disabled{opacity:.35;cursor:default}
+.v-js .order-res{display:flex;flex-wrap:wrap;gap:6px;min-height:36px;align-items:center;font:13px var(--f-mono)}
+.v-js .order-res span{padding:6px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.v-js .order-res span.ok{background:var(--ok-soft);color:var(--ok)}
+.v-js .order-res span.no{background:var(--bad-soft);color:var(--bad)}
+.lesson .test-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+</style>
+</head>
+<body>
+
+<header class="site-bar">
+  <div class="site-bar-in">
+    <a class="brand" href="#home"><i></i>FeLearn</a>
+    <nav class="site-nav" id="siteNav" aria-label="学习站导航"></nav>
+  </div>
+</header>
+
+<!-- ====================== 首页：脑图 ====================== -->
+<section class="view v-home" data-view="home">
+<div class="wrap">
+  <header>
+    <p class="eyebrow">FeLearn · 7 天前端到全栈</p>
+    <h1>前端全栈脑图</h1>
+    <p class="lede">七条主干覆盖 HTML、CSS、JavaScript、浏览器与网络、框架、工程化和后端。每个节点标着建议在第几天学（D1–D7）。点节点看说明，点上方的天数只高亮当天要学的内容。已经上线的知识模块可以直接点进去学。</p>
+  </header>
+
+  <section class="mods-sec" aria-labelledby="modsTitle">
+    <h2 id="modsTitle">知识模块</h2>
+    <div class="mods" id="mods"></div>
+  </section>
+
+  <div class="toolbar">
+    <div class="days" id="days" role="group" aria-label="按天高亮"></div>
+    <div class="actions">
+      <button class="btn" id="expandAll" type="button">全部展开</button>
+      <button class="btn" id="collapseAll" type="button">只看主干</button>
+    </div>
+  </div>
+
+  <div class="detail" id="detail" aria-live="polite"></div>
+
+  <div class="mapbox"><ul class="tree" id="tree"></ul></div>
+
+  <section class="week">
+    <h2>一周学习路径</h2>
+    <p class="hint">每天大约 6–8 小时。前五天打前端地基，后两天接上后端并做出一个能上线的小项目。勾选“已学完”只保存在你自己的浏览器里。</p>
+    <div class="weekgrid" id="week"></div>
+  </section>
+</div>
+</section>
+
+<!-- ====================== 模块：HTML5 核心速通 ====================== -->
+<section class="view lesson v-html5" data-view="html5" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#skeleton"><span>01</span>页面骨架</a></li>
+      <li><a href="#anatomy"><span>02</span>元素与属性</a></li>
+      <li><a href="#text"><span>03</span>文本</a></li>
+      <li><a href="#links"><span>04</span>链接与图片</a></li>
+      <li><a href="#lists"><span>05</span>列表与表格</a></li>
+      <li><a href="#semantic"><span>06</span>语义化标签</a></li>
+      <li><a href="#forms"><span>07</span>表单</a></li>
+      <li><a href="#media"><span>08</span>多媒体</a></li>
+      <li><a href="#boxes"><span>09</span>块级与行内</a></li>
+      <li><a href="#read"><span>10</span>读懂完整页面</a></li>
+      <li><a href="#sheet"><span>11</span>标签速查</a></li>
+      <li><a href="#quiz"><span>12</span>自测</a></li>
+      <li><a href="#challenge"><span>13</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第一站</p>
+      <h1><span class="lt">&lt;</span>HTML5<span class="lt">/&gt;</span> 核心速通</h1>
+      <p class="lede">HTML 是网页的骨架，告诉浏览器"这里是标题、这里是图片、这里是一个表单"。这一页按学习顺序整理了 HTML5 最核心的知识。每个示例都能直接改代码，右侧立刻看到浏览器里的效果。</p>
+      <div class="stack" aria-label="网页的三层">
+        <div class="layer on"><span class="tag">HTML</span><b>结构 · 骨架</b><small>页面上有什么内容，分别是什么角色</small><code>&lt;button&gt;登录&lt;/button&gt;</code></div>
+        <div class="layer"><span class="tag">CSS</span><b>样式 · 外观</b><small>颜色、大小、位置、动画</small><code>button { color: red; }</code></div>
+        <div class="layer"><span class="tag">JavaScript</span><b>行为 · 交互</b><small>点击后发生什么、和后端通信</small><code>btn.onclick = login;</code></div>
+      </div>
+      <ul class="goals">
+        <li>看懂任何一个网页的 HTML 结构</li>
+        <li>用语义化标签搭出页面</li>
+        <li>写出能提交给后端的表单</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="skeleton">
+      <div class="chap-head"><span class="chap-num">01</span><h2>每个网页都有的骨架</h2></div>
+      <p class="sub">任何 HTML 文件都从这 12 行左右的模板开始。点击任意一行，查看它的作用。</p>
+      <div class="reader" data-reader="skeleton">
+        <div class="reader-bar"><span class="ed-title">index.html<small>点一行看解释</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="tip"><span class="lbl">记住</span><p>页面分两块：<code class="i">&lt;head&gt;</code> 写给浏览器和搜索引擎看（编码、标题、引入的文件），<code class="i">&lt;body&gt;</code> 写给用户看。用户在页面上看到的一切都在 body 里。</p></div>
+      <p>下面是同一份代码的可编辑版本。试着把 <code class="i">&lt;h1&gt;</code> 里的文字改成你的名字，或者再加一段 <code class="i">&lt;p&gt;</code>。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">试一试<small>改左边，右边实时更新</small></span></div>
+<textarea data-code><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的第一个网页</title>
+</head>
+<body>
+  <h1>你好，HTML5！</h1>
+  <p>这是我的第一个网页。</p>
+</body>
+</html></textarea>
+      </div>
+      <div class="tip warn"><span class="lbl">提示</span><p>在 VS Code 里新建 <code class="i">index.html</code>，输入 <code class="i">!</code> 再按 Tab，就会自动生成这套骨架。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="anatomy">
+      <div class="chap-head"><span class="chap-num">02</span><h2>元素、标签和属性</h2></div>
+      <p class="sub">看懂 HTML 代码，关键是能把一行代码拆成这几块。点击下面的按钮或代码片段。</p>
+      <div class="anatomy">
+        <div class="ana-code" id="anaCode"></div>
+        <div class="ana-legend" id="anaLegend"></div>
+        <div class="ana-info" id="anaInfo" aria-live="polite"></div>
+      </div>
+
+      <h3>空元素：没有内容，也没有结束标签</h3>
+      <p>有些元素天生不包内容，只写一个标签就够了，例如 <code class="i">&lt;img&gt;</code>、<code class="i">&lt;br&gt;</code>、<code class="i">&lt;hr&gt;</code>、<code class="i">&lt;input&gt;</code>、<code class="i">&lt;meta&gt;</code>、<code class="i">&lt;link&gt;</code>。写成 <code class="i">&lt;br /&gt;</code> 也可以，HTML5 里两种都对。</p>
+
+      <h3>嵌套：像括号一样成对关闭</h3>
+      <p>元素可以套元素，形成一棵"树"。先打开的后关闭，不能交叉。</p>
+      <div class="compare">
+        <div class="cmp good"><h5>✓ 正确嵌套</h5><pre><span class="t-tag">&lt;p&gt;</span>我<span class="t-tag">&lt;strong&gt;</span>很重要<span class="t-tag">&lt;/strong&gt;</span><span class="t-tag">&lt;/p&gt;</span></pre></div>
+        <div class="cmp bad"><h5>✗ 交叉嵌套</h5><pre><span class="t-tag">&lt;p&gt;</span>我<span class="t-tag">&lt;strong&gt;</span>很重要<span class="t-tag">&lt;/p&gt;</span><span class="t-tag">&lt;/strong&gt;</span></pre></div>
+      </div>
+
+      <h3>所有元素都能用的全局属性</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>属性</th><th>作用</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>id</td><td>元素的唯一名字，整页不能重复。用于锚点跳转、JS 获取元素</td><td><code class="i">id="login-form"</code></td></tr>
+          <tr><td>class</td><td>分类名，可以多个、可以重复。CSS 主要靠它选中元素</td><td><code class="i">class="btn btn-primary"</code></td></tr>
+          <tr><td>style</td><td>直接写行内样式（一般不推荐，样式应放 CSS 文件）</td><td><code class="i">style="color:red"</code></td></tr>
+          <tr><td>title</td><td>鼠标悬停时显示的提示文字</td><td><code class="i">title="点我登录"</code></td></tr>
+          <tr><td>hidden</td><td>隐藏元素</td><td><code class="i">&lt;p hidden&gt;</code></td></tr>
+          <tr><td>data-*</td><td>HTML5 新增：存放自定义数据，给 JS 读取</td><td><code class="i">data-user-id="42"</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>注释写法是 <code class="i">&lt;!-- 这是注释 --&gt;</code>，浏览器不会显示它，常用来给代码写说明。</p>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="text">
+      <div class="chap-head"><span class="chap-num">03</span><h2>文本：标题、段落与强调</h2></div>
+      <p class="sub">网页上大部分内容都是文字。下面这些标签覆盖了 90% 的场景。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">文本标签</span></div>
+<textarea data-code><h1>一级标题：页面主题，一页通常只有一个</h1>
+<h2>二级标题</h2>
+<h3>三级标题（最多到 h6）</h3>
+
+<p>段落用 p。这里有<strong>重要内容</strong>，也有<em>强调的语气</em>。</p>
+<p>第一行<br>用 br 换到第二行</p>
+
+<hr>
+
+<blockquote>引用一段别人的话。</blockquote>
+<p>行内代码：<code>console.log("hi")</code>，快捷键：<kbd>Ctrl</kbd> + <kbd>C</kbd></p>
+<p>原价 <del>¥99</del> 现价 <mark>¥59</mark>，H<sub>2</sub>O，2<sup>10</sup> = 1024</p>
+
+<p>写     很多     空格
+和换行，浏览器只显示成一个空格。</p>
+<pre>pre 里的   空格
+    和换行会原样保留</pre></textarea>
+      </div>
+      <div class="tip"><span class="lbl">要点</span><p>标题标签按<b>层级</b>选，不按大小选。想要小字体的一级标题，用 CSS 改字号，不要因为字小就用 h4。搜索引擎和读屏软件靠 h1~h6 理解文章结构。</p></div>
+      <div class="tip warn"><span class="lbl">易混</span><p><code class="i">&lt;strong&gt;</code> 表示"重要"，<code class="i">&lt;b&gt;</code> 只是加粗；<code class="i">&lt;em&gt;</code> 表示"强调语气"，<code class="i">&lt;i&gt;</code> 只是斜体。HTML5 推荐用有含义的 strong 和 em。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="links">
+      <div class="chap-head"><span class="chap-num">04</span><h2>链接与图片</h2></div>
+      <p class="sub">"超文本"里的"超"，指的就是链接。预览里点击链接，会提示它将跳转到哪里。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">a 和 img</span></div>
+<textarea data-code><a href="https://developer.mozilla.org/zh-CN/">MDN 文档（绝对路径）</a><br>
+<a href="about.html">关于我（相对路径）</a><br>
+<a href="https://github.com" target="_blank" rel="noopener">在新标签页打开</a><br>
+<a href="#pic">跳到本页 id="pic" 的位置</a><br>
+<a href="mailto:me@example.com">发邮件</a>
+
+<p>这张图片文件不存在，所以浏览器显示了 alt 文字：</p>
+<img src="images/cat.jpg" alt="一只趴在窗台上的橘猫" width="220">
+
+<figure id="pic">
+  <img src="images/chart.png" alt="2026 年每月销量柱状图" width="220">
+  <figcaption>图 1：带说明文字的图片，用 figure 包起来</figcaption>
+</figure></textarea>
+      </div>
+      <h3>a 标签的常用属性</h3>
+      <ul class="dots">
+        <li><code class="i">href</code>：要去的地址，必填。可以是网址、文件、<code class="i">#id</code>（页内跳转）、<code class="i">mailto:</code>、<code class="i">tel:</code>。</li>
+        <li><code class="i">target="_blank"</code>：在新标签页打开，通常搭配 <code class="i">rel="noopener"</code> 保证安全。</li>
+      </ul>
+      <h3>img 标签的常用属性</h3>
+      <ul class="dots">
+        <li><code class="i">src</code>：图片地址，必填。</li>
+        <li><code class="i">alt</code>：图片的文字描述。图片加载失败时显示，读屏软件会读出来，搜索引擎靠它理解图片。<b>每张图都应该写。</b></li>
+        <li><code class="i">width</code> / <code class="i">height</code>：宽高（单位像素，不用写 px）。只写一个会按比例缩放。</li>
+      </ul>
+      <h3>相对路径怎么写</h3>
+      <p>假设当前文件是 <code class="i">site/blog/post.html</code>：</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>含义</th><th>实际指向</th></tr></thead>
+        <tbody>
+          <tr><td>cat.jpg</td><td>同一个文件夹</td><td>site/blog/cat.jpg</td></tr>
+          <tr><td>./cat.jpg</td><td>同上，./ 表示当前文件夹</td><td>site/blog/cat.jpg</td></tr>
+          <tr><td>img/cat.jpg</td><td>当前文件夹下的子文件夹</td><td>site/blog/img/cat.jpg</td></tr>
+          <tr><td>../cat.jpg</td><td>上一级文件夹</td><td>site/cat.jpg</td></tr>
+          <tr><td>/cat.jpg</td><td>网站根目录（部署到服务器后才有意义）</td><td>域名/cat.jpg</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="lists">
+      <div class="chap-head"><span class="chap-num">05</span><h2>列表与表格</h2></div>
+      <p class="sub">导航菜单、商品列表、步骤说明，本质上都是列表。表格只用来展示二维数据，不要用它做页面布局。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">三种列表</span></div>
+<textarea data-code><h3>无序列表 ul（unordered list）</h3>
+<ul>
+  <li>HTML 负责结构</li>
+  <li>CSS 负责样式</li>
+  <li>JavaScript 负责交互</li>
+</ul>
+
+<h3>有序列表 ol（ordered list）</h3>
+<ol>
+  <li>写 HTML</li>
+  <li>加 CSS</li>
+  <li>写 JavaScript</li>
+</ol>
+
+<h3>描述列表 dl：术语 + 解释</h3>
+<dl>
+  <dt>HTML</dt>
+  <dd>超文本标记语言</dd>
+  <dt>CSS</dt>
+  <dd>层叠样式表</dd>
+</dl></textarea>
+      </div>
+      <div class="tip warn"><span class="lbl">规则</span><p><code class="i">&lt;ul&gt;</code> 和 <code class="i">&lt;ol&gt;</code> 的直接子元素只能是 <code class="i">&lt;li&gt;</code>。li 里面可以再放任何内容，包括另一个列表（多级菜单就是这样做的）。</p></div>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">表格</span><small class="cat-badge">试试把 rowspan 改成 1</small></div>
+<textarea data-code><style>
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #999; padding: 6px 12px; }
+</style>
+
+<table>
+  <caption>一周学习计划</caption>
+  <thead>
+    <tr><th>天</th><th>内容</th><th>产出</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>第 1 天</td><td>HTML5</td><td>个人名片页</td></tr>
+    <tr><td>第 2 天</td><td>CSS 基础</td><td rowspan="2">响应式主页</td></tr>
+    <tr><td>第 3 天</td><td>Flex 与 Grid 布局</td></tr>
+    <tr><td colspan="3">第 4 天起：JavaScript、后端、部署</td></tr>
+  </tbody>
+</table></textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>标签</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>table</td><td>整张表格</td></tr>
+          <tr><td>caption</td><td>表格标题</td></tr>
+          <tr><td>thead / tbody / tfoot</td><td>表头区 / 主体区 / 表尾区</td></tr>
+          <tr><td>tr</td><td>一行（table row）</td></tr>
+          <tr><td>th</td><td>表头单元格，默认加粗居中（table header）</td></tr>
+          <tr><td>td</td><td>普通单元格（table data）</td></tr>
+          <tr><td>colspan / rowspan</td><td>单元格横向 / 纵向合并几格</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="semantic">
+      <div class="chap-head"><span class="chap-num">06</span><h2>语义化标签：HTML5 最重要的变化</h2></div>
+      <p class="sub">以前整页都是 <code class="i">&lt;div&gt;</code>，看代码猜不出哪块是导航、哪块是正文。HTML5 新增了一组"有名字"的容器。点击左边的区块。</p>
+      <div class="sem">
+        <div class="mock" id="mock">
+          <div class="rg" data-k="header">&lt;header&gt;
+            <div class="rg" data-k="nav">&lt;nav&gt;<div class="bar s"></div></div>
+          </div>
+          <div class="rg" data-k="main">&lt;main&gt;
+            <div class="rg-row">
+              <div class="rg" data-k="article">&lt;article&gt;<div class="bar"></div><div class="bar s"></div>
+                <div class="rg" data-k="section">&lt;section&gt;<div class="bar"></div></div>
+                <div class="rg" data-k="section">&lt;section&gt;<div class="bar s"></div></div>
+              </div>
+              <div class="rg" data-k="aside">&lt;aside&gt;<div class="bar"></div><div class="bar s"></div></div>
+            </div>
+          </div>
+          <div class="rg" data-k="footer">&lt;footer&gt;<div class="bar s"></div></div>
+        </div>
+        <div class="sem-info" id="semInfo" aria-live="polite"></div>
+      </div>
+      <h3>同一个页面，两种写法</h3>
+      <div class="compare">
+        <div class="cmp bad"><h5>以前：div 一把梭</h5><pre><span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"header"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"menu"</span><span class="t-tag">&gt;</span>...<span class="t-tag">&lt;/div&gt;</span>
+<span class="t-tag">&lt;/div&gt;</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"content"</span><span class="t-tag">&gt;</span>...<span class="t-tag">&lt;/div&gt;</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">class</span>=<span class="t-val">"footer"</span><span class="t-tag">&gt;</span>...<span class="t-tag">&lt;/div&gt;</span></pre></div>
+        <div class="cmp good"><h5>HTML5：一眼看懂</h5><pre><span class="t-tag">&lt;header&gt;</span>
+  <span class="t-tag">&lt;nav&gt;</span>...<span class="t-tag">&lt;/nav&gt;</span>
+<span class="t-tag">&lt;/header&gt;</span>
+<span class="t-tag">&lt;main&gt;</span>...<span class="t-tag">&lt;/main&gt;</span>
+<span class="t-tag">&lt;footer&gt;</span>...<span class="t-tag">&lt;/footer&gt;</span></pre></div>
+      </div>
+      <p>语义化标签在外观上和 div 没有区别，好处在于：代码更好读、搜索引擎更懂你的页面（SEO）、读屏软件能让视障用户直接跳到导航或正文。打开下面的"标出元素"，看看每个标签占了哪块区域。</p>
+      <div class="editor" data-outline="on">
+        <div class="ed-bar"><span class="ed-title">一个博客页面</span></div>
+<textarea data-code><header>
+  <h1>Jim 的博客</h1>
+  <nav>
+    <a href="#">首页</a> | <a href="#">文章</a> | <a href="#">关于</a>
+  </nav>
+</header>
+
+<main>
+  <article>
+    <h2>我学 HTML5 的第一天</h2>
+    <p>发布于 <time datetime="2026-10-19">2026 年 10 月 19 日</time></p>
+    <section>
+      <h3>学到了什么</h3>
+      <p>语义化标签让代码一眼就能看懂。</p>
+    </section>
+  </article>
+
+  <aside>
+    <h3>相关推荐</h3>
+    <p>CSS 入门指南</p>
+  </aside>
+</main>
+
+<footer>
+  <p>© 2026 Jim</p>
+</footer></textarea>
+      </div>
+      <div class="tip"><span class="lbl">怎么选</span><p>先问"这块内容是什么"。是独立完整的一篇内容用 article；是一篇里的一个章节用 section；纯粹为了加样式、没有含义的包裹用 div（块）或 span（行内）。</p></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="forms">
+      <div class="chap-head"><span class="chap-num">07</span><h2>表单：前端和后端的接口</h2></div>
+      <p class="sub">登录、注册、搜索、下单都靠表单把用户输入交给后端。这一节和你之后写后端直接相关。</p>
+      <p>先空着点"提交"，看浏览器自带的校验提示；再填好所有必填项提交，预览会显示<b>会发送给后端的数据</b>。注意它们的键名来自哪个属性。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">注册表单</span><small class="cat-badge">HTML5 自带校验，不用写 JS</small></div>
+<textarea data-code><form action="/api/register" method="post">
+  <p>
+    <label for="name">姓名</label>
+    <input type="text" id="name" name="username" placeholder="请输入姓名" required>
+  </p>
+  <p>
+    <label for="email">邮箱</label>
+    <input type="email" id="email" name="email" placeholder="me@example.com" required>
+  </p>
+  <p>
+    <label for="pwd">密码</label>
+    <input type="password" id="pwd" name="password" minlength="6" required>
+  </p>
+  <p>
+    <label for="birthday">生日</label>
+    <input type="date" id="birthday" name="birthday">
+  </p>
+  <p>
+    <label for="level">前端熟练度</label>
+    <input type="range" id="level" name="level" min="0" max="10" value="3">
+  </p>
+  <p>
+    <label for="color">喜欢的颜色</label>
+    <input type="color" id="color" name="color" value="#c8421a">
+  </p>
+  <p>
+    方向：
+    <label><input type="radio" name="track" value="frontend" checked> 前端</label>
+    <label><input type="radio" name="track" value="backend"> 后端</label>
+  </p>
+  <p>
+    <label for="city">城市</label>
+    <select id="city" name="city">
+      <option value="">请选择</option>
+      <option value="bj">北京</option>
+      <option value="sh">上海</option>
+    </select>
+  </p>
+  <p>
+    <label for="bio">自我介绍</label><br>
+    <textarea id="bio" name="bio" rows="3" cols="30">&lt;/textarea>
+  </p>
+  <p>
+    <label><input type="checkbox" name="agree" required> 我已阅读并同意协议</label>
+  </p>
+  <button type="submit">注册</button>
+</form></textarea>
+      </div>
+      <h3>表单里最关键的四个属性</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>属性</th><th>写在哪</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>action</td><td>form</td><td>数据提交到哪个地址，通常是后端接口，如 <code class="i">/api/register</code></td></tr>
+          <tr><td>method</td><td>form</td><td><code class="i">get</code>：数据拼在网址后面（适合搜索）；<code class="i">post</code>：数据放在请求体里（适合登录注册）</td></tr>
+          <tr><td>name</td><td>input 等</td><td>提交时数据的<b>键名</b>。没有 name 的输入框不会被提交，后端也就收不到</td></tr>
+          <tr><td>id + for</td><td>input + label</td><td>label 的 for 等于 input 的 id，点文字就能聚焦输入框，读屏软件也能读出这个框是干什么的</td></tr>
+        </tbody>
+      </table></div>
+      <h3>HTML5 的 input 类型</h3>
+      <p>改一个 <code class="i">type</code>，浏览器就会给出对应的输入控件、手机键盘和格式校验。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>type</th><th>用途</th><th>HTML5 新增</th></tr></thead>
+        <tbody>
+          <tr><td>text</td><td>普通单行文本（默认值）</td><td></td></tr>
+          <tr><td>password</td><td>密码，输入显示为圆点</td><td></td></tr>
+          <tr><td>email</td><td>邮箱，自动校验格式</td><td>✓</td></tr>
+          <tr><td>number</td><td>数字，可配合 min / max / step</td><td>✓</td></tr>
+          <tr><td>tel</td><td>电话，手机上弹出数字键盘</td><td>✓</td></tr>
+          <tr><td>url</td><td>网址，自动校验格式</td><td>✓</td></tr>
+          <tr><td>search</td><td>搜索框</td><td>✓</td></tr>
+          <tr><td>date / time</td><td>日期 / 时间选择器</td><td>✓</td></tr>
+          <tr><td>range</td><td>滑块</td><td>✓</td></tr>
+          <tr><td>color</td><td>颜色选择器</td><td>✓</td></tr>
+          <tr><td>checkbox</td><td>多选框</td><td></td></tr>
+          <tr><td>radio</td><td>单选框，同一组的 name 必须相同</td><td></td></tr>
+          <tr><td>file</td><td>上传文件</td><td></td></tr>
+          <tr><td>hidden</td><td>隐藏字段，用户看不到但会被提交</td><td></td></tr>
+        </tbody>
+      </table></div>
+      <h3>常用校验与辅助属性</h3>
+      <p><code class="i">required</code> 必填、<code class="i">placeholder</code> 占位提示、<code class="i">minlength</code> / <code class="i">maxlength</code> 长度限制、<code class="i">min</code> / <code class="i">max</code> 数值范围、<code class="i">pattern</code> 正则校验、<code class="i">disabled</code> 禁用、<code class="i">readonly</code> 只读、<code class="i">autofocus</code> 自动聚焦、<code class="i">value</code> 默认值。</p>
+      <div class="tip warn"><span class="lbl">全栈提醒</span><p>前端校验只是为了用户体验，用户可以绕过它。后端收到数据后必须再校验一遍。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="media">
+      <div class="chap-head"><span class="chap-num">08</span><h2>多媒体：音频、视频和画布</h2></div>
+      <p class="sub">在 HTML5 之前，网页播放视频要装 Flash 插件。现在一个标签就够了。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">video、audio、canvas</span><small class="cat-badge">预览里没有真实音视频文件，只显示播放器外观</small></div>
+<textarea data-code><video src="movie.mp4" controls width="300" poster="cover.jpg">
+  你的浏览器不支持 video 标签。
+</video>
+
+<audio controls>
+  <source src="song.mp3" type="audio/mpeg">
+  <source src="song.ogg" type="audio/ogg">
+</audio>
+
+<p>canvas 是一块画布，用 JavaScript 在上面画图：</p>
+<canvas id="c" width="300" height="120"></canvas>
+<script>
+  const ctx = document.getElementById('c').getContext('2d');
+  ctx.fillStyle = '#c8421a';
+  ctx.fillRect(10, 10, 100, 100);
+  ctx.beginPath();
+  ctx.arc(200, 60, 45, 0, Math.PI * 2);
+  ctx.fillStyle = '#0e7a74';
+  ctx.fill();
+</script></textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>controls</td><td>显示播放、暂停、音量等控制条。不写就没有控制条</td></tr>
+          <tr><td>autoplay</td><td>自动播放。浏览器通常要求同时加 <code class="i">muted</code>（静音）才允许</td></tr>
+          <tr><td>loop</td><td>循环播放</td></tr>
+          <tr><td>poster</td><td>视频加载前显示的封面图</td></tr>
+          <tr><td>&lt;source&gt;</td><td>提供多个格式，浏览器从上到下选第一个能播的</td></tr>
+          <tr><td>&lt;iframe&gt;</td><td>在页面里嵌入另一个网页，比如地图、B 站视频</td></tr>
+          <tr><td>&lt;svg&gt;</td><td>矢量图形，放大不失真，常用于图标</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">知道名字即可</span><p>HTML5 还带来了一批 JavaScript 接口：本地存储 localStorage、拖放 Drag and Drop、地理定位 Geolocation、WebSocket 等。它们写在 JS 里，学 JavaScript 时再展开。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="boxes">
+      <div class="chap-head"><span class="chap-num">09</span><h2>块级元素与行内元素</h2></div>
+      <p class="sub">这是学 CSS 布局前必须分清的概念。蓝色是块级元素，橙色是行内元素。</p>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">两种元素的排列方式</span></div>
+<textarea data-code><style>
+  div, p, h2 { background: #dbe8ff; }
+  span, a, strong { background: #ffe1d4; }
+</style>
+
+<h2>块级元素：独占一行</h2>
+<div>div 的宽度默认撑满父元素</div>
+<p>p 也是块级元素。里面的 <span>span</span>、<a href="#">a</a>、<strong>strong</strong> 都是行内元素，它们挤在同一行，宽度由内容决定。</p>
+<p>按钮 <button>button</button> 和输入框 <input value="input"> 是行内块元素：排在同一行，但可以设置宽高。</p></textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>类型</th><th>表现</th><th>常见元素</th></tr></thead>
+        <tbody>
+          <tr><td>块级 block</td><td>独占一行，宽度默认 100%，能设宽高</td><td>div p h1~h6 ul ol li table form header main section footer</td></tr>
+          <tr><td>行内 inline</td><td>和别的元素排在一行，宽高由内容决定，设置宽高无效</td><td>span a strong em code label</td></tr>
+          <tr><td>行内块 inline-block</td><td>排在一行，但能设宽高</td><td>img input button select textarea</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">嵌套规则</span><p>块级元素可以包含行内元素，行内元素不要包含块级元素。特别注意：<code class="i">&lt;p&gt;</code> 里不能放 <code class="i">&lt;div&gt;</code> 或另一个 <code class="i">&lt;p&gt;</code>，浏览器会自动把 p 提前关闭，导致结构错乱。HTML5 中 <code class="i">&lt;a&gt;</code> 是例外，它可以包住一整块内容（比如一张商品卡片）。</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="read">
+      <div class="chap-head"><span class="chap-num">10</span><h2>读懂一个完整页面</h2></div>
+      <p class="sub">把前面学的串起来。这是一个真实项目里常见的个人主页结构，先自己读一遍，再点开每行核对。</p>
+      <div class="reader" data-reader="full">
+        <div class="reader-bar"><span class="ed-title">index.html<small>点一行看解释</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="tip"><span class="lbl">读代码的顺序</span><p>先看 head 了解页面引入了什么文件；再看 body 的第一层子元素（header / main / footer），弄清页面分几大块；最后再深入每块的细节。</p></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="sheet">
+      <div class="chap-head"><span class="chap-num">11</span><h2>标签速查表</h2></div>
+      <p class="sub">读代码遇到不认识的标签，回来搜一下。</p>
+      <div class="sheet-tools">
+        <input type="search" id="sheetQ" placeholder="搜索标签或用途，例如：图片、table" aria-label="搜索标签">
+        <div id="sheetCats" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>标签</th><th>用途</th><th>分类</th></tr></thead>
+        <tbody id="sheetBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：12 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。全对说明核心知识已经掌握。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">12</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="challenge">
+      <div class="chap-head"><span class="chap-num">13</span><h2>动手挑战：做一张个人名片页</h2></div>
+      <p class="sub">在下面的编辑器里，用今天学的标签写一张名片页。每完成一项，清单会自动打勾。你写的代码会保存在当前浏览器里。</p>
+      <ul class="checks" id="checks"></ul>
+      <div class="editor" id="challengeEd">
+        <div class="ed-bar"><span class="ed-title">my-card.html</span><span class="ed-tools"><button class="chip" type="button" id="showAnswer">看参考答案</button></span></div>
+<textarea data-code data-store="felearn-html5-challenge"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>我的名片</title>
+</head>
+<body>
+  <!-- 在这里写你的名片页 -->
+
+</body>
+</html></textarea>
+      </div>
+      <div id="doneBanner" class="done-banner" hidden>全部完成。你已经能独立写出一个结构完整、语义清晰的 HTML5 页面了，下一站是 CSS。</div>
+      <footer class="end">HTML5 核心速通 · FeLearn 一周全栈计划。想深入查某个标签，推荐 MDN 中文文档：developer.mozilla.org/zh-CN</footer>
+    </section>
+  </main>
+</div>
+</section>
+
+<!-- ====================== 模块：CSS 样式与布局 ====================== -->
+<section class="view lesson v-css" data-view="css" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#css-intro"><span>01</span>规则长什么样</a></li>
+      <li><a href="#css-selectors"><span>02</span>选择器</a></li>
+      <li><a href="#css-cascade"><span>03</span>层叠与优先级</a></li>
+      <li><a href="#css-box"><span>04</span>盒模型</a></li>
+      <li><a href="#css-text"><span>05</span>文字颜色单位</a></li>
+      <li><a href="#css-position"><span>06</span>display 与定位</a></li>
+      <li><a href="#css-flex"><span>07</span>Flexbox</a></li>
+      <li><a href="#css-grid"><span>08</span>Grid</a></li>
+      <li><a href="#css-responsive"><span>09</span>响应式</a></li>
+      <li><a href="#css-effects"><span>10</span>变量与动效</a></li>
+      <li><a href="#css-sheet"><span>11</span>属性速查</a></li>
+      <li><a href="#css-quiz"><span>12</span>自测</a></li>
+      <li><a href="#css-challenge"><span>13</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第二站</p>
+      <h1><span class="lt">{</span>CSS<span class="lt">}</span> 样式与布局</h1>
+      <p class="lede">HTML 决定页面上有什么，CSS 决定它们长什么样、排在哪里。这一页按学习顺序整理了 CSS 最核心的知识：选择器、优先级、盒模型、Flex、Grid 和响应式。大部分示例只需要改左边的 CSS，右边立刻看到效果。</p>
+      <div class="stack" aria-label="网页的三层">
+        <div class="layer"><span class="tag">HTML</span><b>结构 · 骨架</b><small>页面上有什么内容，分别是什么角色</small><code>&lt;button&gt;登录&lt;/button&gt;</code></div>
+        <div class="layer on"><span class="tag">CSS</span><b>样式 · 外观</b><small>颜色、大小、位置、动画</small><code>button { color: red; }</code></div>
+        <div class="layer"><span class="tag">JavaScript</span><b>行为 · 交互</b><small>点击后发生什么、和后端通信</small><code>btn.onclick = login;</code></div>
+      </div>
+      <ul class="goals">
+        <li>看懂任何一段 CSS 在做什么</li>
+        <li>用 Flex 和 Grid 排出常见布局</li>
+        <li>做出手机和电脑都好看的页面</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="css-intro">
+      <div class="chap-head"><span class="chap-num">01</span><h2>一条 CSS 规则长什么样</h2></div>
+      <p class="sub">所有 CSS 都是同一个句式：<b>选中谁</b>，然后<b>把它的某个属性改成某个值</b>。点击任意一行看解释。</p>
+      <div class="reader" data-mode="css">
+        <div class="reader-bar"><span class="ed-title">style.css<small>点一行看解释</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+
+      <h3>把 CSS 放进页面的三种写法</h3>
+      <div class="editor">
+        <div class="ed-bar"><span class="ed-title">三种写法</span><small class="cat-badge">试试删掉 style 属性</small></div>
+<textarea data-code><!-- 1. 外部样式表：真实项目最常用，写在 head 里 -->
+<!-- <link rel="stylesheet" href="style.css"> -->
+
+<!-- 2. 内部样式：写在 style 标签里 -->
+<style>
+  p { color: #2a62d6; }
+</style>
+
+<p>这段是蓝色，来自 style 标签。</p>
+
+<!-- 3. 行内样式：写在元素的 style 属性里 -->
+<p style="color: #c8421a;">这段是橙色，行内样式覆盖了 style 标签。</p></textarea>
+      </div>
+      <div class="tip"><span class="lbl">推荐</span><p>真实项目把 CSS 写在单独的 <code class="i">style.css</code> 里，用 <code class="i">&lt;link&gt;</code> 引入。结构和样式分开，多个页面能共用一份样式，浏览器也能缓存它。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="css-selectors">
+      <div class="chap-head"><span class="chap-num">02</span><h2>选择器：选中要改的元素</h2></div>
+      <p class="sub">下面的 HTML 已经固定好，只改左边的 CSS。把鼠标移到预览里的导航链接上，点一下输入框，看看伪类的效果。</p>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">常用选择器</span></div>
+        <template><nav class="menu">
+  <a href="#" class="active">首页</a>
+  <a href="#">文章</a>
+  <a href="#" data-new>新功能</a>
+</nav>
+<ul id="todo">
+  <li>学 HTML</li>
+  <li class="done">学 CSS</li>
+  <li>学 JavaScript</li>
+  <li>学后端</li>
+</ul>
+<p>段落里有一个 <a href="#">链接</a>。</p>
+<input type="text" placeholder="点我，看 :focus 的效果"></template>
+<textarea data-code>/* 元素选择器：所有 p */
+p { color: #555; }
+
+/* 类选择器：class="active" 的元素 */
+.active { font-weight: bold; color: #c8421a; }
+
+/* ID 选择器：id="todo" 的元素 */
+#todo { border-left: 4px solid #2a62d6; }
+
+/* 后代选择器：.menu 里面的所有 a */
+.menu a { margin-right: 12px; }
+
+/* 属性选择器：带 data-new 属性的元素 */
+[data-new] { background: #fff3c4; }
+
+/* 伪类：悬停、第几个、获得焦点 */
+.menu a:hover { text-decoration: underline wavy; }
+#todo li:nth-child(odd) { background: #eef3ff; }
+input:focus { outline: 3px solid #2a62d6; }
+
+/* 交集：既是 li 又有 class="done" */
+li.done { text-decoration: line-through; color: #999; }
+
+/* 伪元素：在每个 li 前面插入内容 */
+#todo li::before { content: "✓ "; color: #1d7a46; }</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>选中谁</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td>*</td><td>所有元素</td><td><code class="i">* { margin: 0; }</code></td></tr>
+          <tr><td>p</td><td>所有 p 元素</td><td><code class="i">h1 { font-size: 32px; }</code></td></tr>
+          <tr><td>.card</td><td>class 里有 card 的元素，最常用</td><td><code class="i">.btn { ... }</code></td></tr>
+          <tr><td>#app</td><td>id="app" 的那一个元素</td><td><code class="i">#app { ... }</code></td></tr>
+          <tr><td>A B</td><td>A 里面的所有 B（后代，隔几层都算）</td><td><code class="i">.nav a</code></td></tr>
+          <tr><td>A &gt; B</td><td>A 的直接子元素 B</td><td><code class="i">ul &gt; li</code></td></tr>
+          <tr><td>A + B</td><td>紧跟在 A 后面的那个兄弟 B</td><td><code class="i">h2 + p</code></td></tr>
+          <tr><td>A, B</td><td>A 和 B 都选，共用一组样式</td><td><code class="i">h1, h2 { ... }</code></td></tr>
+          <tr><td>[attr]</td><td>带某个属性的元素</td><td><code class="i">input[type="email"]</code></td></tr>
+          <tr><td>:hover :focus</td><td>鼠标悬停 / 获得焦点时</td><td><code class="i">a:hover</code></td></tr>
+          <tr><td>:nth-child(n)</td><td>第 n 个子元素，odd 奇数、even 偶数</td><td><code class="i">tr:nth-child(even)</code></td></tr>
+          <tr><td>::before ::after</td><td>在元素内容前 / 后插入一段，需配合 content</td><td><code class="i">.req::after { content: "*"; }</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">习惯</span><p>写样式主要用<b>类选择器</b>。给元素起一个说明用途的 class，比如 <code class="i">.card-title</code>，比层层嵌套的 <code class="i">div &gt; div &gt; span</code> 好读也好改。</p></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="css-cascade">
+      <div class="chap-head"><span class="chap-num">03</span><h2>层叠、继承与优先级</h2></div>
+      <p class="sub">CSS 的全称是“层叠样式表”。同一个元素被好几条规则同时命中、而且改的是同一个属性时，浏览器按下面的顺序决定听谁的。</p>
+      <ol class="steps">
+        <li><b>!important</b> 最优先（尽量别用）。</li>
+        <li>其次比<b>优先级</b>：行内 style &gt; ID &gt; 类 / 属性 / 伪类 &gt; 元素 / 伪元素。</li>
+        <li>优先级一样，<b>后写的</b>覆盖先写的。</li>
+      </ol>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">这段字最后是什么颜色？</span></div>
+        <template><p id="intro" class="lead">这段文字最后是什么颜色？</p></template>
+<textarea data-code>p      { color: green; }
+.lead  { color: orange; }
+#intro { color: blue; }
+p      { color: red; }  /* 后写，但优先级最低，输了 */
+
+/* 试试：
+   1. 删掉 #intro 那一行，会变成什么颜色？
+   2. 在第一行 green 后面加上 !important */</textarea>
+      </div>
+
+      <h3>优先级计算器</h3>
+      <p>优先级是三个数字 <b>(ID 数, 类数, 元素数)</b>，从左往右逐位比较，左边的一位大就直接赢，不会“进位”。输入两个选择器比一比。</p>
+      <div class="spec" id="cssSpec">
+        <div class="spec-row"><label for="specA">A</label><input id="specA" spellcheck="false" autocomplete="off"><div class="spec-n" data-for="A"></div></div>
+        <div class="spec-row"><label for="specB">B</label><input id="specB" spellcheck="false" autocomplete="off"><div class="spec-n" data-for="B"></div></div>
+        <p class="spec-verdict" aria-live="polite"></p>
+        <div class="spec-presets"><span>换一组：</span></div>
+      </div>
+
+      <h3>继承：有些属性会传给子元素</h3>
+      <p>给 <code class="i">body</code> 设置 <code class="i">color</code> 和 <code class="i">font-family</code>，整页文字都会跟着变，因为<b>文字类属性</b>（color、font-*、line-height、text-align 等）会被子元素继承。<b>盒子类属性</b>（width、padding、margin、border、background 等）不会继承，否则每一层都会多出一圈边框。</p>
+      <div class="tip warn"><span class="lbl">避坑</span><p>样式不生效时，打开浏览器开发者工具（F12）的 Elements 面板，选中元素看右侧 Styles：被划掉的那条就是“输了”的规则，上面那条是赢家。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="css-box">
+      <div class="chap-head"><span class="chap-num">04</span><h2>盒模型：每个元素都是一个盒子</h2></div>
+      <p class="sub">从里到外依次是内容 content、内边距 padding、边框 border、外边距 margin。拖动滑块，看盒子实际占多宽。</p>
+      <div class="bm" id="cssBox">
+        <div class="bm-ctrl"></div>
+        <div class="bm-stage"><div class="bm-l bm-m"><span>margin</span><div class="bm-l bm-b"><span>border</span><div class="bm-l bm-p"><span>padding</span><div class="bm-c">content</div></div></div></div></div>
+        <pre class="bm-code"></pre>
+        <p class="bm-sum" aria-live="polite"></p>
+      </div>
+      <div class="tip"><span class="lbl">几乎每个项目都写</span><p><code class="i wrap">*, *::before, *::after { box-sizing: border-box; }</code>。这样你写的 <code class="i">width</code> 就是盒子最终的宽度，加 padding 和 border 不会把盒子撑大，算布局轻松很多。</p></div>
+      <h3>四个方向的简写</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td>padding: 10px</td><td>上下左右都是 10px</td></tr>
+          <tr><td>padding: 10px 20px</td><td>上下 10px，左右 20px</td></tr>
+          <tr><td>padding: 10px 20px 30px</td><td>上 10px，左右 20px，下 30px</td></tr>
+          <tr><td>padding: 1px 2px 3px 4px</td><td>上、右、下、左，按顺时针</td></tr>
+          <tr><td>padding-top: 10px</td><td>只设置一个方向，同理还有 -right、-bottom、-left</td></tr>
+          <tr><td>margin: 0 auto</td><td>上下 0、左右自动：有固定宽度的块级元素会<b>水平居中</b></td></tr>
+          <tr><td>border: 1px solid #ccc</td><td>边框：粗细、样式（solid 实线、dashed 虚线）、颜色</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">外边距合并</span><p>上下相邻的两个块级元素，一个 <code class="i">margin-bottom: 20px</code>、一个 <code class="i">margin-top: 30px</code>，它们之间的距离是 30px 而不是 50px，取较大的那个。左右方向不会合并，Flex 和 Grid 的子元素之间也不会合并。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="css-text">
+      <div class="chap-head"><span class="chap-num">05</span><h2>文字、颜色与单位</h2></div>
+      <p class="sub">页面大部分是文字。字号、行高、颜色调对了，页面就已经好看一半。</p>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">一张文章卡片</span></div>
+        <template><article class="post">
+  <h2>CSS 让文字更好读</h2>
+  <p class="meta">2026 年 10 月 19 日 · 阅读 3 分钟</p>
+  <p>正文的字号、行高和颜色，决定了读起来累不累。一般正文 16px、行高 1.6 到 1.8 最舒服。</p>
+  <a href="#">继续阅读 →</a>
+</article></template>
+<textarea data-code>.post {
+  font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1d2433;
+  max-width: 32em;
+  background: #f6f8fb;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+.post h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 .25em;
+}
+.meta {
+  font-size: 14px;
+  color: rgb(91 101 119);
+}
+.post p {
+  line-height: 1.75;
+}
+.post a {
+  color: hsl(222 66% 50%);
+  text-decoration: none;
+  font-weight: 600;
+}</textarea>
+      </div>
+      <h3>颜色的写法</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>red</td><td>英文关键字，适合临时调试</td></tr>
+          <tr><td>#2a62d6</td><td>十六进制，红绿蓝各两位，设计稿里最常见</td></tr>
+          <tr><td>rgb(42 98 214)</td><td>红绿蓝，每个 0–255</td></tr>
+          <tr><td>rgb(0 0 0 / .5)</td><td>斜杠后面是透明度，0 全透明，1 不透明</td></tr>
+          <tr><td>hsl(222 66% 50%)</td><td>色相、饱和度、亮度。调深浅只改最后一个数，做配色很方便</td></tr>
+        </tbody>
+      </table></div>
+      <h3>常用单位</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>单位</th><th>相对谁</th><th>常用在</th></tr></thead>
+        <tbody>
+          <tr><td>px</td><td>固定像素</td><td>边框、圆角、小间距</td></tr>
+          <tr><td>%</td><td>父元素的尺寸</td><td>宽度，比如 <code class="i">width: 50%</code></td></tr>
+          <tr><td>em</td><td>当前元素的字号</td><td>和文字大小挂钩的间距</td></tr>
+          <tr><td>rem</td><td>根元素 html 的字号（默认 16px）</td><td>字号、全局间距，最推荐</td></tr>
+          <tr><td>vw / vh</td><td>视口宽 / 高的 1%</td><td>全屏区块，比如 <code class="i">min-height: 100vh</code></td></tr>
+          <tr><td>fr</td><td>Grid 里剩余空间的份数</td><td><code class="i">grid-template-columns: 1fr 2fr</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="css-position">
+      <div class="chap-head"><span class="chap-num">06</span><h2>display 与定位</h2></div>
+      <p class="sub">HTML 那一站学过块级和行内元素。<code class="i">display</code> 可以随时改变元素的排列方式，<code class="i">position</code> 可以把元素放到指定位置。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>display</th><th>效果</th></tr></thead>
+        <tbody>
+          <tr><td>block</td><td>独占一行，能设宽高</td></tr>
+          <tr><td>inline</td><td>排在一行，宽高由内容决定</td></tr>
+          <tr><td>inline-block</td><td>排在一行，又能设宽高。按钮、标签常用</td></tr>
+          <tr><td>none</td><td>隐藏，而且不占位置（<code class="i">visibility: hidden</code> 也隐藏，但还占着位置）</td></tr>
+          <tr><td>flex</td><td>子元素按 Flex 规则排列，见第 07 节</td></tr>
+          <tr><td>grid</td><td>子元素按网格排列，见第 08 节</td></tr>
+        </tbody>
+      </table></div>
+      <h3>定位：把角标钉在卡片右上角</h3>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">relative + absolute</span><small class="cat-badge">试试删掉 .card 的 position</small></div>
+        <template><div class="card">
+  <span class="badge">NEW</span>
+  <h3>商品卡片</h3>
+  <p>角标用 absolute 定位到卡片右上角。</p>
+</div></template>
+<textarea data-code>.card {
+  position: relative;  /* 让自己成为子元素定位的参照物 */
+  width: 220px;
+  margin: 16px;
+  padding: 16px;
+  border: 1px solid #ccd3e0;
+  border-radius: 10px;
+}
+.badge {
+  position: absolute;  /* 脱离正常排列，相对最近的“已定位”祖先摆放 */
+  top: -10px;
+  right: -10px;
+  background: #c8421a;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>position</th><th>效果</th><th>典型用途</th></tr></thead>
+        <tbody>
+          <tr><td>static</td><td>默认值，正常排列，top/left 无效</td><td></td></tr>
+          <tr><td>relative</td><td>相对自己原来的位置偏移，原位置仍然占着</td><td>给 absolute 子元素当参照物</td></tr>
+          <tr><td>absolute</td><td>脱离正常排列，相对最近的非 static 祖先定位</td><td>角标、下拉菜单、弹出提示</td></tr>
+          <tr><td>fixed</td><td>相对浏览器窗口定位，滚动也不动</td><td>回到顶部按钮、悬浮客服</td></tr>
+          <tr><td>sticky</td><td>平时正常排列，滚到指定位置就“粘”住</td><td>吸顶导航、表头</td></tr>
+        </tbody>
+      </table></div>
+      <p>元素叠在一起时，用 <code class="i">z-index</code> 决定谁在上面，数字大的在上，只对定位过的元素有效。</p>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="css-flex">
+      <div class="chap-head"><span class="chap-num">07</span><h2>Flexbox：一维排列的首选</h2></div>
+      <p class="sub">给父元素写上 <code class="i">display: flex</code>，它的直接子元素就会排成一行。导航栏、按钮组、卡片一行排开，基本都用它。点下面的按钮，观察每个属性的作用。</p>
+      <div class="fx" id="cssFlex">
+        <div class="fx-ctrl"></div>
+        <p class="fx-tip" aria-live="polite"></p>
+        <div class="fx-stage"><div class="fx-box"></div></div>
+        <pre class="fx-code"></pre>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>属性</th><th>写在</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>display: flex</td><td>父元素</td><td>开启 Flex 布局</td></tr>
+          <tr><td>flex-direction</td><td>父元素</td><td>主轴方向：row 横排，column 竖排</td></tr>
+          <tr><td>justify-content</td><td>父元素</td><td>主轴上怎么分布</td></tr>
+          <tr><td>align-items</td><td>父元素</td><td>交叉轴上怎么对齐。<code class="i">justify-content: center</code> 加 <code class="i">align-items: center</code> 就是水平垂直居中</td></tr>
+          <tr><td>flex-wrap</td><td>父元素</td><td>放不下时是否换行</td></tr>
+          <tr><td>gap</td><td>父元素</td><td>子元素之间的间距</td></tr>
+          <tr><td>flex: 1</td><td>子元素</td><td>占满剩余空间；几个子元素都写 1 就平分</td></tr>
+          <tr><td>align-self</td><td>子元素</td><td>单独覆盖自己的 align-items</td></tr>
+          <tr><td>order</td><td>子元素</td><td>改变显示顺序，不用改 HTML</td></tr>
+        </tbody>
+      </table></div>
+      <h3>实战：一个导航栏</h3>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">导航栏</span></div>
+        <template><header class="nav">
+  <strong class="logo">FeLearn</strong>
+  <nav class="links">
+    <a href="#">首页</a>
+    <a href="#">课程</a>
+    <a href="#">关于</a>
+  </nav>
+  <button>登录</button>
+</header></template>
+<textarea data-code>.nav {
+  display: flex;
+  align-items: center;             /* 垂直居中 */
+  justify-content: space-between;  /* 两端对齐 */
+  gap: 16px;
+  padding: 12px 16px;
+  background: #18202e;
+  color: white;
+  border-radius: 10px;
+}
+.links {
+  display: flex;
+  gap: 16px;
+}
+.links a {
+  color: #cfd8e8;
+  text-decoration: none;
+}
+/* 试试：让导航链接挨着 logo，按钮推到最右边
+   .links { flex: 1; } */</textarea>
+      </div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="css-grid">
+      <div class="chap-head"><span class="chap-num">08</span><h2>Grid：二维网格布局</h2></div>
+      <p class="sub">Flex 管一行或一列，Grid 同时管行和列。整页的大框架、卡片墙、相册，用 Grid 最省事。</p>
+      <div class="editor" data-mode="css" data-resize="600">
+        <div class="ed-bar"><span class="ed-title">自动换行的卡片墙</span><small class="cat-badge">拖动预览宽度，列数自动变</small></div>
+        <template><div class="grid">
+  <div>1</div><div>2</div><div>3</div><div>4</div>
+  <div>5</div><div>6</div><div>7</div><div>8</div>
+</div></template>
+<textarea data-code>.grid {
+  display: grid;
+  /* 每列至少 120px，放得下几列就放几列，剩余空间平分 */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.grid div {
+  background: #e2eafb;
+  border-radius: 8px;
+  padding: 24px 0;
+  text-align: center;
+  font-weight: 700;
+}
+/* 试试改成：grid-template-columns: 1fr 2fr 1fr; */</textarea>
+      </div>
+      <h3>用区域名字画出页面框架</h3>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">grid-template-areas</span><small class="cat-badge">试试把 aside 挪到左边</small></div>
+        <template><div class="page">
+  <header>header</header>
+  <nav>nav</nav>
+  <main>main</main>
+  <aside>aside</aside>
+  <footer>footer</footer>
+</div></template>
+<textarea data-code>.page {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header header"
+    "nav    main   aside"
+    "footer footer footer";
+  gap: 8px;
+  min-height: 240px;
+}
+header { grid-area: header; }
+nav    { grid-area: nav; }
+main   { grid-area: main; }
+aside  { grid-area: aside; }
+footer { grid-area: footer; }
+
+.page > * {
+  background: #e2eafb;
+  border-radius: 6px;
+  padding: 8px;
+  font: 600 13px monospace;
+}</textarea>
+      </div>
+      <div class="tip"><span class="lbl">怎么选</span><p>内容沿一个方向排、数量不固定（导航链接、标签、按钮组）用 <b>Flex</b>；要行列对齐的二维结构（页面框架、卡片墙、表单两栏）用 <b>Grid</b>。两者经常嵌套使用：Grid 搭框架，框架里的小组件用 Flex。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="css-responsive">
+      <div class="chap-head"><span class="chap-num">09</span><h2>响应式：一套代码适配手机和电脑</h2></div>
+      <p class="sub">媒体查询 <code class="i">@media</code> 让一段 CSS 只在满足条件时生效。拖动“预览宽度”滑块，看卡片从一列变成三列。</p>
+      <div class="editor" data-mode="css" data-resize="360">
+        <div class="ed-bar"><span class="ed-title">移动优先的三栏卡片</span></div>
+        <template><div class="cards">
+  <div class="card">卡片 1</div>
+  <div class="card">卡片 2</div>
+  <div class="card">卡片 3</div>
+</div></template>
+<textarea data-code>/* 移动优先：先写手机上的样式 */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.card {
+  background: #e2eafb;
+  padding: 24px;
+  border-radius: 10px;
+  font-size: clamp(14px, 3vw, 20px); /* 字号随宽度变，但不小于 14、不大于 20 */
+}
+
+/* 宽度 ≥ 600px：两列 */
+@media (min-width: 600px) {
+  .cards { grid-template-columns: 1fr 1fr; }
+}
+
+/* 宽度 ≥ 800px：三列 */
+@media (min-width: 800px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
+}</textarea>
+      </div>
+      <ul class="dots">
+        <li><b>移动优先</b>：先写手机样式，再用 <code class="i">min-width</code> 给大屏幕加样式。手机上加载的 CSS 更少，思路也更清楚。</li>
+        <li>常用断点：<code class="i">640px</code> 大手机、<code class="i">768px</code> 平板、<code class="i">1024px</code> 笔记本、<code class="i">1280px</code> 台式机。按内容需要定，不必死记。</li>
+        <li>图片自适应：<code class="i">img { max-width: 100%; height: auto; }</code>，图片永远不会撑破容器。</li>
+        <li>别忘了 HTML 里的 <a href="#skeleton">viewport meta 标签</a>，没有它手机会按电脑宽度缩小显示，媒体查询也不准。</li>
+      </ul>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="css-effects">
+      <div class="chap-head"><span class="chap-num">10</span><h2>CSS 变量、过渡与动画</h2></div>
+      <p class="sub">变量让配色集中管理，过渡和动画让界面有反馈感。把鼠标移到预览里的按钮上。</p>
+      <div class="editor" data-mode="css">
+        <div class="ed-bar"><span class="ed-title">按钮与动画</span><small class="cat-badge">试试把 --brand 改成 #c8421a</small></div>
+        <template><button class="btn">悬停我</button>
+<button class="btn ghost">次要按钮</button>
+<div class="dot"></div></template>
+<textarea data-code>:root {
+  --brand: #2a62d6;   /* 定义变量 */
+  --radius: 10px;
+}
+.btn {
+  background: var(--brand);   /* 使用变量 */
+  color: white;
+  border: 2px solid var(--brand);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgb(42 98 214 / .35);
+}
+.btn.ghost {
+  background: transparent;
+  color: var(--brand);
+}
+.dot {
+  width: 24px;
+  height: 24px;
+  margin-top: 20px;
+  border-radius: 50%;
+  background: var(--brand);
+  animation: slide 1s ease-in-out infinite alternate;
+}
+@keyframes slide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(200px); }
+}</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>--name: 值</td><td>定义 CSS 变量，一般写在 <code class="i">:root</code> 里全局可用。暗色模式就是换一组变量值</td></tr>
+          <tr><td>var(--name)</td><td>使用变量</td></tr>
+          <tr><td>transition</td><td>属性变化时平滑过渡：<code class="i">transition: 属性 时长</code></td></tr>
+          <tr><td>transform</td><td>移动 translate、缩放 scale、旋转 rotate，不影响周围元素的排列</td></tr>
+          <tr><td>@keyframes + animation</td><td>定义并播放一段关键帧动画</td></tr>
+          <tr><td>box-shadow</td><td>阴影：x 偏移、y 偏移、模糊、颜色</td></tr>
+          <tr><td>opacity</td><td>不透明度，0 到 1</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">性能</span><p>动画尽量只改 <code class="i">transform</code> 和 <code class="i">opacity</code>。改 width、top 这类属性会让浏览器每一帧重新计算布局，容易卡顿。</p></div>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="css-sheet">
+      <div class="chap-head"><span class="chap-num">11</span><h2>常用属性速查</h2></div>
+      <p class="sub">写样式时忘了属性名，回来搜一下。</p>
+      <div class="sheet-tools">
+        <input type="search" id="cssSheetQ" placeholder="搜索属性或用途，例如：圆角、居中" aria-label="搜索 CSS 属性">
+        <div id="cssSheetCats" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>属性</th><th>用途</th><th>分类</th></tr></thead>
+        <tbody id="cssSheetBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="css-quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：12 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">12</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="css-challenge">
+      <div class="chap-head"><span class="chap-num">13</span><h2>动手挑战：给个人主页穿上衣服</h2></div>
+      <p class="sub">HTML 已经写好了：一个页头和三张卡片。在下面只写 CSS，把它排成宽屏三列、窄屏一列的样子。清单会在 900px 和 400px 两种宽度下自动检查，你写的 CSS 会保存在当前浏览器里。</p>
+      <ul class="checks" id="cssChecks"></ul>
+      <details class="tpl-view"><summary>查看这道题的 HTML</summary><pre id="cssChTpl"></pre></details>
+      <div class="editor" id="cssChallengeEd" data-mode="css" data-resize>
+        <div class="ed-bar"><span class="ed-title">my-home.css</span><span class="ed-tools"><button class="chip" type="button" id="cssShowAnswer">看参考答案</button></span></div>
+        <template><header class="site-header">
+  <a class="logo" href="#">Jim.dev</a>
+  <nav class="links">
+    <a href="#">首页</a>
+    <a href="#">作品</a>
+    <a href="#">联系</a>
+  </nav>
+</header>
+<main class="cards">
+  <article class="card">
+    <h2>HTML5</h2>
+    <p>页面骨架与语义化标签。</p>
+  </article>
+  <article class="card">
+    <h2>CSS3</h2>
+    <p>样式、盒模型与布局。</p>
+  </article>
+  <article class="card">
+    <h2>JavaScript</h2>
+    <p>交互与数据请求。</p>
+  </article>
+</main></template>
+<textarea data-code data-store="felearn-css-challenge">/* 页面结构已经写好（点上方“查看这道题的 HTML”），这里只写 CSS */
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 16px;
+}
+</textarea>
+      </div>
+      <div id="cssDoneBanner" class="done-banner" hidden>全部完成。你已经能用 Flex、Grid 和媒体查询做出一个响应式页面了，下一站是 JavaScript。</div>
+      <footer class="end">CSS 样式与布局 · FeLearn 一周全栈计划。想深入查某个属性，推荐 MDN 中文文档：developer.mozilla.org/zh-CN/docs/Web/CSS</footer>
+    </section>
+  </main>
+</div>
+</section>
+
+<!-- ====================== 模块：JavaScript 核心 ====================== -->
+<section class="view lesson v-js" data-view="js" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#js-start"><span>01</span>第一行 JS</a></li>
+      <li><a href="#js-vars"><span>02</span>变量与类型</a></li>
+      <li><a href="#js-logic"><span>03</span>判断与真假</a></li>
+      <li><a href="#js-loops"><span>04</span>循环</a></li>
+      <li><a href="#js-func"><span>05</span>函数与闭包</a></li>
+      <li><a href="#js-data"><span>06</span>数组与对象</a></li>
+      <li><a href="#js-class"><span>07</span>类与模块</a></li>
+      <li><a href="#js-dom"><span>08</span>DOM 与事件</a></li>
+      <li><a href="#js-async"><span>09</span>异步与 fetch</a></li>
+      <li><a href="#js-errors"><span>10</span>错误与调试</a></li>
+      <li><a href="#js-sheet"><span>11</span>方法速查</a></li>
+      <li><a href="#js-quiz"><span>12</span>自测</a></li>
+      <li><a href="#js-challenge"><span>13</span>动手挑战</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 第三站</p>
+      <h1><span class="lt">( )=&gt;</span> JavaScript 核心</h1>
+      <p class="lede">HTML 搭骨架，CSS 穿衣服，JavaScript 让页面动起来：响应点击、修改内容、向后端要数据。它也是你后面写 React 和 Node.js 后端用的同一门语言。这一页的代码都能直接运行，点<b>▶ 运行</b>或按 Ctrl + Enter，结果显示在右边的控制台里。</p>
+      <div class="stack" aria-label="网页的三层">
+        <div class="layer"><span class="tag">HTML</span><b>结构 · 骨架</b><small>页面上有什么内容，分别是什么角色</small><code>&lt;button&gt;登录&lt;/button&gt;</code></div>
+        <div class="layer"><span class="tag">CSS</span><b>样式 · 外观</b><small>颜色、大小、位置、动画</small><code>button { color: red; }</code></div>
+        <div class="layer on"><span class="tag">JavaScript</span><b>行为 · 交互</b><small>点击后发生什么、和后端通信</small><code>btn.onclick = login;</code></div>
+      </div>
+      <ul class="goals">
+        <li>读懂并写出常见的 JS 逻辑</li>
+        <li>用 DOM 和事件做出可交互的页面</li>
+        <li>用 async / await 向后端请求数据</li>
+      </ul>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="js-start">
+      <div class="chap-head"><span class="chap-num">01</span><h2>第一行 JavaScript</h2></div>
+      <p class="sub">浏览器里自带 JS 引擎。最常用的调试手段是 <code class="i">console.log()</code>，把任何值打印到控制台。改一改再点运行。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">hello.js</span></div>
+<textarea data-code>console.log("你好，JavaScript！");
+console.log(1 + 2 * 3);
+console.log("拼接" + "字符串", 42, true);
+
+// 双斜杠是单行注释，/* */ 是多行注释
+const name = "Jim";
+console.log(`模板字符串：你好，${name}，今天是学 JS 的第 ${3} 天`);</textarea>
+      </div>
+      <h3>把 JS 放进网页</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>写法</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>&lt;script src="app.js" defer&gt;</td><td>最推荐。写在 head 里，<code class="i">defer</code> 让脚本等 HTML 解析完再执行，不会阻塞页面显示，也能拿到所有元素</td></tr>
+          <tr><td>&lt;script type="module" src="main.js"&gt;</td><td>ES 模块，可以用 import / export，默认就是 defer。Vite 项目都这么写</td></tr>
+          <tr><td>&lt;script&gt;...&lt;/script&gt;</td><td>直接写在页面里，适合几行小代码。放在 body 最后才能拿到前面的元素</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">随手试</span><p>在任意网页按 <b>F12</b> 打开开发者工具，切到 Console 面板，可以直接输入 JS 回车执行，是最快的试验场。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="js-vars">
+      <div class="chap-head"><span class="chap-num">02</span><h2>变量与数据类型</h2></div>
+      <p class="sub">变量是给值起的名字。现代 JS 只用两个关键字：不会重新赋值用 <code class="i">const</code>，会变的用 <code class="i">let</code>。<code class="i">var</code> 是旧写法，有作用域上的坑，不要再用。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">变量与 typeof</span><small class="cat-badge">试试给 PI 重新赋值</small></div>
+<textarea data-code>const PI = 3.14;        // 常量：不能再赋值
+let count = 0;          // 变量：可以改
+count = count + 1;
+count += 1;
+count++;
+console.log("count =", count);
+
+// 七种基本类型 + 对象
+console.log(typeof 42);          // number：整数小数都是它
+console.log(typeof "你好");       // string
+console.log(typeof true);        // boolean
+console.log(typeof undefined);   // undefined：声明了但没赋值
+console.log(typeof null);        // "object"——历史遗留的 bug，记住 null 表示“空”
+console.log(typeof 10n);         // bigint：超大整数
+console.log(typeof Symbol());    // symbol：唯一标识
+console.log(typeof { a: 1 }, typeof [1, 2], typeof function () {});
+
+// 类型转换
+console.log(Number("42") + 1, String(42) + 1, parseInt("12px"));
+console.log(0.1 + 0.2);  // 浮点数精度问题，算钱时要小心</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>类型</th><th>例子</th><th>要点</th></tr></thead>
+        <tbody>
+          <tr><td>number</td><td><code class="i">42</code> <code class="i">3.14</code> <code class="i">NaN</code></td><td>整数小数同一种类型。<code class="i">NaN</code> 表示“不是数字”，它和谁都不相等，连自己也不等</td></tr>
+          <tr><td>string</td><td><code class="i">"双引号"</code> <code class="i">'单引号'</code> <code class="i">`反引号`</code></td><td>反引号是模板字符串，能换行、能用 <code class="i">${}</code> 插值</td></tr>
+          <tr><td>boolean</td><td><code class="i">true</code> <code class="i">false</code></td><td>判断条件的结果</td></tr>
+          <tr><td>undefined</td><td><code class="i">let x;</code></td><td>“还没有值”，系统给的</td></tr>
+          <tr><td>null</td><td><code class="i">let user = null;</code></td><td>“空”，你主动设置的</td></tr>
+          <tr><td>object</td><td><code class="i">{}</code> <code class="i">[]</code> 函数</td><td>对象、数组、函数都是引用类型：赋值时复制的是“地址”，不是内容</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip warn"><span class="lbl">const 不等于不可变</span><p><code class="i">const user = { age: 1 }</code> 之后，<code class="i">user = {}</code> 会报错，但 <code class="i">user.age = 2</code> 可以。const 只保证这个名字一直指向同一个对象。</p></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="js-logic">
+      <div class="chap-head"><span class="chap-num">03</span><h2>判断：比较、真假值与条件</h2></div>
+      <p class="sub">比较永远用三个等号 <code class="i">===</code>。两个等号 <code class="i">==</code> 会先偷偷转换类型，<code class="i">0 == ""</code> 居然是 true。</p>
+      <h3>真假值：放进 if 里会被当成什么？</h3>
+      <p>if 的条件不一定是布尔值，JS 会把它转换一下。只有 6 个值会被当成 false（叫 falsy），其他全是 true。先猜，再点开看。</p>
+      <div class="lab" id="jsTruthy">
+        <div class="lab-head"><span>点一个值看它是真还是假</span><span class="sp"></span><button type="button" data-all>全部揭晓</button><button type="button" data-reset>重来</button></div>
+        <div class="tf"></div>
+        <div class="lab-body"><p class="tf-msg" aria-live="polite">记住这 6 个假值：<code class="i">false</code> <code class="i">0</code> <code class="i">""</code> <code class="i">null</code> <code class="i">undefined</code> <code class="i">NaN</code>。</p></div>
+      </div>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">条件写法</span><small class="cat-badge">改改 score 和 user 再运行</small></div>
+<textarea data-code>const score = 82;
+
+if (score >= 90) {
+  console.log("优秀");
+} else if (score >= 60) {
+  console.log("及格");
+} else {
+  console.log("加油");
+}
+
+// 三元运算符：条件 ? 是 : 否
+const label = score >= 60 ? "通过" : "未通过";
+console.log(label);
+
+// && 并且，|| 或者，! 取反
+console.log(score > 60 && score < 90, !true);
+
+// 默认值：?? 只在 null / undefined 时用右边
+const nickname = null;
+console.log(nickname ?? "匿名用户");
+
+// 可选链 ?.：对象可能不存在时不报错
+const user = { profile: null };
+console.log(user.profile?.avatar);   // undefined，不会报错
+
+// switch：多个固定值的分支
+const day = 3;
+switch (day) {
+  case 6:
+  case 7:
+    console.log("周末");
+    break;
+  default:
+    console.log("工作日");
+}</textarea>
+      </div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="js-loops">
+      <div class="chap-head"><span class="chap-num">04</span><h2>循环：重复做一件事</h2></div>
+      <p class="sub">遍历数组首选 <code class="i">for...of</code>，需要下标时用经典 for。实际项目里更常用下一节的数组方法 <code class="i">map</code> / <code class="i">filter</code>。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">四种循环</span></div>
+<textarea data-code>// 经典 for：初始化; 条件; 每轮之后
+for (let i = 1; i <= 3; i++) {
+  console.log("第", i, "次");
+}
+
+// for...of：直接拿到数组里的每一项
+const fruits = ["苹果", "香蕉", "橙子"];
+for (const f of fruits) {
+  console.log(f);
+}
+
+// for...in：遍历对象的键
+const scores = { 语文: 90, 数学: 85 };
+for (const key in scores) {
+  console.log(key, scores[key]);
+}
+
+// while：不知道要循环几次时用
+let n = 1;
+while (n < 100) {
+  n *= 2;
+}
+console.log("第一个 ≥ 100 的 2 的幂：", n);
+
+// break 跳出循环，continue 跳过本轮
+for (const x of [1, 2, 3, 4, 5]) {
+  if (x === 2) continue;
+  if (x === 4) break;
+  console.log("x =", x);
+}</textarea>
+      </div>
+      <div class="tip warn"><span class="lbl">小心死循环</span><p>while 的条件永远为真，页面就会卡死。写 while 时先想清楚：循环体里哪一行会让条件最终变成 false。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="js-func">
+      <div class="chap-head"><span class="chap-num">05</span><h2>函数、作用域与闭包</h2></div>
+      <p class="sub">函数是一段可以反复调用的代码，可以接收参数、返回结果。JS 里函数也是值，可以存进变量、当参数传来传去。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">三种写法</span></div>
+<textarea data-code>// 1. 函数声明
+function add(a, b) {
+  return a + b;
+}
+
+// 2. 箭头函数（最常用）：只有一行时可以省掉 {} 和 return
+const multiply = (a, b) => a * b;
+
+// 3. 默认参数、剩余参数
+const greet = (name = "朋友") => `你好，${name}`;
+const sum = (...nums) => nums.reduce((s, n) => s + n, 0);
+
+console.log(add(2, 3), multiply(2, 3));
+console.log(greet(), greet("Jim"));
+console.log(sum(1, 2, 3, 4));
+
+// 函数可以当参数传：这种函数叫“回调函数”
+const twice = (fn, x) => fn(fn(x));
+console.log(twice(n => n + 10, 1));</textarea>
+      </div>
+      <h3>闭包：函数记住了它出生时的环境</h3>
+      <p>闭包听起来玄，其实是一句话：<b>内部函数可以一直访问外部函数的变量，哪怕外部函数已经执行完了。</b>点开每一行看它在做什么。</p>
+      <div class="reader" data-mode="js" id="jsClosure">
+        <div class="reader-bar"><span class="ed-title">counter.js<small>点一行看解释</small></span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>概念</th><th>一句话</th></tr></thead>
+        <tbody>
+          <tr><td>作用域</td><td>变量在哪里能用。<code class="i">{}</code> 里用 let / const 声明的变量，出了花括号就访问不到</td></tr>
+          <tr><td>闭包</td><td>函数 + 它能访问的外部变量。用来做私有数据、计数器、防抖节流</td></tr>
+          <tr><td>this</td><td>普通函数里 this 取决于“谁调用它”；箭头函数没有自己的 this，用外层的。写 React 和事件回调时多用箭头函数，少踩坑</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="js-data">
+      <div class="chap-head"><span class="chap-num">06</span><h2>数组与对象：处理数据的主力</h2></div>
+      <p class="sub">后端返回的数据几乎都是“对象组成的数组”。下面这组商品数据，点不同的方法看它返回什么。这几个方法都<b>不改原数组</b>，而是返回新结果。</p>
+      <div class="lab" id="jsArrayLab">
+        <pre class="lab-code" data-src></pre>
+        <div class="lab-head lab-opts"></div>
+        <pre class="lab-code" data-call></pre>
+        <pre class="lab-out" data-out aria-live="polite"></pre>
+        <div class="lab-body"><p data-why></p></div>
+      </div>
+      <h3>对象、解构与展开</h3>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">对象的常用操作</span></div>
+<textarea data-code>const user = {
+  name: "Jim",
+  age: 28,
+  skills: ["HTML", "CSS"],
+  address: { city: "上海" },
+};
+
+// 读写属性
+console.log(user.name, user["age"], user.address.city);
+user.age = 29;
+
+// 解构：一次取出多个属性
+const { name, skills, address: { city } } = user;
+console.log(name, skills, city);
+
+// 数组解构
+const [first, second = "无"] = ["HTML"];
+console.log(first, second);
+
+// 展开 ...：复制并修改（React 里更新 state 天天用）
+const older = { ...user, age: 30 };
+const moreSkills = [...user.skills, "JavaScript"];
+console.log(older.age, user.age, moreSkills);
+
+// 遍历对象
+console.log(Object.keys(user), Object.entries({ a: 1, b: 2 }));
+
+// JSON：和后端交换数据的格式
+const text = JSON.stringify({ id: 1, done: false });
+console.log(text, JSON.parse(text).done);</textarea>
+      </div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="js-class">
+      <div class="chap-head"><span class="chap-num">07</span><h2>类与模块</h2></div>
+      <p class="sub">class 是创建一类相似对象的模板。现代前端更多用函数和对象，但看懂 class 很必要，后端框架和各种库里到处都是。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">class 与继承</span></div>
+<textarea data-code>class Animal {
+  constructor(name) {      // new 的时候执行，用来初始化
+    this.name = name;
+  }
+  speak() {
+    return `${this.name} 发出了声音`;
+  }
+}
+
+class Dog extends Animal { // 继承 Animal 的属性和方法
+  speak() {                // 重写父类方法
+    return `${this.name}：汪汪！`;
+  }
+}
+
+const a = new Animal("小动物");
+const d = new Dog("旺财");
+console.log(a.speak());
+console.log(d.speak());
+console.log(d instanceof Animal);  // true：Dog 也是 Animal</textarea>
+      </div>
+      <h3>ES 模块：把代码拆成多个文件</h3>
+      <div class="compare">
+        <div class="cmp good"><h5>math.js：导出</h5><pre><span class="t-com">// 具名导出，可以有多个</span>
+<span class="t-kw">export</span> <span class="t-kw">const</span> add = (a, b) =&gt; a + b;
+<span class="t-kw">export</span> <span class="t-kw">const</span> PI = <span class="t-num">3.14</span>;
+
+<span class="t-com">// 默认导出，每个文件最多一个</span>
+<span class="t-kw">export</span> <span class="t-kw">default</span> <span class="t-kw">function</span> <span class="t-fn">square</span>(x) {
+  <span class="t-kw">return</span> x * x;
+}</pre></div>
+        <div class="cmp good"><h5>main.js：导入</h5><pre><span class="t-com">// 具名导入要用 {}，名字必须一致</span>
+<span class="t-kw">import</span> { add, PI } <span class="t-kw">from</span> <span class="t-val">"./math.js"</span>;
+
+<span class="t-com">// 默认导入不用 {}，名字随便起</span>
+<span class="t-kw">import</span> square <span class="t-kw">from</span> <span class="t-val">"./math.js"</span>;
+
+<span class="t-com">// 导入 npm 包</span>
+<span class="t-kw">import</span> React <span class="t-kw">from</span> <span class="t-val">"react"</span>;</pre></div>
+      </div>
+      <p>模块需要在 <code class="i">&lt;script type="module"&gt;</code> 里或者用 Vite 这类构建工具运行。后面的 React 和工程化模块里你会天天写 import。</p>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="js-dom">
+      <div class="chap-head"><span class="chap-num">08</span><h2>DOM 与事件：让页面动起来</h2></div>
+      <p class="sub">浏览器把 HTML 解析成一棵对象树，叫 DOM。JS 通过它找到元素、修改内容、监听点击。运行下面的代码后，在预览里添加和删除待办。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">待办清单</span><small class="cat-badge">页面 HTML 已写好，JS 负责交互</small></div>
+        <template><style>
+  body { font-family: system-ui, sans-serif; }
+  form { display: flex; gap: 8px; }
+  input { flex: 1; padding: 6px 8px; }
+  li { display: flex; justify-content: space-between; padding: 4px 0; }
+  li.done span { text-decoration: line-through; color: #999; }
+</style>
+<form id="form">
+  <input id="input" placeholder="要做什么？" required>
+  <button>添加</button>
+</form>
+<ul id="list">
+  <li><span>学 HTML</span><button class="del">删除</button></li>
+</ul>
+<p id="count"></p></template>
+<textarea data-code>// 1. 找到元素
+const form = document.querySelector("#form");
+const input = document.querySelector("#input");
+const list = document.querySelector("#list");
+const count = document.querySelector("#count");
+
+function updateCount() {
+  // 2. 修改内容
+  count.textContent = `共 ${list.children.length} 项`;
+}
+
+// 3. 监听提交事件
+form.addEventListener("submit", (event) => {
+  event.preventDefault();          // 阻止表单默认的刷新页面
+  const li = document.createElement("li");
+  li.innerHTML = `<span></span><button class="del">删除</button>`;
+  li.querySelector("span").textContent = input.value;  // 用 textContent 防止 XSS
+  list.append(li);
+  input.value = "";
+  updateCount();
+  console.log("添加了一项");
+});
+
+// 4. 事件委托：只在父元素上监听一次，新加的 li 也能响应
+list.addEventListener("click", (event) => {
+  const li = event.target.closest("li");
+  if (!li) return;
+  if (event.target.matches(".del")) {
+    li.remove();
+    updateCount();
+  } else {
+    li.classList.toggle("done");   // 点文字切换完成状态
+  }
+});
+
+updateCount();</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>API</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>document.querySelector(css)</td><td>用 CSS 选择器找第一个匹配的元素，找不到返回 null</td></tr>
+          <tr><td>querySelectorAll(css)</td><td>找所有匹配的元素，可以用 forEach 遍历</td></tr>
+          <tr><td>el.textContent</td><td>读写纯文本，安全</td></tr>
+          <tr><td>el.innerHTML</td><td>读写 HTML。<b>不要</b>把用户输入直接塞进去，会被注入脚本（XSS）</td></tr>
+          <tr><td>el.classList.add / remove / toggle</td><td>增删 class，配合 CSS 切换样式，最常用</td></tr>
+          <tr><td>el.style.color = "red"</td><td>直接改行内样式</td></tr>
+          <tr><td>el.setAttribute / el.dataset</td><td>读写属性和 data-* 数据</td></tr>
+          <tr><td>document.createElement / el.append / el.remove</td><td>创建、插入、删除元素</td></tr>
+          <tr><td>el.addEventListener(type, fn)</td><td>监听事件：click、input、submit、keydown、change……</td></tr>
+          <tr><td>event.target / preventDefault()</td><td>事件发生在哪个元素上 / 阻止默认行为</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">事件冒泡</span><p>点击按钮时，事件会从按钮一路向上传给 li、ul、body。所以只需要在父元素上监听一次，用 <code class="i">event.target</code> 判断点的是谁，这就是<b>事件委托</b>。列表项很多、或者会动态增加时特别好用。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="js-async">
+      <div class="chap-head"><span class="chap-num">09</span><h2>异步：Promise、async / await 与 fetch</h2></div>
+      <p class="sub">请求后端、读文件、定时器都需要时间。JS 不会傻等，而是先往下执行，等结果回来再处理。这就是异步，也是连接前后端的关键。</p>
+      <h3>先猜一猜：这四行按什么顺序输出？</h3>
+      <div class="lab" id="jsOrder">
+        <pre class="lab-code" data-code></pre>
+        <div class="lab-body">
+          <p>按你认为的输出顺序，依次点下面的按钮：</p>
+          <div class="order-pick"></div>
+          <div class="order-res" aria-live="polite"></div>
+          <p data-why hidden></p>
+          <div><button type="button" class="chip" data-reset>重来</button></div>
+        </div>
+      </div>
+      <h3>从回调到 async / await</h3>
+      <p>下面的 <code class="i">mockFetch</code> 模拟了一个要 0.5 秒才返回的后端接口，用法和真正的 <code class="i">fetch</code> 一样。把 <code class="i">"/api/user/1"</code> 改成 <code class="i">"/api/user/99"</code> 看看出错时怎么处理。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">请求数据</span></div>
+        <template><script>
+  // 模拟后端：0.5 秒后返回，和浏览器自带的 fetch 用法相同
+  const DB = { 1: { id: 1, name: "Jim", role: "学生" }, 2: { id: 2, name: "Lily", role: "老师" } };
+  function mockFetch(url) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const id = Number(url.split("/").pop());
+        const user = DB[id];
+        resolve({
+          ok: !!user,
+          status: user ? 200 : 404,
+          json: async () => user ?? { error: "用户不存在" },
+        });
+      }, 500);
+    });
+  }
+</script></template>
+<textarea data-code>// 写法一：Promise 链 .then().catch()
+mockFetch("/api/user/2")
+  .then((res) => res.json())
+  .then((data) => console.log("then 拿到：", data));
+
+// 写法二：async / await，读起来像同步代码，推荐
+async function loadUser(id) {
+  try {
+    const res = await mockFetch(`/api/user/${id}`);
+    if (!res.ok) {
+      throw new Error(`请求失败，状态码 ${res.status}`);
+    }
+    const user = await res.json();
+    console.log("await 拿到：", user);
+    return user;
+  } catch (err) {
+    console.error("出错了：", err.message);
+  } finally {
+    console.log("不管成功失败，都会执行 finally");
+  }
+}
+
+loadUser(1);
+console.log("我先输出，因为请求还在路上……");
+
+// 同时发多个请求，全部回来再处理
+Promise.all([mockFetch("/api/user/1"), mockFetch("/api/user/2")])
+  .then((list) => console.log("两个请求都回来了，状态：", list.map((r) => r.status)));</textarea>
+      </div>
+      <h3>真实的 fetch 长这样</h3>
+      <div class="compare">
+        <div class="cmp good"><h5>GET：读取数据</h5><pre><span class="t-kw">const</span> res = <span class="t-kw">await</span> <span class="t-fn">fetch</span>(<span class="t-val">"/api/todos"</span>);
+<span class="t-kw">if</span> (!res.ok) <span class="t-kw">throw</span> <span class="t-kw">new</span> <span class="t-fn">Error</span>(res.status);
+<span class="t-kw">const</span> todos = <span class="t-kw">await</span> res.<span class="t-fn">json</span>();</pre></div>
+        <div class="cmp good"><h5>POST：提交 JSON</h5><pre><span class="t-kw">const</span> res = <span class="t-kw">await</span> <span class="t-fn">fetch</span>(<span class="t-val">"/api/todos"</span>, {
+  method: <span class="t-val">"POST"</span>,
+  headers: { <span class="t-val">"Content-Type"</span>: <span class="t-val">"application/json"</span> },
+  body: JSON.<span class="t-fn">stringify</span>({ title: <span class="t-val">"学 JS"</span> }),
+});</pre></div>
+      </div>
+      <div class="tip warn"><span class="lbl">易错</span><p>fetch 只有网络断了才会 reject。服务器返回 404、500 时 fetch 依然“成功”，所以一定要检查 <code class="i">res.ok</code> 或 <code class="i">res.status</code>。另外 <code class="i">await</code> 只能写在 <code class="i">async</code> 函数里（模块顶层除外）。</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="js-errors">
+      <div class="chap-head"><span class="chap-num">10</span><h2>错误与调试</h2></div>
+      <p class="sub">报错不可怕，读懂报错信息是最重要的调试能力。运行下面的代码，看看控制台里的红字说了什么，再把它修好。</p>
+      <div class="editor" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">找 bug</span></div>
+<textarea data-code>const user = { name: "Jim", tags: ["前端"] };
+
+console.log(user.name.toUpperCase());
+console.log(user.tags.length);
+
+// 下面这行会报 TypeError：user.profile 是 undefined，不能再读 .avatar
+// 修法：user.profile?.avatar
+console.log(user.profile.avatar);
+
+console.log("上面报错后，这行不会执行");</textarea>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>错误</th><th>通常的原因</th></tr></thead>
+        <tbody>
+          <tr><td>ReferenceError: x is not defined</td><td>变量名拼错了，或者在声明前就用了</td></tr>
+          <tr><td>TypeError: Cannot read properties of undefined</td><td>对 undefined / null 读属性。数据还没请求回来、或者路径写错时最常见</td></tr>
+          <tr><td>TypeError: x is not a function</td><td>调用的东西不是函数，比如方法名拼错</td></tr>
+          <tr><td>SyntaxError: Unexpected token</td><td>语法写错：少了括号、引号、逗号</td></tr>
+          <tr><td>TypeError: Assignment to constant variable</td><td>给 const 变量重新赋值</td></tr>
+        </tbody>
+      </table></div>
+      <ul class="dots">
+        <li><code class="i">console.log</code> 打印中间值，<code class="i">console.table(数组)</code> 用表格看数据。</li>
+        <li>在代码里写一行 <code class="i">debugger;</code>，打开开发者工具后运行到这里会自动暂停，可以一步步执行、查看每个变量。</li>
+        <li>Sources 面板可以直接点行号打断点，Network 面板看请求有没有发出去、返回了什么。</li>
+      </ul>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="js-sheet">
+      <div class="chap-head"><span class="chap-num">11</span><h2>常用方法速查</h2></div>
+      <p class="sub">忘了方法名回来搜一下。</p>
+      <div class="sheet-tools">
+        <input type="search" id="jsSheetQ" placeholder="搜索方法或用途，例如：去空格、排序" aria-label="搜索 JS 方法">
+        <div id="jsSheetCats" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>方法</th><th>用途</th><th>分类</th></tr></thead>
+        <tbody id="jsSheetBody"></tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="js-quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：12 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">12</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="js-challenge">
+      <div class="chap-head"><span class="chap-num">13</span><h2>动手挑战：购物车小工具</h2></div>
+      <p class="sub">补全下面 5 个函数。每次修改后会自动跑测试，通过的项会打勾；也可以点“▶ 运行”在控制台里自己试。代码会保存在当前浏览器里。</p>
+      <ul class="checks" id="jsChecks"></ul>
+      <div class="editor" id="jsChallengeEd" data-mode="js">
+        <div class="ed-bar"><span class="ed-title">cart.js</span><span class="ed-tools"><button class="chip" type="button" id="jsShowAnswer">看参考答案</button></span></div>
+        <template><script>
+  // 模拟后端：0.3 秒后返回购物车数据
+  function mockFetch(url) {
+    return new Promise((resolve) => setTimeout(() => resolve({
+      ok: true,
+      json: async () => [
+        { name: "键盘", price: 199, qty: 1, category: "外设" },
+        { name: "鼠标", price: 99, qty: 2, category: "外设" },
+        { name: "显示器", price: 1299, qty: 1, category: "显示" },
+      ],
+    }), 300));
+  }
+</script></template>
+<textarea data-code data-store="felearn-js-challenge">const cart = [
+  { name: "键盘", price: 199, qty: 1, category: "外设" },
+  { name: "鼠标", price: 99, qty: 2, category: "外设" },
+  { name: "显示器", price: 1299, qty: 1, category: "显示" },
+];
+
+// 1. 返回总价：每件商品 price × qty 加起来
+function total(items) {
+  // TODO
+}
+
+// 2. 返回价格不超过 max 的商品名字数组，例如 ["键盘", "鼠标"]
+function cheapItems(items, max) {
+  // TODO
+}
+
+// 3. 把数字格式化成 "¥12.50"：两位小数，前面加 ¥
+function formatPrice(n) {
+  // TODO
+}
+
+// 4. 按分类分组：{ 外设: ["键盘", "鼠标"], 显示: ["显示器"] }
+function groupByCategory(items) {
+  // TODO
+}
+
+// 5. 用 await mockFetch("/api/cart") 取数据，再用 res.json() 解析，返回总价
+async function loadCartTotal() {
+  // TODO
+}
+
+console.log(total(cart), cheapItems(cart, 200), formatPrice(12.5));</textarea>
+      </div>
+      <div class="test-bar"><button class="btn" type="button" id="jsRunTests">重新跑测试</button><span class="cat-badge" id="jsTestState"></span></div>
+      <div id="jsDoneBanner" class="done-banner" hidden>全部通过。你已经能用数组方法处理数据、用 async / await 请求接口了，下一站是浏览器与网络。</div>
+      <footer class="end">JavaScript 核心 · FeLearn 一周全栈计划。系统学习推荐 MDN 中文的 JavaScript 指南：developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide</footer>
+    </section>
+  </main>
+</div>
+</section>
+
+<script>
+/* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
+const MODULES = [
+  { id: "html5", title: "HTML5 核心速通", short: "HTML5", c: "--html", day: "D1", desc: "页面骨架、语义化标签、表单，每个示例都能边改边看。", ready: true },
+  { id: "css", title: "CSS 样式与布局", short: "CSS", c: "--css", day: "D1–D2", desc: "选择器、优先级、盒模型、Flex 与 Grid、响应式，带练习场和挑战。", ready: true },
+  { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
+  { id: "net", title: "浏览器与网络", short: "网络", c: "--net", day: "D4", desc: "HTTP、从 URL 到页面、存储与安全。", ready: false },
+  { id: "fw", title: "前端框架 React", short: "React", c: "--fw", day: "D5", desc: "组件、props 与 state、Hooks、路由。", ready: false },
+  { id: "eng", title: "工程化", short: "工程化", c: "--eng", day: "D5–D7", desc: "npm、Vite、Git、代码规范、部署上线。", ready: false },
+  { id: "be", title: "后端与全栈", short: "后端", c: "--be", day: "D6–D7", desc: "Node、REST API、数据库、登录、部署。", ready: false },
+];
+</script>
+
+<script>
+/* ====================== 首页：脑图 ====================== */
+(function(){
+const N = (label, note, days, children) => ({ label, note, days, children });
+
+const DATA = N("前端 → 全栈", "从页面结构一路学到后端接口和部署。先按天数顺序过一遍主干，再回头补细节。", null, [
+  { c: "--html", mod: "html5", ...N("HTML 结构", "网页的骨架，决定内容是什么。配套模块《HTML5 核心速通》已经上线，可以直接进去边改代码边学。", [1], [
+    N("文档结构", "<!DOCTYPE html>、<html lang>、<head> 里的 <meta charset> 与 viewport、<body>。", [1]),
+    N("语义化标签", "header / nav / main / article / section / aside / footer。让结构对人、对搜索引擎、对读屏软件都清楚。", [1]),
+    N("文本、链接、图片", "h1–h6、p、ul/ol、a 的 href 与 target、img 的 src 与 alt。", [1]),
+    N("表单", "form、input 的各种 type、label 的 for、select、textarea、required 与 pattern 原生校验。后面做全栈时表单就是数据入口。", [1]),
+    N("表格与多媒体", "table/thead/tbody、video、audio、iframe 的基本用法。", [1]),
+    N("可访问性", "alt 文本、label 关联、aria-* 属性、键盘可操作。", [1]),
+  ]) },
+  { c: "--css", mod: "css", ...N("CSS 样式与布局", "决定页面长什么样、怎么排。布局是重点，花整整一天。配套模块《CSS 样式与布局》已经上线。", [1, 2], [
+    N("选择器与优先级", "元素 / 类 / ID / 属性 / 伪类 / 伪元素；优先级计算与层叠，!important 少用。", [1]),
+    N("盒模型", "content、padding、border、margin；box-sizing: border-box；外边距合并。", [1]),
+    N("布局", "现代布局三件套，先学 Flex 再学 Grid。", [2], [
+      N("Flexbox", "一维布局：justify-content、align-items、flex: 1、gap、flex-wrap。导航栏和卡片行首选。", [2]),
+      N("Grid", "二维布局：grid-template-columns、fr 单位、repeat(auto-fill, minmax())、区域命名。", [2]),
+      N("定位", "static / relative / absolute / fixed / sticky，z-index 与层叠上下文。", [2]),
+    ]),
+    N("响应式", "移动优先、媒体查询 @media、rem / em / vw / %、clamp()、图片自适应。", [2]),
+    N("视觉与动效", "颜色、字体、阴影、圆角、transition、transform、@keyframes 动画。", [2]),
+    N("CSS 变量", "--name 自定义属性，用来做主题色和暗色模式。", [2]),
+    N("工具类框架", "了解 Tailwind CSS 的思路，等写框架项目时再上手。", [5]),
+  ]) },
+  { c: "--js", ...N("JavaScript", "让页面能交互、能请求数据。用两天：第一天语言本身，第二天 DOM 和异步。", [3, 4], [
+    N("基础语法", "let / const、数据类型、运算符、条件与循环、模板字符串。", [3]),
+    N("函数", "函数声明与箭头函数、参数默认值、作用域、闭包、this 的指向。", [3]),
+    N("对象与数组", "解构、展开运算符、map / filter / reduce / find、JSON.parse 与 stringify。", [3]),
+    N("类与原型", "class、extends、原型链的基本概念。", [3]),
+    N("ES 模块", "import / export，现代前端项目的组织方式。", [3]),
+    N("DOM 与事件", "querySelector、修改内容与样式、addEventListener、事件冒泡与事件委托。", [4]),
+    N("异步编程", "回调 → Promise → async / await；用 fetch 请求接口并处理错误。这是连接后端的关键。", [4]),
+    N("TypeScript 入门", "类型标注、interface、联合类型。框架项目里会用到，先认识即可。", [5]),
+  ]) },
+  { c: "--net", ...N("浏览器与网络", "理解页面是怎么从服务器到你屏幕上的，前后端协作的共同语言。", [4], [
+    N("HTTP 协议", "请求方法 GET / POST / PUT / DELETE、状态码 2xx / 3xx / 4xx / 5xx、请求头与响应头、HTTPS。", [4]),
+    N("从 URL 到页面", "DNS 解析 → TCP / TLS 连接 → 请求响应 → 解析 HTML 生成 DOM 和 CSSOM → 布局 → 绘制。", [4]),
+    N("浏览器存储", "Cookie、localStorage、sessionStorage 的区别与使用场景。", [4]),
+    N("安全基础", "同源策略、CORS 跨域、XSS、CSRF。写后端接口时一定会遇到 CORS。", [4, 6]),
+    N("开发者工具", "Elements 看结构、Console 调试、Network 看请求、Application 看存储。每天都在用。", [4]),
+    N("性能", "缓存、图片懒加载、减少请求、代码分割。了解即可。", [4]),
+  ]) },
+  { c: "--fw", ...N("前端框架", "用组件组织界面。React 和 Vue 选一个学透，建议 React（生态最大，接 Next.js 做全栈最顺）。", [5], [
+    N("组件化思想", "把页面拆成可复用的组件，数据从上往下流，事件从下往上传。", [5]),
+    N("React", "推荐路线。", [5], [
+      N("JSX", "在 JS 里写类似 HTML 的结构，用 {} 嵌入表达式。", [5]),
+      N("props 与 state", "props 是外部传入，state 是组件自己的数据，state 变了界面跟着变。", [5]),
+      N("Hooks", "useState、useEffect，再到 useMemo、自定义 Hook。", [5]),
+    ]),
+    N("Vue（备选）", "模板语法、ref / reactive 响应式、组合式 API。上手更平缓。", [5]),
+    N("路由", "React Router 或 Vue Router，多页面切换。", [5]),
+    N("状态管理", "先用组件 state 和 Context，复杂了再看 Zustand / Pinia。", [5]),
+    N("数据请求", "在组件里用 fetch 调接口，处理加载中和出错状态。", [5]),
+  ]) },
+  { c: "--eng", ...N("工程化", "把代码变成能协作、能上线的项目。", [5, 7], [
+    N("包管理", "npm / pnpm，package.json、依赖与脚本。", [5]),
+    N("构建工具 Vite", "npm create vite@latest 一键起项目，开发服务器与打包。", [5]),
+    N("Git 与 GitHub", "commit、branch、push、pull request。每天的成果都提交到 FeLearn 仓库。", [1, 7]),
+    N("代码规范", "ESLint 查问题、Prettier 统一格式。", [5]),
+    N("部署", "前端静态站部署到 Vercel / Netlify / GitHub Pages，环境变量的概念。", [7]),
+  ]) },
+  { c: "--be", ...N("后端与全栈", "最后两天把前端接上自己的后端：接口、数据库、登录，再把整个项目部署上线。", [6, 7], [
+    N("Node.js", "让 JS 跑在服务器上：模块、fs 文件、npm 生态。", [6]),
+    N("Web 框架", "Express 或 Hono 写路由和中间件，接收请求返回 JSON。", [6]),
+    N("REST API 设计", "资源化 URL、用 HTTP 方法表达增删改查、统一的错误格式。", [6]),
+    N("数据库", "关系型优先。", [6], [
+      N("SQL 与 PostgreSQL / SQLite", "建表、增删改查、关联查询。", [6]),
+      N("ORM：Prisma", "用 JS 代码定义模型和查询，自动生成类型。", [6]),
+      N("MongoDB（了解）", "文档型数据库，知道它和 SQL 的区别。", [6]),
+    ]),
+    N("登录鉴权", "密码哈希（bcrypt）、Session 与 Cookie、JWT 的取舍。", [6]),
+    N("全栈框架 Next.js", "页面和 API 写在一个项目里，服务端渲染，部署到 Vercel 一步到位。", [7]),
+    N("实战项目", "做一个带登录的待办或笔记应用：前端页面 → API → 数据库 → 部署上线。", [7]),
+  ]) },
+]);
+
+const WEEK = [
+  { d: 1, h: "HTML + CSS 入门", items: ["HTML 文档结构与语义化", "表单与可访问性", "选择器、盒模型", "Git 基本操作"], out: "一张语义化的个人简介页" },
+  { d: 2, h: "CSS 布局与响应式", items: ["Flexbox、Grid、定位", "媒体查询与相对单位", "CSS 变量与过渡动画"], out: "手机和电脑都好看的作品集页面" },
+  { d: 3, h: "JavaScript 语言基础", items: ["变量、类型、函数、闭包", "对象数组与常用方法", "类与 ES 模块"], out: "一组小练习：数组处理、计算器逻辑" },
+  { d: 4, h: "DOM、异步与浏览器", items: ["DOM 操作与事件委托", "Promise、async/await、fetch", "HTTP、存储、DevTools"], out: "调用公开 API 的天气或搜索小工具" },
+  { d: 5, h: "框架与工程化", items: ["组件化与 React 基础", "Hooks、路由、数据请求", "npm、Vite、ESLint"], out: "用 React 重写第 4 天的小工具" },
+  { d: 6, h: "后端：Node 与数据库", items: ["Node.js 与 Express", "REST API 设计", "SQL、Prisma、登录鉴权"], out: "带数据库的待办事项 API" },
+  { d: 7, h: "全栈整合与上线", items: ["前端接上自己的 API", "Next.js 全栈写法", "部署与环境变量"], out: "带登录的待办应用上线" },
+];
+
+const modById = Object.fromEntries(MODULES.map(m => [m.id, m]));
+
+// 知识模块卡片
+const modsEl = document.getElementById("mods");
+MODULES.forEach(m => {
+  const el = document.createElement(m.ready ? "a" : "div");
+  el.className = "mod" + (m.ready ? "" : " soon");
+  el.style.setProperty("--c", `var(${m.c})`);
+  if (m.ready) el.href = "#" + m.id;
+  el.innerHTML = `<div class="top"><b></b><span class="d">${m.day}</span></div><small></small><span class="st">${m.ready ? "开始学习 →" : "即将上线"}</span>`;
+  el.querySelector("b").textContent = m.title;
+  el.querySelector("small").textContent = m.desc;
+  modsEl.appendChild(el);
+});
+
+const tree = document.getElementById("tree");
+const detail = document.getElementById("detail");
+let selectedDay = 0;
+let activeBtn = null;
+
+function dayText(days) { return days && days.length ? days.map(d => "D" + d).join(" ") : ""; }
+
+function build(n, depth, color, mod) {
+  const li = document.createElement("li");
+  const c = n.c || color;
+  const m = n.mod || mod;
+  if (c) li.style.setProperty("--c", `var(${c})`);
+  const btn = document.createElement("button");
+  btn.type = "button";
+  const kids = n.children || [];
+  btn.className = "node " + (depth === 0 ? "root" : depth === 1 ? "l1" : kids.length ? "" : "leaf");
+  const ready = n.mod && modById[n.mod] && modById[n.mod].ready;
+  btn.innerHTML = `<span class="lbl"></span>${n.days ? `<span class="day">${dayText(n.days)}</span>` : ""}${ready ? `<span class="mk">可学</span>` : ""}${kids.length ? `<span class="count" hidden>+${kids.length}</span>` : ""}`;
+  btn.querySelector(".lbl").textContent = n.label;
+  btn._n = n;
+  btn._mod = m && modById[m] && modById[m].ready ? m : null;
+  li.appendChild(btn);
+  if (kids.length) {
+    btn.setAttribute("aria-expanded", "true");
+    const ul = document.createElement("ul");
+    kids.forEach(k => ul.appendChild(build(k, depth + 1, c, m)));
+    li.appendChild(ul);
+    if (depth >= 2) setCollapsed(li, true);
+  }
+  btn.addEventListener("click", () => {
+    if (kids.length && depth > 0) setCollapsed(li, !li.classList.contains("collapsed"));
+    show(btn);
+  });
+  return li;
+}
+
+function setCollapsed(li, v) {
+  li.classList.toggle("collapsed", v);
+  const btn = li.querySelector(":scope > .node");
+  btn.setAttribute("aria-expanded", String(!v));
+  const cnt = btn.querySelector(".count");
+  if (cnt) cnt.hidden = !v;
+}
+
+function show(btn) {
+  if (activeBtn) activeBtn.classList.remove("active");
+  activeBtn = btn;
+  btn.classList.add("active");
+  const n = btn._n;
+  detail.style.removeProperty("--c");
+  detail.innerHTML = `<div class="t"><span></span><span class="tag">${dayText(n.days) ? "建议：" + dayText(n.days) : "总览"}</span></div><p></p>`;
+  detail.querySelector(".t span").textContent = n.label;
+  detail.querySelector("p").textContent = n.note || "";
+  if (btn._mod) {
+    const m = modById[btn._mod];
+    const a = document.createElement("a");
+    a.className = "go"; a.href = "#" + m.id;
+    a.textContent = `进入「${m.title}」模块 →`;
+    detail.style.setProperty("--c", `var(${m.c})`);
+    detail.appendChild(a);
+  }
+}
+
+function showDay(d) {
+  const w = WEEK.find(x => x.d === d);
+  detail.style.removeProperty("--c");
+  detail.innerHTML = `<div class="t"><span></span><span class="tag">D${d} 产出</span></div><p></p>`;
+  detail.querySelector(".t span").textContent = `第 ${d} 天 · ${w.h}`;
+  detail.querySelector("p").textContent = `${w.items.join("、")}。当天做出：${w.out}。`;
+  const ms = MODULES.filter(m => m.ready && m.day.includes(String(d)));
+  ms.forEach(m => {
+    const a = document.createElement("a");
+    a.className = "go"; a.href = "#" + m.id;
+    a.style.setProperty("--c", `var(${m.c})`);
+    a.textContent = `当天配套：${m.title} →`;
+    detail.appendChild(a);
+  });
+}
+
+// 返回该子树里是否有命中当天的节点
+function applyDay(li, d) {
+  const btn = li.querySelector(":scope > .node");
+  const n = btn._n;
+  const self = !!(n.days && n.days.includes(d));
+  let childHit = false;
+  li.querySelectorAll(":scope > ul > li").forEach(c => { if (applyDay(c, d)) childHit = true; });
+  const isRoot = btn.classList.contains("root");
+  btn.classList.toggle("hit", self && !isRoot);
+  btn.classList.toggle("dim", !self && !childHit && !isRoot);
+  if (childHit && li.querySelector(":scope > ul")) setCollapsed(li, false);
+  return self || childHit;
+}
+
+function selectDay(d) {
+  selectedDay = d;
+  document.querySelectorAll("#days .chip").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.d === d)));
+  document.querySelectorAll(".daycard").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.d === d)));
+  tree.classList.toggle("filtering", d > 0);
+  const root = tree.firstElementChild;
+  if (d > 0) { applyDay(root, d); showDay(d); }
+  else { tree.querySelectorAll(".node").forEach(b => b.classList.remove("hit", "dim")); show(root.querySelector(".node")); }
+  try { localStorage.setItem("felearn-day", String(d)); } catch (e) {}
+}
+
+// 日期按钮
+const daysEl = document.getElementById("days");
+[0, 1, 2, 3, 4, 5, 6, 7].forEach(d => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.dataset.d = d;
+  b.innerHTML = d ? `<span class="d">D${d}</span>${WEEK[d - 1].h.split(/[ +：、]/)[0]}` : "全部";
+  b.addEventListener("click", () => selectDay(d));
+  daysEl.appendChild(b);
+});
+
+// 一周卡片
+let doneSet = new Set();
+try { doneSet = new Set(JSON.parse(localStorage.getItem("felearn-done") || "[]")); } catch (e) {}
+const weekEl = document.getElementById("week");
+WEEK.forEach(w => {
+  const card = document.createElement("div");
+  card.className = "daycard" + (doneSet.has(w.d) ? " isdone" : "");
+  card.dataset.d = w.d; card.tabIndex = 0; card.setAttribute("role", "button");
+  card.innerHTML = `<div class="top"><span class="n">DAY ${w.d}</span><label class="done"><input type="checkbox" id="done-${w.d}" ${doneSet.has(w.d) ? "checked" : ""}>已学完</label></div>
+    <div class="h"></div><ul>${w.items.map(i => `<li></li>`).join("")}</ul><div class="out">产出：<b></b></div>`;
+  card.querySelector(".h").textContent = w.h;
+  card.querySelectorAll("li").forEach((li, i) => li.textContent = w.items[i]);
+  card.querySelector(".out b").textContent = w.out;
+  const cb = card.querySelector("input");
+  cb.addEventListener("click", e => e.stopPropagation());
+  card.querySelector(".done").addEventListener("click", e => e.stopPropagation());
+  cb.addEventListener("change", () => {
+    cb.checked ? doneSet.add(w.d) : doneSet.delete(w.d);
+    card.classList.toggle("isdone", cb.checked);
+    try { localStorage.setItem("felearn-done", JSON.stringify([...doneSet])); } catch (e) {}
+  });
+  const pick = () => { selectDay(selectedDay === w.d ? 0 : w.d); document.querySelector(".v-home .mapbox").scrollIntoView({ behavior: "smooth", block: "center" }); };
+  card.addEventListener("click", pick);
+  card.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  weekEl.appendChild(card);
+});
+
+tree.appendChild(build(DATA, 0, null, null));
+
+document.getElementById("expandAll").addEventListener("click", () => {
+  tree.querySelectorAll("li").forEach(li => { if (li.querySelector(":scope > ul")) setCollapsed(li, false); });
+});
+document.getElementById("collapseAll").addEventListener("click", () => {
+  tree.querySelectorAll(":scope > li > ul > li").forEach(li => { if (li.querySelector(":scope > ul")) setCollapsed(li, true); });
+});
+
+let start = 0;
+try { start = +(localStorage.getItem("felearn-day") || 0) || 0; } catch (e) {}
+selectDay(start);
+})();
+</script>
+
+<script>
+/* ====================== 模块共用组件：代码编辑器、逐行解读、测验、目录高亮 ====================== */
+const FL = (function(){
+  /* ---------- 语法高亮 ---------- */
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function hlAttrs(s){
+    return s.replace(/([^\s=]+)(?:(\s*=\s*)("[^"]*"|'[^']*'|[^\s"'>]+))?/g,(m,n,eq,v)=>
+      '<span class="t-attr">'+esc(n)+'</span>'+(eq!==undefined&&v!==undefined?'<span class="t-p">'+esc(eq)+'</span><span class="t-val">'+esc(v)+'</span>':''));
+  }
+  function hl(src){
+    const re=/(<!--[\s\S]*?(?:-->|$))|(<!DOCTYPE[^>]*>?)|(<\/?)([a-zA-Z][\w-]*)([^<>]*?)(\/?>|$)|([^<]+|<)/gi;
+    let out='',m;
+    re.lastIndex=0;
+    while((m=re.exec(src))){
+      if(m[0]==='')break;
+      if(m[1])out+='<span class="t-com">'+esc(m[1])+'</span>';
+      else if(m[2])out+='<span class="t-doc">'+esc(m[2])+'</span>';
+      else if(m[4]!==undefined){
+        out+='<span class="t-tag">'+esc(m[3]+m[4])+'</span>'+hlAttrs(m[5]||'')+'<span class="t-tag">'+esc(m[6]||'')+'</span>';
+      } else out+=esc(m[7]);
+    }
+    return out;
+  }
+  // CSS 高亮：遇到 { 前面是选择器，遇到 ; 或 } 前面是“属性: 值”
+  function hlCss(src){
+    let out='',buf='',depth=0,i=0;
+    const decl=s=>{const k=s.indexOf(':');return k<0?esc(s):'<span class="t-attr">'+esc(s.slice(0,k))+'</span><span class="t-p">:</span><span class="t-val">'+esc(s.slice(k+1))+'</span>';};
+    while(i<src.length){
+      if(src.startsWith('/*',i)){
+        out+=esc(buf);buf='';
+        const j=src.indexOf('*/',i+2), e=j<0?src.length:j+2;
+        out+='<span class="t-com">'+esc(src.slice(i,e))+'</span>';i=e;continue;
+      }
+      const ch=src[i];
+      if(ch==='{'){out+='<span class="t-tag">'+esc(buf)+'</span><span class="t-p">{</span>';buf='';depth++;}
+      else if(ch===';'||ch==='}'){out+=decl(buf)+'<span class="t-p">'+ch+'</span>';buf='';if(ch==='}')depth=Math.max(0,depth-1);}
+      else buf+=ch;
+      i++;
+    }
+    out+=depth>0?decl(buf):'<span class="t-tag">'+esc(buf)+'</span>';
+    return out;
+  }
+
+  // JS 高亮：注释、字符串、关键字、数字；JSX 的标签名也顺带标出来
+  const JS_KW=new Set('const let var function return if else for while do break continue switch case default new class extends super this typeof instanceof in of try catch finally throw async await import export from as true false null undefined yield delete void static get set'.split(' '));
+  function hlJs(src){
+    const re=/(\/\/[^\n]*|\/\*[\s\S]*?(?:\*\/|$))|("(?:\\.|[^"\\\n])*"?|'(?:\\.|[^'\\\n])*'?|`(?:\\[\s\S]|[^`\\])*`?)|(<\/?[A-Za-z][\w.]*|\/?>)|(\b\d[\d_.]*\b)|([A-Za-z_$][\w$]*)|([\s\S])/g;
+    let out='',m;
+    while((m=re.exec(src))){
+      if(m[1])out+='<span class="t-com">'+esc(m[1])+'</span>';
+      else if(m[2])out+='<span class="t-val">'+esc(m[2])+'</span>';
+      else if(m[3])out+='<span class="t-tag">'+esc(m[3])+'</span>';
+      else if(m[4])out+='<span class="t-num">'+esc(m[4])+'</span>';
+      else if(m[5])out+=JS_KW.has(m[5])?'<span class="t-kw">'+m[5]+'</span>':(src[re.lastIndex]==='('?'<span class="t-fn">'+m[5]+'</span>':esc(m[5]));
+      else out+=esc(m[6]);
+    }
+    return out;
+  }
+
+  /* ---------- 预览里注入的辅助脚本 ---------- */
+  const BASE = '<style>:where(html){color-scheme:light}:where(body){font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;margin:0;padding:14px;line-height:1.6;color:#1d2433;background:#fff}'
+    +'#__fl_toast{position:fixed;left:10px;right:10px;bottom:10px;background:#18202E;color:#fff;font:13px/1.55 system-ui,sans-serif;padding:9px 12px;border-radius:8px;white-space:pre-wrap;z-index:2147483647;box-shadow:0 6px 20px rgba(0,0,0,.25)}</style>'
+    +'<script>(function(){'
+    +'function toast(t){var el=document.getElementById("__fl_toast");if(!el){el=document.createElement("div");el.id="__fl_toast";document.body.appendChild(el);}el.textContent=t;clearTimeout(window.__flT);window.__flT=setTimeout(function(){el.remove();send();},5000);send(true);}'
+    +'document.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("a[href]");if(!a)return;var h=a.getAttribute("href");if(h.charAt(0)==="#"){e.preventDefault();var id=h.slice(1),t=id&&document.getElementById(id);if(t){t.scrollIntoView({behavior:"smooth"});toast("页内跳转：滚动到 id=\\""+id+"\\" 的元素");}else{toast(id?"找不到 id=\\""+id+"\\" 的元素":"href=\\"#\\" 是空链接，常用作占位");}return;}e.preventDefault();toast("点击后浏览器会跳转到："+h+(a.target==="_blank"?"\\n（target=\\"_blank\\"：在新标签页打开）":""));});'
+    +'document.addEventListener("submit",function(e){e.preventDefault();var f=e.target,fd=new FormData(f),l=[];fd.forEach(function(v,k){l.push("  "+k+" = "+(typeof v==="string"?v:v.name));});var m=(f.getAttribute("method")||"get").toUpperCase(),a=f.getAttribute("action")||"(当前页面)";toast("✓ 校验通过！浏览器将发送请求：\\n"+m+" "+a+"\\n"+(l.length?l.join("\\n"):"  （没有任何带 name 的字段，后端什么也收不到）"));});'
+    +'var last=0;function send(extra){var b=document.body;if(!b)return;var cs=getComputedStyle(b);var h=Math.ceil(b.scrollHeight+parseFloat(cs.marginTop)+parseFloat(cs.marginBottom));if(extra)h+=90;if(h!==last){last=h;parent.postMessage({__flH:h},"*");}}'
+    +'window.addEventListener("load",function(){send()});if(window.ResizeObserver)new ResizeObserver(function(){send()}).observe(document.body);send();'
+    +'})();<\/script>';
+  const OUTLINE = '<style>body *{outline:1px dashed rgba(200,66,26,.55);outline-offset:-1px}'
+    +['header','nav','main','article','section','aside','footer','figure','form'].map(t=>t+'::before{content:"<'+t+'>";display:block;font:600 10px/1.5 ui-monospace,monospace;color:#c8421a}').join('')
+    +'header,nav,main,article,section,aside,footer,figure,form{padding:4px 6px;margin:4px 0}</style>';
+
+
+  const frames=new Map();
+  window.addEventListener('message',e=>{
+    if(!e.data||typeof e.data.__flH!=='number')return;
+    const f=frames.get(e.source); if(!f)return;
+    f.style.height=Math.max(90,Math.min(900,e.data.__flH))+'px';
+  });
+
+  function autosize(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+
+  /* ---------- 编辑器 ----------
+     <div class="editor">：textarea 里是完整 HTML，右侧预览。
+     <div class="editor" data-mode="css">：textarea 里只写 CSS，HTML 固定写在 <template> 里。
+     data-resize="600"：预览上方多一个“预览宽度”滑块，初始 600px；只写 data-resize 时初始跟随预览区宽度。 */
+  /* ---------- 编辑器的几种模式 ----------
+     html（默认）：textarea 里是完整 HTML，改完自动刷新预览。
+     css：textarea 里只写 CSS，HTML 固定写在 <template> 里。
+     js：textarea 里写 JavaScript，点“运行”执行，console.log 显示在预览下方的控制台；<template> 可选，作为页面上的 HTML。
+     react：textarea 里写 JSX，用 React 18 + Babel 在预览里渲染。
+     模块可以用 FL.addMode(name, {...}) 注册自己的模式（例如后端模块的模拟服务器、SQL 练习）。
+     data-resize="600"：预览上方多一个“预览宽度”滑块，初始 600px；只写 data-resize 时初始跟随预览区宽度。 */
+  const CDN={
+    react:'https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js',
+    reactDom:'https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js',
+    babel:'https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js',
+    sqlJs:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js',
+    sqlWasm:'https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/'
+  };
+  // 预览里的“控制台”：接管 console.*，把输出和报错显示在页面上
+  const CONSOLE='<style>#__fl_con{margin-top:12px;border:1px solid #d5dbe4;border-radius:8px;overflow:hidden;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}'
+    +'#__fl_con>b{display:block;padding:4px 10px;background:#eef1f5;color:#5b6577;font:600 11px/1.6 system-ui,sans-serif;letter-spacing:.06em}'
+    +'#__fl_con>div{padding:3px 10px;border-top:1px solid #eef1f5;white-space:pre-wrap;overflow-wrap:anywhere;color:#1d2433}'
+    +'#__fl_con>.w{background:#fff8e1;color:#7a5600}#__fl_con>.e{background:#fdecea;color:#b42318}#__fl_con>.n{color:#97a1b3}</style>'
+    +'<script>(function(){var box;function el(){if(!box){box=document.createElement("div");box.id="__fl_con";box.innerHTML="<b>控制台</b>";(document.body||document.documentElement).appendChild(box);}return box;}'
+    +'function f(v,d){d=d||0;if(typeof v==="string")return d?JSON.stringify(v):v;if(typeof v==="function")return "ƒ "+(v.name||"匿名函数")+"()";if(v===undefined)return "undefined";if(v===null)return "null";'
+    +'if(typeof v==="number"||typeof v==="boolean"||typeof v==="bigint")return String(v);if(v instanceof Error)return v.name+": "+v.message;if(typeof Element!=="undefined"&&v instanceof Element)return "<"+v.tagName.toLowerCase()+(v.id?"#"+v.id:"")+(v.className&&typeof v.className==="string"?"."+v.className.trim().split(/\\s+/).join("."):"")+">";'
+    +'if(v instanceof Promise)return "Promise {…}";if(d>3)return Array.isArray(v)?"[…]":"{…}";if(Array.isArray(v))return "["+v.map(function(x){return f(x,d+1)}).join(", ")+"]";'
+    +'if(v instanceof Map)return "Map("+v.size+") {"+Array.from(v).map(function(e){return f(e[0],d+1)+" => "+f(e[1],d+1)}).join(", ")+"}";if(v instanceof Set)return "Set("+v.size+") {"+Array.from(v).map(function(x){return f(x,d+1)}).join(", ")+"}";'
+    +'try{var k=Object.keys(v);return (v.constructor&&v.constructor!==Object&&v.constructor.name?v.constructor.name+" ":"")+"{"+k.map(function(x){return x+": "+f(v[x],d+1)}).join(", ")+"}";}catch(e){return String(v);}}'
+    +'function add(c,a){var d=document.createElement("div");d.className=c;d.textContent=Array.prototype.map.call(a,function(x){return f(x)}).join(" ");el().appendChild(d);}'
+    +'["log","info","debug","table"].forEach(function(m){console[m]=function(){add("",arguments)}});console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'
+    +'window.addEventListener("error",function(e){add("e",["❌ "+(e.error&&e.error.name?e.error.name+": "+e.error.message:e.message)+(e.lineno?"（第 "+e.lineno+" 行附近）":"")]);});'
+    +'window.addEventListener("unhandledrejection",function(e){add("e",["❌ 未处理的 Promise 错误：",e.reason]);});'
+    +'window.addEventListener("load",function(){setTimeout(function(){if(box&&box.children.length===1){var d=document.createElement("div");d.className="n";d.textContent="（没有输出）";box.appendChild(d);}else if(!box){add("n",["（没有输出）"]);}},60);});'
+    +'})();<\/script>';
+  const modes={
+    html:{hl:hl,label:'代码编辑区',build:(c,t,ed)=>c+BASE+(ed.cb&&ed.cb.checked?OUTLINE:'')},
+    css:{hl:hlCss,label:'CSS 编辑区',build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>'+c+'</style></head><body>'+t+BASE+'</body></html>'},
+    js:{hl:hlJs,label:'JavaScript 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+t+CONSOLE+BASE+'<script>'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'},
+    react:{hl:hlJs,label:'React 编辑区',manual:true,build:(c,t)=>'<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"></head><body>'+(t||'<div id="root"></div>')+CONSOLE+BASE
+      +'<script src="'+CDN.react+'"><\/script><script src="'+CDN.reactDom+'"><\/script><script src="'+CDN.babel+'"><\/script>'
+      +'<script>if(!window.Babel)console.error("React 运行库没有加载成功，检查一下网络后再点“运行”。");<\/script>'
+      +'<script type="text/babel" data-presets="react">'+c.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>'}
+  };
+  function addMode(name,m){modes[name]=Object.assign({hl:hlJs,label:'代码编辑区'},m);}
+
+  const editors=[];
+  function makeEditor(box){
+    const ta=box.querySelector('textarea[data-code]');
+    const mode=modes[box.dataset.mode||'html'];
+    const tplEl=box.querySelector('template');
+    const tpl=tplEl?tplEl.innerHTML:'';
+    const original=ta.value;
+    let stored=null;
+    if(ta.dataset.store){try{stored=localStorage.getItem(ta.dataset.store);}catch(e){}}
+    if(stored)ta.value=stored;
+    ta.removeAttribute('data-code');
+    ta.spellcheck=false;ta.setAttribute('autocapitalize','off');ta.setAttribute('autocomplete','off');
+    ta.setAttribute('aria-label',mode.label);
+    const grid=document.createElement('div');grid.className='ed-grid';
+    const code=document.createElement('div');code.className='code';
+    const pre=document.createElement('pre');pre.setAttribute('aria-hidden','true');
+    code.append(pre,ta);
+    const pv=document.createElement('div');pv.className='pv';
+    pv.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><span>'+(mode.manual?'运行结果':'浏览器预览')+'</span></div>';
+    const stage=document.createElement('div');stage.className='pv-stage';
+    const fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts allow-forms');fr.title='预览';
+    stage.append(fr);pv.append(stage);
+    grid.append(code,pv);
+    box.append(grid);
+
+    const tools=box.querySelector('.ed-tools')||(()=>{const t=document.createElement('span');t.className='ed-tools';box.querySelector('.ed-bar').append(t);return t;})();
+    const ed={box,ta,fr,original,onchange:null,cb:null};
+    if(mode===modes.html){
+      const lab=document.createElement('label');lab.className='chip';
+      ed.cb=document.createElement('input');ed.cb.type='checkbox';ed.cb.id='ol-'+editors.length;ed.cb.checked=box.dataset.outline==='on';
+      lab.append(ed.cb,document.createTextNode('标出元素'));
+      tools.append(lab);
+      ed.cb.addEventListener('change',render);
+    }
+    if(box.dataset.resize!==undefined){
+      const lab=document.createElement('label');lab.className='chip';
+      const rg=document.createElement('input');rg.type='range';rg.min=280;rg.max=900;rg.step=10;rg.value=box.dataset.resize||600;
+      const auto=!box.dataset.resize;
+      const out=document.createElement('span');out.className='pv-w';
+      lab.append(document.createTextNode('预览宽度'),rg,out);
+      tools.append(lab);
+      const setW=()=>{fr.style.width=rg.value+'px';out.textContent=rg.value+'px';};
+      rg.addEventListener('input',setW);
+      if(auto)out.textContent='自适应';else setW();
+    }
+    if(mode.manual){
+      const run=document.createElement('button');run.type='button';run.className='chip run';run.innerHTML='▶ 运行';run.title='Ctrl + Enter';
+      run.addEventListener('click',render);
+      tools.prepend(run);
+      ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();render();}});
+    }
+    const rs=document.createElement('button');rs.type='button';rs.className='chip';rs.textContent='还原代码';
+    tools.append(rs);
+
+    let timer=null;
+    function paint(){pre.innerHTML=mode.hl(ta.value)+'\n';autosize(ta);}
+    function render(){
+      frames.delete(fr.contentWindow);
+      fr.srcdoc=mode.build(ta.value,tpl,ed);
+      requestAnimationFrame(()=>frames.set(fr.contentWindow,fr));
+    }
+    ed.render=render;
+    fr.addEventListener('load',()=>frames.set(fr.contentWindow,fr));
+    function changed(){
+      paint();
+      if(!mode.manual){clearTimeout(timer);timer=setTimeout(render,300);}
+      if(ta.dataset.store){try{localStorage.setItem(ta.dataset.store,ta.value);}catch(e){}}
+      if(ed.onchange)ed.onchange(ta.value);
+    }
+    ed.set=v=>{ta.value=v;changed();if(mode.manual)render();};
+    ta.addEventListener('input',changed);
+    ta.addEventListener('keydown',e=>{
+      if(e.key==='Tab'&&!e.shiftKey&&!e.altKey&&!e.metaKey&&!e.ctrlKey){
+        e.preventDefault();
+        const s=ta.selectionStart,en=ta.selectionEnd;
+        ta.setRangeText('  ',s,en,'end');changed();
+      }
+    });
+    rs.addEventListener('click',()=>ed.set(original));
+    paint();render();
+    editors.push(ed);
+    return ed;
+  }
+
+  /* ---------- 自动判题：在隐藏的沙箱 iframe 里运行学习者的代码，再逐条执行检查表达式 ----------
+     tests 是字符串数组，每条是一个返回 true/false 的 JS 表达式（可以 await）。返回 Promise<boolean[]>。 */
+  let testSeq=0;
+  function runTests(code,tests,{prelude='',html='',timeout=3000}={}){
+    const id='t'+(++testSeq);
+    const f=document.createElement('iframe');
+    f.setAttribute('sandbox','allow-scripts');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.title='判题';
+    f.style.cssText='position:absolute;left:-10000px;top:0;width:600px;height:400px;border:0;visibility:hidden';
+    const harness='<script>(async function(){var T='+JSON.stringify(tests)+',r=[];for(var i=0;i<T.length;i++){try{r.push(!!(await (0,eval)("(async()=>("+T[i]+"))()")));}catch(e){r.push(false);}}parent.postMessage({__flT:"'+id+'",r:r},"*");})();<\/script>';
+    f.srcdoc='<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'+html+'<script>console.log=function(){};'+prelude+'<\/script><script>'+code.replace(/<\/script/gi,'<\\/script')+'<\/script>'+harness+'</body></html>';
+    return new Promise(res=>{
+      const done=r=>{removeEventListener('message',on);clearTimeout(tm);f.remove();res(r);};
+      const on=e=>{if(e.source===f.contentWindow&&e.data&&e.data.__flT===id)done(e.data.r);};
+      const tm=setTimeout(()=>done(tests.map(()=>false)),timeout);
+      addEventListener('message',on);
+      document.body.append(f);
+    });
+  }
+  const reflow=()=>editors.forEach(ed=>autosize(ed.ta));
+  window.addEventListener('resize',reflow);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(reflow);
+
+  /* ---------- 逐行解读 ---------- */
+  function makeReader(r,data,openFirst){
+    const ol=r.querySelector('ol');
+    data.forEach(([src,note])=>{
+      const li=document.createElement('li');
+      const b=document.createElement('button');b.type='button';b.className='rl';b.setAttribute('aria-expanded','false');
+      b.innerHTML='<span class="src">'+(r.dataset.mode==='css'?hlCss(src):r.dataset.mode==='js'?hlJs(src):hl(src))+'</span><span class="more">解释</span>';
+      const n=document.createElement('div');n.className='note';n.innerHTML=note;n.hidden=true;
+      b.addEventListener('click',()=>{const open=n.hidden;n.hidden=!open;li.classList.toggle('open',open);b.setAttribute('aria-expanded',String(open));});
+      li.append(b,n);ol.append(li);
+    });
+    const ex=r.querySelector('[data-expand]');
+    ex.addEventListener('click',()=>{
+      const anyClosed=[...ol.querySelectorAll('.note')].some(n=>n.hidden);
+      ol.querySelectorAll('li').forEach(li=>{const n=li.querySelector('.note');n.hidden=!anyClosed;li.classList.toggle('open',anyClosed);li.querySelector('.rl').setAttribute('aria-expanded',String(anyClosed));});
+      ex.textContent=anyClosed?'全部收起':'全部展开';
+    });
+    if(openFirst)ol.querySelector('.rl').click();
+  }
+
+  /* ---------- 测验：root 里要有 data-q="score|total|meter|reset|box" ---------- */
+  function makeQuiz(root,QUIZ){
+    const q=k=>root.querySelector('[data-q="'+k+'"]');
+    const box=q('box'), qScore=q('score'), qMeter=q('meter');
+    q('total').textContent=QUIZ.length;
+    const fmt=s=>esc(s).replace(/(&lt;[^&]*?&gt;)/g,'<code>$1</code>');
+    function draw(){
+      let score=0;qScore.textContent='0';qMeter.style.width='0';
+      box.innerHTML='';
+      QUIZ.forEach(([qs,opts,ans,why],i)=>{
+        const d=document.createElement('div');d.className='q';
+        d.innerHTML='<p class="q-t"><span class="qn">'+String(i+1).padStart(2,'0')+'</span><span class="qx">'+fmt(qs)+'</span></p><div class="opts"></div><p class="why" hidden></p>';
+        const ob=d.querySelector('.opts'), w=d.querySelector('.why');
+        opts.forEach((o,j)=>{
+          const b=document.createElement('button');b.type='button';b.className='opt';b.innerHTML=fmt(o);
+          b.addEventListener('click',()=>{
+            ob.querySelectorAll('.opt').forEach((x,k)=>{x.disabled=true;if(k===ans)x.classList.add('right');});
+            const ok=j===ans; if(!ok)b.classList.add('wrong');
+            if(ok)score++;
+            w.hidden=false;w.innerHTML='<b>'+(ok?'答对了。':'正确答案是 '+String.fromCharCode(65+ans)+'。')+'</b>'+fmt(why);
+            qScore.textContent=score;qMeter.style.width=(score/QUIZ.length*100)+'%';
+          });
+          ob.append(b);
+        });
+        box.append(d);
+      });
+    }
+    q('reset').addEventListener('click',draw);
+    draw();
+  }
+
+  /* ---------- 目录高亮与阅读进度（只在该模块显示时工作） ---------- */
+  function tocSpy(view){
+    const links=[...view.querySelectorAll('.toc a')];
+    const secs=links.map(a=>document.getElementById(a.getAttribute('href').slice(1)));
+    const prog=view.querySelector('.progress');
+    function onScroll(){
+      if(view.hidden)return;
+      const h=document.documentElement.scrollHeight-innerHeight;
+      prog.style.width=(h>0?Math.min(100,scrollY/h*100):0)+'%';
+      let cur=0;secs.forEach((s,i)=>{if(s.getBoundingClientRect().top<140)cur=i;});
+      links.forEach((a,i)=>a.classList.toggle('active',i===cur));
+      const act=links[cur]; if(act&&matchMedia('(max-width:960px)').matches){const ol=act.closest('ol');const l=act.offsetLeft-ol.clientWidth/2+act.clientWidth/2;if(Math.abs(ol.scrollLeft-l)>40)ol.scrollTo({left:l,behavior:'smooth'});}
+    }
+    addEventListener('scroll',onScroll,{passive:true});onScroll();
+  }
+
+  return {esc,hl,hlCss,hlJs,makeEditor,makeReader,makeQuiz,tocSpy,runTests,addMode,CONSOLE,BASE,CDN};
+})();
+</script>
+
+<script>
+/* ====================== 模块：HTML5 核心速通 ====================== */
+(function(){
+  const {esc,hl}=FL;
+  const view=document.querySelector('.v-html5');
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  /* ---------- 逐行解读 ---------- */
+  const READERS={
+    skeleton:[
+      ['<!DOCTYPE html>','<b>文档类型声明。</b>告诉浏览器"这是一个 HTML5 文档"，请按最新标准解析。必须写在第一行。HTML5 把以前又长又难记的声明简化成了这一句。'],
+      ['<html lang="zh-CN">','<b>根元素。</b>页面上所有内容都包在它里面。<code>lang="zh-CN"</code> 声明页面语言是简体中文，帮助搜索引擎、读屏软件和浏览器翻译功能。'],
+      ['<head>','<b>头部开始。</b>这里是写给浏览器看的"说明书"，里面的内容不会直接显示在页面上（title 除外，它显示在标签页上）。'],
+      ['  <meta charset="UTF-8">','<b>字符编码。</b>UTF-8 能表示全世界几乎所有文字。不写或写错，中文就可能变成乱码。习惯上放在 head 的第一行。'],
+      ['  <meta name="viewport" content="width=device-width, initial-scale=1.0">','<b>移动端适配。</b>让页面宽度等于手机屏幕宽度，初始不缩放。没有这一行，手机会把页面当成电脑网页缩小显示，字小得看不清。做响应式网页必写。'],
+      ['  <title>我的第一个网页</title>','<b>页面标题。</b>显示在浏览器标签页上，也是收藏夹的默认名字、搜索结果里的蓝色大标题。'],
+      ['</head>','头部结束。注意斜杠 <code>/</code>：带斜杠的是结束标签。'],
+      ['<body>','<b>主体开始。</b>用户在页面上能看到的一切都写在 body 里。'],
+      ['  <h1>你好，HTML5！</h1>','<b>一级标题。</b>代表整个页面最重要的标题，一个页面通常只有一个 h1。'],
+      ['  <p>这是我的第一个网页。</p>','<b>段落。</b>p 是 paragraph 的缩写，一段文字用一个 p 包起来。'],
+      ['</body>','主体结束。'],
+      ['</html>','根元素结束，整个文档到此为止。前面的缩进只是为了好读，浏览器不在乎缩进。']
+    ],
+    full:[
+      ['<!DOCTYPE html>','HTML5 文档声明。'],
+      ['<html lang="zh-CN">','根元素，页面语言为简体中文。'],
+      ['<head>','头部开始：下面都是页面的"配置"。'],
+      ['  <meta charset="UTF-8">','字符编码，防止中文乱码。'],
+      ['  <meta name="viewport" content="width=device-width, initial-scale=1.0">','移动端适配，让手机按屏幕宽度显示。'],
+      ['  <meta name="description" content="Jim 的个人主页">','<b>页面描述。</b>搜索引擎结果里标题下面那段灰色小字，通常就来自这里。属于 SEO 优化。'],
+      ['  <title>Jim · 全栈学习中</title>','标签页上显示的标题。'],
+      ['  <link rel="stylesheet" href="style.css">','<b>引入 CSS 文件。</b><code>rel="stylesheet"</code> 说明这是样式表，<code>href</code> 是文件路径。样式和结构分开放，是标准做法。下一站学 CSS 时你会天天写这一行。'],
+      ['</head>','头部结束。'],
+      ['<body>','主体开始：下面都是用户能看到的内容。'],
+      ['  <header class="site-header">','<b>页头。</b><code>class="site-header"</code> 是给 CSS 用的名字，CSS 里写 <code>.site-header { ... }</code> 就能给它加样式。'],
+      ['    <nav>','<b>导航区</b>，放主要的站内链接。'],
+      ['      <a href="/" class="active">首页</a>','链接到网站根目录 <code>/</code>。<code>class="active"</code> 是个常见约定，表示"当前所在页面"，CSS 会把它高亮。'],
+      ['      <a href="/blog">博客</a>','链接到 <code>/blog</code> 页面。这种以 <code>/</code> 开头的路径是从网站根目录算起的。'],
+      ['    </nav>','导航结束。'],
+      ['  </header>','页头结束。'],
+      ['  <main>','<b>主要内容区</b>，一页只有一个 main。'],
+      ['    <section id="about">','<b>"关于我"章节。</b><code>id="about"</code> 是唯一标识，别处写 <code>&lt;a href="#about"&gt;</code> 就能跳到这里。'],
+      ['      <h1>你好，我是 Jim</h1>','页面主标题。'],
+      ['      <img src="avatar.jpg" alt="Jim 的头像" width="120">','<b>头像图片。</b>空元素，没有结束标签。<code>alt</code> 描述图片内容，<code>width="120"</code> 表示宽 120 像素，高度按比例自动算。'],
+      ['      <p>正在用 <strong>一周</strong> 时间学习前端。</p>','段落里嵌套了行内元素 strong，表示"一周"是重点。'],
+      ['    </section>','"关于我"章节结束。'],
+      ['    <section id="contact">','<b>"联系我"章节。</b>'],
+      ['      <h2>联系我</h2>','二级标题，层级低于 h1。'],
+      ['      <form action="/api/message" method="post">','<b>表单。</b>点提交时，浏览器把数据用 POST 方式发送到后端接口 <code>/api/message</code>。将来你写后端，就是要实现这个接口来接收数据。'],
+      ['        <input type="email" name="email" placeholder="你的邮箱" required>','<b>邮箱输入框。</b><code>type="email"</code> 自动校验格式；<code>name="email"</code> 是提交给后端的键名；<code>placeholder</code> 是灰色提示文字；<code>required</code> 表示必填。'],
+      ['        <button type="submit">发送</button>','<b>提交按钮。</b><code>type="submit"</code> 点击会提交所在的表单。'],
+      ['      </form>','表单结束。'],
+      ['    </section>','"联系我"章节结束。'],
+      ['  </main>','主要内容结束。'],
+      ['  <footer>© 2026 Jim</footer>','<b>页脚</b>，放版权、备案号、联系方式等。'],
+      ['  <script src="app.js"><\/script>','<b>引入 JavaScript 文件。</b>放在 body 最后，是为了让页面内容先显示出来、再加载脚本，这样 JS 运行时页面元素也都已经存在了。注意 script 不是空元素，必须写结束标签。'],
+      ['</body>','主体结束。'],
+      ['</html>','文档结束。']
+    ]
+  };
+  view.querySelectorAll('.reader').forEach(r=>FL.makeReader(r,READERS[r.dataset.reader],r.dataset.reader==='skeleton'));
+
+  /* ---------- 元素解剖 ---------- */
+  const PARTS=[['<a','open'],[' ',''],['href','attr'],['=','eq'],['"https://example.com"','val'],[' ',''],['target','attr'],['=','eq'],['"_blank"','val'],['>','open'],['点我访问','content'],['</a>','close']];
+  const INFO={
+    el:['元素 element','开始标签 + 内容 + 结束标签，合起来叫一个<b>元素</b>。平时说"一个 a 元素"或"一个 a 标签"，指的基本是同一个东西。'],
+    open:['开始标签','用尖括号包起来的标签名，表示元素从这里开始。<code class="i">a</code> 是 anchor（锚）的缩写，代表链接。属性都写在开始标签里。'],
+    attr:['属性名','给元素的额外信息，写在开始标签里，和标签名之间用空格隔开。多个属性之间也用空格隔开，顺序无所谓。'],
+    val:['属性值','写在等号后面，用双引号包起来。<code class="i">href</code> 的值是链接地址，<code class="i">target="_blank"</code> 表示在新标签页打开。'],
+    content:['内容','开始标签和结束标签之间的部分，会显示在页面上。内容里还可以继续嵌套其他元素。'],
+    close:['结束标签','和开始标签同名，前面多一个斜杠 <code class="i">/</code>，表示元素到这里结束。忘写结束标签是新手最常见的错误。']
+  };
+  const anaCode=document.getElementById('anaCode'), anaLegend=document.getElementById('anaLegend'), anaInfo=document.getElementById('anaInfo');
+  const cls={open:'t-tag',close:'t-tag',attr:'t-attr',val:'t-val',eq:'t-p',content:''};
+  anaCode.innerHTML=PARTS.map(([t,k])=>k?'<span class="pt '+(cls[k]||'')+'" data-k="'+k+'">'+esc(t)+'</span>':t).join('');
+  ['el','open','attr','val','content','close'].forEach(k=>{const b=document.createElement('button');b.type='button';b.dataset.k=k;b.textContent=INFO[k][0];anaLegend.append(b);});
+  function ana(k){
+    if(k==='eq')k='attr';
+    anaCode.querySelectorAll('.pt').forEach(p=>p.classList.toggle('hi',k==='el'||p.dataset.k===k||(k==='attr'&&p.dataset.k==='eq')));
+    anaLegend.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+    anaInfo.innerHTML='<b>'+INFO[k][0]+'：</b>'+INFO[k][1];
+  }
+  anaLegend.addEventListener('click',e=>{const b=e.target.closest('button');if(b)ana(b.dataset.k);});
+  anaCode.addEventListener('click',e=>{const p=e.target.closest('.pt');if(p)ana(p.dataset.k);});
+  anaLegend.addEventListener('mouseover',e=>{const b=e.target.closest('button');if(b)ana(b.dataset.k);});
+  ana('el');
+
+  /* ---------- 语义化布局 ---------- */
+  const SEM={
+    header:['<header>','页头或某一块内容的头部。','通常放 logo、网站名、主导航、搜索框。一个页面可以有多个 header，比如每篇 article 也可以有自己的 header。'],
+    nav:['<nav>','导航链接区。','放网站的主要导航菜单。不是所有链接都要放 nav，只有"主要的导航块"才用。'],
+    main:['<main>','页面的主要内容。','每个页面只能有一个可见的 main。侧边栏、页头页脚这种每页都重复的内容不放在 main 里。'],
+    article:['<article>','一篇独立、完整的内容。','判断标准：把它单独拿出去也能看懂。比如一篇博客文章、一条新闻、一个商品卡片、一条评论。'],
+    section:['<section>','内容中的一个章节或主题分组。','一般带一个标题（h2~h6）。比如文章里的"第一章""第二章"，或首页的"产品介绍""用户评价"区块。'],
+    aside:['<aside>','和主内容相关、但不是核心的附属内容。','侧边栏、相关推荐、广告、作者简介。去掉它，主内容依然完整。'],
+    footer:['<footer>','页脚或某一块内容的尾部。','版权信息、备案号、联系方式、友情链接。和 header 一样，可以出现多次。']
+  };
+  const mock=document.getElementById('mock'), semInfo=document.getElementById('semInfo');
+  function sem(k){
+    mock.querySelectorAll('.rg').forEach(r=>r.classList.toggle('on',r.dataset.k===k));
+    const d=SEM[k];
+    semInfo.innerHTML='<h4>'+esc(d[0])+'</h4><p>'+d[1]+'</p><p class="when">'+d[2]+'</p>';
+  }
+  mock.querySelectorAll('.rg').forEach(r=>{
+    r.tabIndex=0;r.setAttribute('role','button');r.setAttribute('aria-label',r.dataset.k);
+    r.addEventListener('click',e=>{e.stopPropagation();sem(r.dataset.k);});
+    r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();sem(r.dataset.k);}});
+  });
+  sem('header');
+
+  /* ---------- 速查表 ---------- */
+  const SHEET=[
+    ['<!DOCTYPE html>','声明 HTML5 文档','结构'],['<html>','根元素','结构'],['<head>','头部，放页面配置','结构'],['<body>','主体，放可见内容','结构'],
+    ['<title>','标签页标题','结构'],['<meta>','元信息：编码、视口、描述','结构'],['<link>','引入外部资源，最常见是 CSS 文件','结构'],
+    ['<style>','在页面里直接写 CSS','结构'],['<script>','引入或编写 JavaScript','结构'],
+    ['<header>','页头 / 区块头部','语义'],['<nav>','导航','语义'],['<main>','主要内容，每页一个','语义'],['<article>','独立完整的内容，如文章、卡片','语义'],
+    ['<section>','章节、主题分组','语义'],['<aside>','侧边栏、附属内容','语义'],['<footer>','页脚 / 区块尾部','语义'],
+    ['<figure>','带说明的图片、图表、代码块','语义'],['<figcaption>','figure 的说明文字','语义'],['<time>','日期时间，datetime 属性写机器可读格式','语义'],
+    ['<h1>~<h6>','一到六级标题','文本'],['<p>','段落','文本'],['<br>','换行（空元素）','文本'],['<hr>','分隔线（空元素）','文本'],
+    ['<strong>','重要内容，默认加粗','文本'],['<em>','强调语气，默认斜体','文本'],['<span>','无语义的行内容器，用来加样式','文本'],
+    ['<blockquote>','长引用','文本'],['<code>','行内代码','文本'],['<pre>','保留空格和换行的预格式文本','文本'],['<mark>','高亮标记','文本'],
+    ['<sub> / <sup>','下标 / 上标','文本'],['<del>','删除线','文本'],
+    ['<a>','链接，href 指定地址','链接媒体'],['<img>','图片，src 和 alt 必写（空元素）','链接媒体'],['<video>','视频','链接媒体'],['<audio>','音频','链接媒体'],
+    ['<source>','给 video/audio 提供多个文件格式','链接媒体'],['<canvas>','画布，用 JS 绘图','链接媒体'],['<iframe>','嵌入另一个网页','链接媒体'],['<svg>','矢量图形','链接媒体'],
+    ['<ul>','无序列表','列表表格'],['<ol>','有序列表','列表表格'],['<li>','列表项','列表表格'],['<dl> <dt> <dd>','描述列表：术语与解释','列表表格'],
+    ['<table>','表格','列表表格'],['<thead> / <tbody>','表头区 / 主体区','列表表格'],['<tr>','表格的一行','列表表格'],['<th>','表头单元格','列表表格'],['<td>','普通单元格','列表表格'],
+    ['<form>','表单，action 和 method 决定提交到哪、怎么提交','表单'],['<input>','输入框，type 决定类型（空元素）','表单'],['<label>','输入框的说明文字','表单'],
+    ['<button>','按钮','表单'],['<select> / <option>','下拉选择框 / 选项','表单'],['<textarea>','多行文本框','表单'],['<fieldset> / <legend>','把表单项分组 / 组标题','表单'],
+    ['<div>','无语义的块级容器，用来布局和加样式','容器']
+  ];
+  const cats=['全部',...new Set(SHEET.map(r=>r[2]))];
+  let curCat='全部';
+  const sheetBody=document.getElementById('sheetBody'), sheetQ=document.getElementById('sheetQ'), sheetCats=document.getElementById('sheetCats');
+  cats.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cat'+(c==='全部'?' on':'');b.textContent=c;b.addEventListener('click',()=>{curCat=c;sheetCats.querySelectorAll('.cat').forEach(x=>x.classList.toggle('on',x===b));drawSheet();});sheetCats.append(b);});
+  function drawSheet(){
+    const q=sheetQ.value.trim().toLowerCase();
+    const rows=SHEET.filter(r=>(curCat==='全部'||r[2]===curCat)&&(!q||(r[0]+r[1]+r[2]).toLowerCase().includes(q)));
+    sheetBody.innerHTML=rows.length?rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><span class="cat-badge">'+r[2]+'</span></td></tr>').join(''):'<tr><td colspan="3" class="empty">没有找到，换个关键词试试</td></tr>';
+  }
+  sheetQ.addEventListener('input',drawSheet);drawSheet();
+
+  /* ---------- 测验 ---------- */
+  const QUIZ=[
+    ['想防止页面中文乱码，应该在 head 里写？',['<meta charset="UTF-8">','<meta lang="zh">','<html charset="UTF-8">','<title charset="UTF-8">'],0,'字符编码由 meta 的 charset 属性声明。lang 是写在 html 上声明语言的，和乱码无关。'],
+    ['下面哪个是空元素（没有结束标签）？',['<p>','<a>','<img>','<li>'],2,'img、br、hr、input、meta、link 都是空元素，它们不包内容。'],
+    ['图片加载失败时显示的替代文字，由哪个属性决定？',['title','alt','src','name'],1,'alt 是图片的文字描述，失败时显示，读屏软件也会读它。title 是鼠标悬停提示。'],
+    ['让链接在新标签页打开，要加哪个属性？',['href="_new"','open="tab"','target="_blank"','rel="new"'],2,'target="_blank" 在新标签页打开，通常搭配 rel="noopener"。'],
+    ['表示"页面主要内容"、每页只应有一个的语义标签是？',['<section>','<main>','<article>','<div>'],1,'main 每页只能有一个。section 和 article 都可以出现多次。'],
+    ['表单提交到后端时，数据的"键名"来自输入框的哪个属性？',['id','class','placeholder','name'],3,'name 决定键名，没有 name 的输入框不会被提交。id 是给 label 和 JS 用的。'],
+    ['点击文字就能聚焦输入框，label 的 for 要等于 input 的？',['id','name','type','value'],0,'label 的 for 和 input 的 id 对应。也可以直接把 input 写在 label 里面。'],
+    ['下面哪个是行内元素？',['<div>','<p>','<span>','<h1>'],2,'span 是行内元素，宽度由内容决定；div、p、h1 都是块级元素，独占一行。'],
+    ['让浏览器自动校验邮箱格式，最简单的写法是？',['<input type="email">','<input format="email">','<input check="email">','<input pattern="email">'],0,'HTML5 的 type="email" 自带格式校验，手机上还会弹出带 @ 的键盘。'],
+    ['表格中，表头单元格用哪个标签？',['<td>','<tr>','<th>','<thead>'],2,'th 是表头单元格，td 是普通单元格，tr 是一行，thead 是整个表头区域。'],
+    ['下面哪种写法是错误的？',['<div><p>文字</p></div>','<p><div>文字</div></p>','<li><a href="#">链接</a></li>','<a href="#"><img src="a.jpg" alt="商品"></a>'],1,'p 里不能放 div 等块级元素，浏览器会提前关闭 p，结构就乱了。HTML5 允许 a 包住图片甚至整块内容。'],
+    ['<meta name="viewport" content="width=device-width, initial-scale=1.0"> 的作用是？',['设置页面背景','让手机按屏幕宽度显示页面','声明页面语言','提高加载速度'],1,'没有它，手机会把页面当成电脑网页缩小显示。做响应式网页必写。']
+  ];
+  FL.makeQuiz(view.querySelector('#quiz'),QUIZ);
+
+  /* ---------- 动手挑战 ---------- */
+  const CHECKS=[
+    ['加上移动端适配 <code>meta viewport</code>',d=>!!d.querySelector('meta[name="viewport"]')],
+    ['用 <code>header</code> 包住写着名字的 <code>h1</code>',d=>!!d.querySelector('header h1')],
+    ['放一张带 <code>alt</code> 描述的头像 <code>img</code>',d=>[...d.querySelectorAll('img')].some(i=>(i.getAttribute('alt')||'').trim())],
+    ['用列表写出至少 3 项技能',d=>[...d.querySelectorAll('ul,ol')].some(l=>l.querySelectorAll(':scope > li').length>=3)],
+    ['一个在新标签页打开的链接',d=>!!d.querySelector('a[href][target="_blank"]')],
+    ['使用 <code>main</code> 和 <code>footer</code>',d=>!!(d.querySelector('main')&&d.querySelector('footer'))],
+    ['一个必填的邮箱输入框 <code>type="email"</code> + <code>required</code>',d=>!!d.querySelector('input[type="email"][required]')],
+    ['邮箱框有 <code>label</code> 关联，并带 <code>name</code>',d=>[...d.querySelectorAll('input[type="email"]')].some(i=>i.name&&((i.id&&d.querySelector('label[for="'+CSS.escape(i.id)+'"]'))||i.closest('label')))]
+  ];
+  const ANSWER=`<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jim 的名片</title>
+</head>
+<body>
+  <header>
+    <h1>Jim</h1>
+    <p>全栈开发学习者</p>
+  </header>
+
+  <main>
+    <section>
+      <img src="avatar.jpg" alt="Jim 的头像" width="100">
+      <h2>技能</h2>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS3</li>
+        <li>JavaScript</li>
+      </ul>
+      <p>我的代码：<a href="https://github.com" target="_blank" rel="noopener">GitHub</a></p>
+    </section>
+
+    <section>
+      <h2>联系我</h2>
+      <form action="/api/contact" method="post">
+        <label for="email">你的邮箱</label>
+        <input type="email" id="email" name="email" required>
+        <button type="submit">发送</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 Jim</p>
+  </footer>
+</body>
+</html>`;
+  const chEd=editors.find(e=>e.box.id==='challengeEd');
+  const checksEl=document.getElementById('checks'), banner=document.getElementById('doneBanner');
+  checksEl.innerHTML=CHECKS.map(c=>'<li>'+c[0]+'</li>').join('');
+  function runChecks(v){
+    const d=new DOMParser().parseFromString(v,'text/html');
+    let all=true;
+    CHECKS.forEach((c,i)=>{let ok=false;try{ok=c[1](d);}catch(e){}checksEl.children[i].classList.toggle('done',ok);if(!ok)all=false;});
+    banner.hidden=!all;
+  }
+  chEd.onchange=runChecks;runChecks(chEd.ta.value);
+  document.getElementById('showAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：CSS 样式与布局 ====================== */
+(function(){
+  const {esc,hl,hlCss}=FL;
+  const view=document.querySelector('.v-css');
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  /* ---------- 逐行解读：一条规则 ---------- */
+  FL.makeReader(view.querySelector('#css-intro .reader'),[
+    ['/* 选中所有 class="card" 的元素 */','<b>注释。</b>写在 <code>/* */</code> 之间，浏览器会忽略。CSS 只有这一种注释写法，<code>//</code> 不行。'],
+    ['.card {','<b>选择器 + 左花括号。</b><code>.card</code> 是选择器，决定这条规则作用到哪些元素，点开头表示按 class 选。花括号里的部分叫<b>声明块</b>。'],
+    ['  color: #333;','<b>一条声明 = 属性: 值;</b> <code>color</code> 是文字颜色，<code>#333</code> 是深灰。属性和值之间用冒号，结尾用分号。'],
+    ['  background: white;','<b>背景。</b>颜色可以写英文关键字、<code>#</code> 十六进制、<code>rgb()</code>、<code>hsl()</code>。'],
+    ['  padding: 16px;','<b>内边距：</b>内容和边框之间的空隙。只写一个值，表示上下左右都是 16px。'],
+    ['  border-radius: 8px;','<b>圆角。</b>值越大越圆，写 <code>50%</code> 能把正方形变成圆形。'],
+    ['}','<b>声明块结束。</b>最后一条声明后面的分号其实可以省略，但习惯上都写，以后加新行时就不会出错。']
+  ],true);
+
+  /* ---------- 优先级计算器 ---------- */
+  function spec(sel){
+    let s=' '+sel+' ',a=0,b=0,c=0;
+    s=s.replace(/:where\([^)]*\)/g,' ');
+    s=s.replace(/:(not|is|has)\(([^)]*)\)/g,' $2 ');
+    s=s.replace(/\[[^\]]*\]/g,()=>{b++;return ' ';});
+    s=s.replace(/::[\w-]+/g,()=>{c++;return ' ';});
+    s=s.replace(/:(before|after|first-line|first-letter)\b/g,()=>{c++;return ' ';});
+    s=s.replace(/:[\w-]+(\([^)]*\))?/g,()=>{b++;return ' ';});
+    s=s.replace(/#[\w-]+/g,()=>{a++;return ' ';});
+    s=s.replace(/\.[\w-]+/g,()=>{b++;return ' ';});
+    s.replace(/[a-zA-Z][\w-]*/g,()=>{c++;return '';});
+    return [a,b,c];
+  }
+  const specBox=view.querySelector('#cssSpec');
+  const inA=specBox.querySelector('#specA'), inB=specBox.querySelector('#specB');
+  const verdict=specBox.querySelector('.spec-verdict');
+  const NAMES=['ID','类 / 属性 / 伪类','元素 / 伪元素'];
+  function drawSpec(){
+    const sa=spec(inA.value), sb=spec(inB.value);
+    [['A',sa],['B',sb]].forEach(([k,v])=>{
+      specBox.querySelector('[data-for="'+k+'"]').innerHTML=v.map((n,i)=>'<span><b>'+n+'</b>'+NAMES[i]+'</span>').join('');
+    });
+    let w=0,at=-1;
+    for(let i=0;i<3;i++){if(sa[i]!==sb[i]){w=sa[i]>sb[i]?1:2;at=i;break;}}
+    specBox.querySelectorAll('.spec-row').forEach((r,i)=>r.classList.toggle('win',w===i+1));
+    verdict.innerHTML=w?'<b>'+(w===1?'A':'B')+' 赢。</b>从左往右比，第一个不同的位置是“'+NAMES[at]+'”：'+(w===1?sa[at]+' &gt; '+sb[at]:sb[at]+' &gt; '+sa[at])+'。'
+      :'<b>一样大。</b>这时看书写顺序，后写的那条生效。';
+  }
+  const PRESETS=[['#nav .link','nav ul li a.active'],['.btn.primary','button.btn'],['ul li:first-child','.item'],['a:hover','a.link'],['.card p','.card .text']];
+  const pre=specBox.querySelector('.spec-presets');
+  PRESETS.forEach(([x,y])=>{const b=document.createElement('button');b.type='button';b.textContent=x+'  vs  '+y;b.addEventListener('click',()=>{inA.value=x;inB.value=y;drawSpec();});pre.append(b);});
+  inA.value=PRESETS[0][0];inB.value=PRESETS[0][1];
+  inA.addEventListener('input',drawSpec);inB.addEventListener('input',drawSpec);
+  drawSpec();
+
+  /* ---------- 盒模型 ---------- */
+  const bm=view.querySelector('#cssBox');
+  const BM={width:[120,320,200],padding:[0,40,16],border:[0,20,6],margin:[0,40,16]};
+  const st={sizing:'content-box'};
+  const ctrl=bm.querySelector('.bm-ctrl');
+  Object.entries(BM).forEach(([k,[min,max,v]])=>{
+    st[k]=v;
+    const lab=document.createElement('label');
+    lab.innerHTML='<span>'+k+'</span><input type="range" min="'+min+'" max="'+max+'" value="'+v+'" aria-label="'+k+'"><output></output>';
+    const r=lab.querySelector('input');
+    r.addEventListener('input',()=>{st[k]=+r.value;drawBox();});
+    ctrl.append(lab);
+  });
+  const sz=document.createElement('div');sz.className='bm-sizing';sz.innerHTML='<span>box-sizing:</span>';
+  ['content-box','border-box'].forEach(v=>{const b=document.createElement('button');b.type='button';b.textContent=v;b.dataset.v=v;b.addEventListener('click',()=>{st.sizing=v;drawBox();});sz.append(b);});
+  ctrl.append(sz);
+  function drawBox(){
+    const {width:w,padding:p,border:bd,margin:m,sizing}=st;
+    const cw=sizing==='border-box'?Math.max(0,w-2*p-2*bd):w;
+    const box=cw+2*p+2*bd, total=box+2*m;
+    ctrl.querySelectorAll('label').forEach(l=>{l.querySelector('output').textContent=st[l.querySelector('span').textContent]+'px';});
+    sz.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===sizing)));
+    const [M,B,P,C]=['.bm-m','.bm-b','.bm-p','.bm-c'].map(s=>bm.querySelector(s));
+    M.style.padding=m+'px';B.style.padding=bd+'px';P.style.padding=p+'px';C.style.width=cw+'px';
+    [[M,m],[B,bd],[P,p]].forEach(([el,v])=>{el.firstElementChild.style.visibility=v>=12?'visible':'hidden';});
+    bm.querySelector('.bm-code').innerHTML=hlCss('.box {\n  box-sizing: '+sizing+';\n  width: '+w+'px;\n  padding: '+p+'px;\n  border: '+bd+'px solid;\n  margin: '+m+'px;\n}');
+    bm.querySelector('.bm-sum').innerHTML=sizing==='content-box'
+      ?'content-box：width 只管内容。盒子实际宽 = 内容 '+w+' + 内边距 2×'+p+' + 边框 2×'+bd+' = <b>'+box+'px</b>，比你写的 width 多了 '+(box-w)+'px。算上外边距，一共占 <b>'+total+'px</b>。'
+      :'border-box：width 已经包含内边距和边框。盒子实际宽就是 <b>'+box+'px</b>'+(cw===0&&w<2*p+2*bd?'（内容被挤没了）':'')+'，内容区剩 '+cw+'px。算上外边距，一共占 <b>'+total+'px</b>。';
+  }
+  drawBox();
+
+  /* ---------- Flex 练习场 ---------- */
+  const fx=view.querySelector('#cssFlex');
+  const FX={
+    'flex-direction':['row','row-reverse','column','column-reverse'],
+    'justify-content':['flex-start','center','flex-end','space-between','space-around','space-evenly'],
+    'align-items':['stretch','flex-start','center','flex-end'],
+    'flex-wrap':['nowrap','wrap']
+  };
+  const FX_TIP={
+    'flex-direction':'决定<b>主轴</b>方向。row 横排（默认），column 竖排，-reverse 是倒过来排。换成 column 后，justify-content 管的就变成了上下方向。',
+    'justify-content':'子元素在<b>主轴</b>上怎么分布：靠前、居中、靠后，或者把剩余空间分到它们中间（space-between）、两边（space-around）、均匀（space-evenly）。',
+    'align-items':'子元素在<b>交叉轴</b>上怎么对齐。默认 stretch 会把它们拉到一样高，所以一行卡片天然等高。',
+    'flex-wrap':'一行放不下时要不要换行。默认 nowrap 会把子元素挤在一行。加几个子元素，再切到 wrap 看看。',
+    'gap':'子元素之间的<b>间距</b>，比给每个子元素加 margin 简单，首尾也不会多出空白。',
+    'grow':'给第 1 个子元素写 <b>flex: 1</b>，它会吃掉主轴上所有剩余空间。导航栏里“把按钮推到最右边”就靠它。',
+    'count':'增减子元素的数量，看看放不下时会发生什么。'
+  };
+  const HEIGHTS=[10,22,14,30,18,26,12,20];
+  const fs={'flex-direction':'row','justify-content':'flex-start','align-items':'stretch','flex-wrap':'nowrap',gap:8,count:4,grow:false};
+  const fxCtrl=fx.querySelector('.fx-ctrl'), fxBox=fx.querySelector('.fx-box'), fxTip=fx.querySelector('.fx-tip');
+  const group=(k,inner)=>{const g=document.createElement('div');g.className='fx-g';g.innerHTML='<span class="fx-k">'+k+'</span><div class="fx-opts"></div>';inner(g.querySelector('.fx-opts'));fxCtrl.append(g);};
+  Object.entries(FX).forEach(([k,vals])=>group(k,o=>vals.forEach(v=>{
+    const b=document.createElement('button');b.type='button';b.textContent=v;b.dataset.k=k;b.dataset.v=v;
+    b.addEventListener('click',()=>{fs[k]=v;drawFlex(k);});o.append(b);
+  })));
+  group('gap',o=>{o.innerHTML='<input type="range" min="0" max="32" step="2" aria-label="gap"><output></output>';const r=o.querySelector('input');r.value=fs.gap;r.addEventListener('input',()=>{fs.gap=+r.value;drawFlex('gap');});});
+  group('子元素',o=>{
+    const minus=document.createElement('button');minus.type='button';minus.textContent='− 1';
+    const plus=document.createElement('button');plus.type='button';plus.textContent='+ 1';
+    const lab=document.createElement('label');lab.innerHTML='<input type="checkbox"> 第 1 个 flex: 1';
+    minus.addEventListener('click',()=>{fs.count=Math.max(1,fs.count-1);drawFlex('count');});
+    plus.addEventListener('click',()=>{fs.count=Math.min(8,fs.count+1);drawFlex('count');});
+    lab.querySelector('input').addEventListener('change',e=>{fs.grow=e.target.checked;drawFlex('grow');});
+    o.append(minus,plus,lab);
+  });
+  function drawFlex(changed){
+    fxCtrl.querySelectorAll('button[data-k]').forEach(b=>b.setAttribute('aria-pressed',String(fs[b.dataset.k]===b.dataset.v)));
+    fxCtrl.querySelector('output').textContent=fs.gap+'px';
+    Object.keys(FX).forEach(k=>fxBox.style.setProperty(k,fs[k]));
+    fxBox.style.gap=fs.gap+'px';
+    fxBox.innerHTML='';
+    for(let i=0;i<fs.count;i++){const d=document.createElement('div');d.textContent=i+1;d.style.paddingBlock=HEIGHTS[i]+'px';if(i===0&&fs.grow)d.className='grow';fxBox.append(d);}
+    const lines=['.box {','  display: flex;'];
+    Object.keys(FX).forEach(k=>lines.push('  '+k+': '+fs[k]+';'));
+    lines.push('  gap: '+fs.gap+'px;','}');
+    if(fs.grow)lines.push('.box > :first-child {','  flex: 1;','}');
+    fx.querySelector('.fx-code').innerHTML=hlCss(lines.join('\n'));
+    fxTip.innerHTML=FX_TIP[changed]||'点上面的按钮改属性。虚线框是父元素 <b>.box</b>，编号块是它的子元素，高矮故意做得不一样。';
+  }
+  drawFlex();
+
+  /* ---------- 属性速查 ---------- */
+  const SHEET=[
+    ['color','文字颜色','文字'],['font-size','字号','文字'],['font-weight','粗细：400 常规、700 加粗','文字'],['font-family','字体，逗号分隔多个备选','文字'],
+    ['line-height','行高，正文常用 1.6–1.8','文字'],['text-align','文字对齐：left / center / right','文字'],['text-decoration','下划线、删除线，none 去掉链接下划线','文字'],
+    ['letter-spacing','字间距','文字'],['white-space','空白和换行怎么处理，nowrap 不换行','文字'],
+    ['background','背景简写：颜色、图片、位置','颜色背景'],['background-color','背景颜色','颜色背景'],['background-image','背景图或渐变 linear-gradient()','颜色背景'],['opacity','不透明度 0–1','颜色背景'],
+    ['width / height','宽 / 高','盒模型'],['max-width','最大宽度，内容区限宽常用','盒模型'],['padding','内边距','盒模型'],['margin','外边距，0 auto 水平居中','盒模型'],
+    ['border','边框：粗细 样式 颜色','盒模型'],['border-radius','圆角','盒模型'],['box-sizing','border-box 让 width 包含内边距和边框','盒模型'],
+    ['overflow','内容超出时：hidden 裁掉、auto 出滚动条','盒模型'],['box-shadow','阴影','盒模型'],
+    ['display','block / inline / inline-block / none / flex / grid','布局'],['gap','Flex 和 Grid 子元素间距','布局'],['visibility','hidden 隐藏但占位','布局'],
+    ['flex-direction','主轴方向 row / column','Flex'],['justify-content','主轴分布，居中、两端对齐','Flex'],['align-items','交叉轴对齐，垂直居中','Flex'],
+    ['flex-wrap','是否换行','Flex'],['flex','子元素伸缩，flex: 1 占满剩余空间','Flex'],['align-self','单个子元素自己的对齐','Flex'],['order','显示顺序','Flex'],
+    ['grid-template-columns','定义列：1fr 1fr、repeat(3, 1fr)','Grid'],['grid-template-rows','定义行','Grid'],['grid-template-areas','用名字画布局','Grid'],
+    ['grid-area','子元素放到哪个区域','Grid'],['grid-column','子元素跨几列：1 / 3、span 2','Grid'],
+    ['position','static / relative / absolute / fixed / sticky','定位'],['top / right / bottom / left','定位后的偏移量','定位'],['z-index','叠放顺序，大的在上','定位'],
+    ['transition','属性变化时的过渡动画','效果'],['transform','移动、缩放、旋转','效果'],['animation','播放 @keyframes 动画','效果'],['cursor','鼠标样式，pointer 是小手','效果'],
+    ['@media','媒体查询，按屏幕宽度写不同样式','响应式'],['var(--x)','使用 CSS 变量','响应式'],['clamp()','限定最小、理想、最大值，做流式字号','响应式']
+  ];
+  const cats=['全部',...new Set(SHEET.map(r=>r[2]))];
+  let curCat='全部';
+  const body=view.querySelector('#cssSheetBody'), q=view.querySelector('#cssSheetQ'), catsEl=view.querySelector('#cssSheetCats');
+  cats.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cat'+(c==='全部'?' on':'');b.textContent=c;b.addEventListener('click',()=>{curCat=c;catsEl.querySelectorAll('.cat').forEach(x=>x.classList.toggle('on',x===b));drawSheet();});catsEl.append(b);});
+  function drawSheet(){
+    const s=q.value.trim().toLowerCase();
+    const rows=SHEET.filter(r=>(curCat==='全部'||r[2]===curCat)&&(!s||(r[0]+r[1]+r[2]).toLowerCase().includes(s)));
+    body.innerHTML=rows.length?rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><span class="cat-badge">'+r[2]+'</span></td></tr>').join(''):'<tr><td colspan="3" class="empty">没有找到，换个关键词试试</td></tr>';
+  }
+  q.addEventListener('input',drawSheet);drawSheet();
+
+  /* ---------- 测验 ---------- */
+  FL.makeQuiz(view.querySelector('#css-quiz'),[
+    ['想选中所有 class="card" 的元素，选择器怎么写？',['card','.card','#card','<card>'],1,'点开头是类选择器，# 开头是 ID 选择器，不带符号的是元素选择器。'],
+    ['下面哪个选择器的优先级最高？',['div p','.box p','#main p','p'],2,'#main p 是 (1,0,1)，有一个 ID 就压过任意多个类和元素。'],
+    ['margin: 10px 20px; 表示什么？',['上下 10px，左右 20px','上 10px、右 20px，其余为 0','左右 10px，上下 20px','四边都是 15px'],0,'两个值时，第一个管上下，第二个管左右。'],
+    ['想让 width 包含 padding 和 border，应该写？',['box-sizing: content-box','box-sizing: border-box','display: block','overflow: hidden'],1,'border-box 下写多宽就是多宽，内边距和边框往里挤。'],
+    ['Flex 容器里，让子元素在主轴上两端对齐？',['align-items: space-between','justify-content: space-between','flex-wrap: wrap','text-align: justify'],1,'justify-content 管主轴，align-items 管交叉轴。'],
+    ['下面哪个属性会被子元素继承？',['border','margin','color','background'],2,'文字类属性（color、font-*、line-height）会继承，盒子类属性不会。'],
+    ['position: absolute 的元素相对谁定位？',['浏览器窗口','父元素，不管它有没有定位','最近的、position 不是 static 的祖先','自己原来的位置'],2,'所以常给父元素加 position: relative 当参照物。相对窗口的是 fixed。'],
+    ['1rem 等于多少？',['父元素的字号','根元素 html 的字号','视口宽度的 1%','固定 16px，永远不变'],1,'rem 的 r 是 root。浏览器默认根字号是 16px，但可以改。em 才是相对当前元素字号。'],
+    ['想让样式在“屏幕宽度不小于 768px”时生效？',['@media (max-width: 768px)','@media (min-width: 768px)','@media screen = 768px','@screen (768px)'],1,'min-width 表示“至少这么宽”，移动优先写法就是一层层加 min-width。'],
+    ['grid-template-columns: repeat(3, 1fr) 的效果？',['3 行等高','3 列等宽','每列 3px','最多放 3 个子元素'],1,'fr 是剩余空间的份数，3 个 1fr 就是三等分。子元素多了会自动换到下一行。'],
+    ['想隐藏元素，并且不占位置？',['visibility: hidden','opacity: 0','display: none','z-index: -1'],2,'visibility: hidden 和 opacity: 0 都还占着原来的位置。'],
+    ['使用名为 --brand 的 CSS 变量，正确写法是？',['$brand','var(--brand)','--brand()','@brand'],1,'定义用 --brand: #2a62d6;，使用用 var(--brand)。$ 和 @ 是 Sass 之类预处理器的写法。']
+  ]);
+
+  /* ---------- 动手挑战：在 900px 和 400px 两个隐藏 iframe 里实际排版后检查 ---------- */
+  const chEd=editors.find(e=>e.box.id==='cssChallengeEd');
+  const tpl=chEd.box.querySelector('template').innerHTML;
+  view.querySelector('#cssChTpl').innerHTML=hl(tpl);
+  const probes=[900,400].map(w=>{
+    const f=document.createElement('iframe');
+    f.setAttribute('sandbox','allow-same-origin');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.title='挑战检查';
+    f.style.cssText='position:absolute;left:-10000px;top:0;width:'+w+'px;height:600px;border:0;visibility:hidden';
+    document.body.append(f);return f;
+  });
+  const R=(d,s,i)=>d.querySelectorAll(s)[i||0].getBoundingClientRect();
+  const CS=(d,s)=>d.defaultView.getComputedStyle(d.querySelector(s));
+  const strip=s=>s.replace(/\/\*[\s\S]*?\*\//g,'');
+  const CHECKS=[
+    ['所有元素使用 <code>box-sizing: border-box</code>',(w)=>CS(w,'.card').boxSizing==='border-box'&&CS(w,'.site-header').boxSizing==='border-box'],
+    ['页头用 Flex：logo 在最左、导航在最右',(w)=>{const h=R(w,'.site-header'),l=R(w,'.logo'),n=R(w,'.links');return CS(w,'.site-header').display==='flex'&&l.left-h.left<48&&h.right-n.right<48&&Math.abs(l.top+l.height/2-(n.top+n.height/2))<16;}],
+    ['导航链接之间至少有 8px 间距',(w)=>R(w,'.links a',1).left-R(w,'.links a',0).right>=8&&R(w,'.links a',2).left-R(w,'.links a',1).right>=8],
+    ['宽屏（900px）三张卡片排成一行',(w)=>{const t=[0,1,2].map(i=>R(w,'.card',i).top);return Math.abs(t[0]-t[1])<2&&Math.abs(t[1]-t[2])<2;}],
+    ['卡片之间有间距',(w,n)=>{const a=R(w,'.card',0),b=R(w,'.card',1);return (Math.abs(a.top-b.top)<2?b.left-a.right:b.top-a.bottom)>=8;}],
+    ['卡片有内边距、圆角，以及边框或阴影',(w)=>{const c=CS(w,'.card');return parseFloat(c.paddingLeft)>0&&parseFloat(c.borderTopLeftRadius)>0&&(parseFloat(c.borderTopWidth)>0||c.boxShadow!=='none');}],
+    ['用 CSS 变量定义主色并用上 <code>var(--...)</code>',(w,n,css)=>/--[\w-]+\s*:/.test(css)&&/var\(\s*--[\w-]+/.test(css)],
+    ['窄屏（400px）卡片变成竖排',(w,n)=>R(n,'.card',1).top>=R(n,'.card',0).bottom-1],
+    ['卡片有鼠标悬停效果 <code>.card:hover</code>',(w,n,css)=>/\.card[^{},]*:hover/.test(css)]
+  ];
+  const ANSWER=`:root {
+  --brand: #2a62d6;
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 16px;
+}
+
+/* 页头：Flex 两端对齐 */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--brand);
+  border-radius: 10px;
+}
+.logo {
+  color: white;
+  font-weight: 800;
+  text-decoration: none;
+}
+.links {
+  display: flex;
+  gap: 16px;
+}
+.links a {
+  color: white;
+  text-decoration: none;
+}
+
+/* 卡片：手机一列 */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.card {
+  padding: 16px;
+  border: 1px solid #dce1e9;
+  border-radius: 12px;
+  transition: transform .2s, box-shadow .2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgb(0 0 0 / .1);
+}
+.card h2 {
+  margin: 0 0 8px;
+  color: var(--brand);
+}
+
+/* 宽屏：三列 */
+@media (min-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+`;
+  const checksEl=view.querySelector('#cssChecks'), banner=view.querySelector('#cssDoneBanner');
+  checksEl.innerHTML=CHECKS.map(c=>'<li>'+c[0]+'</li>').join('');
+  let seq=0,timer=null;
+  function runChecks(v){
+    const my=++seq, css=strip(v);
+    const doc='<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>'+v.replace(/<\/style/gi,'<\\/style')+'</style></head><body>'+tpl+'</body></html>';
+    Promise.all(probes.map(f=>new Promise(res=>{f.onload=()=>res(f.contentDocument);f.srcdoc=doc;}))).then(([w,n])=>{
+      if(my!==seq)return;
+      let all=true;
+      CHECKS.forEach((c,i)=>{let ok=false;try{ok=!!c[1](w,n,css);}catch(e){}checksEl.children[i].classList.toggle('done',ok);if(!ok)all=false;});
+      banner.hidden=!all;
+    });
+  }
+  chEd.onchange=v=>{clearTimeout(timer);timer=setTimeout(()=>runChecks(v),400);};
+  runChecks(chEd.ta.value);
+  view.querySelector('#cssShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：JavaScript 核心 ====================== */
+(function(){
+  const {esc,hlJs}=FL;
+  const view=document.querySelector('.v-js');
+  const editors=[...view.querySelectorAll('.editor')].map(FL.makeEditor);
+
+  /* ---------- 真假值 ---------- */
+  const TF=[['0',false],['""',false],['"0"',true],['" "',true],['[]',true],['{}',true],['null',false],['undefined',false],['NaN',false],['-1',true],['false',false],['"false"',true]];
+  const tfBox=view.querySelector('#jsTruthy'), tf=tfBox.querySelector('.tf'), tfMsg=tfBox.querySelector('.tf-msg');
+  const MSG={'"0"':'字符串 "0" 不是空字符串，所以是真。','" "':'只有一个空格也不是空字符串，是真。','[]':'空数组是对象，对象永远是真。判断数组是否为空要写 arr.length === 0。','{}':'空对象也是真。','"false"':'这是一个字符串，不是布尔值 false，所以是真。','NaN':'NaN（不是数字）是假值。','-1':'除了 0 和 NaN，所有数字都是真，负数也一样。'};
+  function reveal(b){const v=b.dataset.v==='1';b.classList.add(v?'t':'f');b.querySelector('small').textContent=v?'真 true':'假 false';}
+  TF.forEach(([s,v])=>{
+    const b=document.createElement('button');b.type='button';b.dataset.v=v?'1':'0';b.innerHTML=esc(s)+'<small>?</small>';
+    b.addEventListener('click',()=>{reveal(b);tfMsg.innerHTML=esc(s)+' → <b>'+(v?'真':'假')+'</b>。'+(MSG[s]||(v?'':'它是 6 个假值之一。'));});
+    tf.append(b);
+  });
+  tfBox.querySelector('[data-all]').addEventListener('click',()=>tf.querySelectorAll('button').forEach(reveal));
+  tfBox.querySelector('[data-reset]').addEventListener('click',()=>tf.querySelectorAll('button').forEach(b=>{b.className='';b.querySelector('small').textContent='?';}));
+
+  /* ---------- 闭包逐行解读 ---------- */
+  FL.makeReader(view.querySelector('#jsClosure'),[
+    ['function createCounter() {','定义一个“制造计数器”的函数。'],
+    ['  let count = 0;','<b>外部变量。</b>count 是 createCounter 里的局部变量，外面的代码没办法直接改它，相当于“私有数据”。'],
+    ['  return () => {','返回一个箭头函数。注意返回的是<b>函数本身</b>，还没有执行它。'],
+    ['    count++;','<b>闭包就在这里：</b>内部函数用到了外部的 count。createCounter 执行完以后，count 本该被回收，但因为内部函数还“记着”它，它会一直活着。'],
+    ['    return count;','返回当前的计数。'],
+    ['  };','内部函数结束。'],
+    ['}','createCounter 结束。'],
+    ['const a = createCounter();','调用一次，得到计数器 a，它有自己的一份 count。'],
+    ['const b = createCounter();','再调用一次，得到计数器 b，它的 count 和 a 的<b>互不影响</b>。'],
+    ['a(); a(); console.log(a());','a 被调用了三次，输出 3。'],
+    ['console.log(b());','b 第一次调用，输出 1。每次调用 createCounter 都会产生一个新的闭包。']
+  ],true);
+
+  /* ---------- 数组实验台 ---------- */
+  const products=[{name:'键盘',price:199,category:'外设'},{name:'显示器',price:1299,category:'显示'},{name:'鼠标',price:99,category:'外设'},{name:'耳机',price:399,category:'音频'}];
+  const lab=view.querySelector('#jsArrayLab');
+  lab.querySelector('[data-src]').innerHTML=hlJs('const products = [\n'+products.map(p=>'  { name: "'+p.name+'", price: '+p.price+', category: "'+p.category+'" },').join('\n')+'\n];');
+  const show=v=>JSON.stringify(v,null,2).replace(/"(\w+)":/g,'$1:').replace(/\{\n\s+/g,'{ ').replace(/,\n\s+(?=\w+:)/g,', ').replace(/\n\s+\}/g,' }');
+  const AM=[
+    ['map','products.map(p => p.name)',()=>products.map(p=>p.name),'<b>map</b>：把每一项变成另一个值，返回<b>同样长度</b>的新数组。React 里把数据渲染成列表就用它。'],
+    ['filter','products.filter(p => p.price < 300)',()=>products.filter(p=>p.price<300),'<b>filter</b>：只留下回调返回 true 的项。做搜索、筛选、删除都用它。'],
+    ['find','products.find(p => p.name === "鼠标")',()=>products.find(p=>p.name==='鼠标'),'<b>find</b>：返回<b>第一个</b>满足条件的项本身，找不到返回 undefined。按 id 找一条数据就用它。'],
+    ['some / every','[products.some(p => p.price > 1000), products.every(p => p.price > 50)]',()=>[products.some(p=>p.price>1000),products.every(p=>p.price>50)],'<b>some</b>：有一个满足就返回 true；<b>every</b>：全部满足才返回 true。'],
+    ['reduce','products.reduce((sum, p) => sum + p.price, 0)',()=>products.reduce((s,p)=>s+p.price,0),'<b>reduce</b>：把整个数组“累积”成一个值。第二个参数 0 是初始值，sum 是上一轮的结果。求和、计数、分组都能用它。'],
+    ['sort','[...products].sort((a, b) => a.price - b.price).map(p => p.name)',()=>[...products].sort((a,b)=>a.price-b.price).map(p=>p.name),'<b>sort</b>：排序，回调返回负数时 a 排前面。注意 sort 会<b>修改原数组</b>，所以先用 [...products] 复制一份。'],
+    ['includes / indexOf','[["a", "b"].includes("b"), ["a", "b"].indexOf("c")]',()=>[['a','b'].includes('b'),['a','b'].indexOf('c')],'<b>includes</b> 判断有没有，<b>indexOf</b> 返回位置，没有就是 -1。'],
+    ['forEach','products.forEach(p => console.log(p.name))',()=>'（forEach 没有返回值，只是对每一项执行一次回调）\n键盘\n显示器\n鼠标\n耳机','<b>forEach</b>：只是遍历执行，<b>不返回</b>新数组。需要结果时用 map / filter。']
+  ];
+  const opts=lab.querySelector('.lab-opts');
+  function pick(i){
+    const [,call,fn,why]=AM[i];
+    opts.querySelectorAll('button').forEach((b,k)=>b.setAttribute('aria-pressed',String(k===i)));
+    lab.querySelector('[data-call]').innerHTML=hlJs(call);
+    const r=fn();lab.querySelector('[data-out]').textContent='→ '+(typeof r==='string'?r:show(r));
+    lab.querySelector('[data-why]').innerHTML=why;
+  }
+  AM.forEach((m,i)=>{const b=document.createElement('button');b.type='button';b.textContent=m[0];b.addEventListener('click',()=>pick(i));opts.append(b);});
+  pick(0);
+
+  /* ---------- 猜输出顺序 ---------- */
+  const ORD=view.querySelector('#jsOrder');
+  const LINES=['console.log("A 同步代码");','setTimeout(() => console.log("B setTimeout"), 0);','Promise.resolve().then(() => console.log("C Promise.then"));','console.log("D 同步代码");'];
+  const RIGHT=['A','D','C','B'];
+  ORD.querySelector('[data-code]').innerHTML=hlJs(LINES.join('\n'));
+  const pickEl=ORD.querySelector('.order-pick'), res=ORD.querySelector('.order-res'), why=ORD.querySelector('[data-why]');
+  let seqO=[];
+  function drawOrder(){
+    pickEl.innerHTML='';res.innerHTML='<span style="background:none;color:var(--muted)">你的顺序会显示在这里</span>';why.hidden=true;seqO=[];
+    ['B','D','A','C'].forEach(k=>{
+      const b=document.createElement('button');b.type='button';b.textContent=k;b.title=LINES.find(l=>l.includes('"'+k+' '));
+      b.addEventListener('click',()=>{
+        b.disabled=true;seqO.push(k);
+        res.innerHTML=seqO.map((x,i)=>'<span'+(seqO.length===4?' class="'+(x===RIGHT[i]?'ok':'no')+'"':'')+'>'+(i+1)+'. '+x+'</span>').join('');
+        if(seqO.length===4){
+          const ok=seqO.join('')===RIGHT.join('');
+          why.hidden=false;
+          why.innerHTML=(ok?'<b>完全正确。</b>':'<b>正确顺序是 A → D → C → B。</b>')+'同步代码先全部跑完（A、D）；然后执行<b>微任务</b>，Promise 的 then 属于微任务（C）；最后才轮到<b>宏任务</b>，setTimeout 哪怕延迟写 0 也排在最后（B）。这套调度机制叫<b>事件循环</b>。';
+        }
+      });
+      pickEl.append(b);
+    });
+  }
+  ORD.querySelector('[data-reset]').addEventListener('click',drawOrder);
+  drawOrder();
+
+  /* ---------- 方法速查 ---------- */
+  const SHEET=[
+    ['str.length','字符串长度','字符串'],['str.trim()','去掉首尾空格','字符串'],['str.toUpperCase() / toLowerCase()','转大写 / 小写','字符串'],
+    ['str.includes(s)','是否包含某段文字','字符串'],['str.startsWith(s) / endsWith(s)','是否以某段开头 / 结尾','字符串'],['str.split(sep)','按分隔符切成数组','字符串'],
+    ['str.replace(a, b) / replaceAll','替换文字','字符串'],['str.slice(start, end)','截取一段','字符串'],['str.padStart(n, "0")','补齐长度，常用于补 0','字符串'],
+    ['arr.push(x) / pop()','末尾添加 / 删除（会改原数组）','数组'],['arr.unshift(x) / shift()','开头添加 / 删除（会改原数组）','数组'],['arr.map(fn)','逐项转换，返回新数组','数组'],
+    ['arr.filter(fn)','筛选，返回新数组','数组'],['arr.find(fn) / findIndex(fn)','找第一个满足条件的项 / 下标','数组'],['arr.reduce(fn, init)','累积成一个值','数组'],
+    ['arr.some(fn) / every(fn)','有一个满足 / 全部满足','数组'],['arr.includes(x)','是否包含','数组'],['arr.join(sep)','拼成字符串','数组'],
+    ['arr.slice(a, b)','截取一段，不改原数组','数组'],['arr.splice(i, n)','删除或插入，会改原数组','数组'],['arr.sort(fn)','排序，会改原数组','数组'],
+    ['[...arr] / Array.from(x)','复制数组 / 把类数组转成数组','数组'],['arr.flat() / flatMap(fn)','拍平嵌套数组','数组'],
+    ['Object.keys(obj) / values / entries','取键 / 值 / 键值对数组','对象'],['{ ...obj, a: 1 }','复制并覆盖属性','对象'],['structuredClone(obj)','深拷贝','对象'],
+    ['JSON.stringify(v) / JSON.parse(s)','转成 JSON 字符串 / 解析回来','对象'],['obj?.a?.b','可选链，中间为空不报错','对象'],
+    ['Math.round / floor / ceil','四舍五入 / 向下 / 向上取整','数字'],['Math.max(...arr) / Math.min','最大 / 最小值','数字'],['Math.random()','0 到 1 的随机数','数字'],
+    ['n.toFixed(2)','保留两位小数，返回字符串','数字'],['Number(s) / parseInt(s) / parseFloat(s)','字符串转数字','数字'],['Number.isNaN(x)','判断是不是 NaN','数字'],
+    ['setTimeout(fn, ms) / clearTimeout','延迟执行一次 / 取消','异步'],['setInterval(fn, ms) / clearInterval','每隔一段时间执行 / 取消','异步'],
+    ['fetch(url, options)','发 HTTP 请求，返回 Promise','异步'],['Promise.all([...])','等所有 Promise 都完成','异步'],['async / await','用同步的写法写异步','异步'],
+    ['document.querySelector(css)','找一个元素','DOM'],['el.addEventListener(type, fn)','监听事件','DOM'],['el.classList.toggle(c)','切换 class','DOM'],
+    ['localStorage.setItem(k, v) / getItem(k)','在浏览器里存取字符串，刷新也不丢','DOM'],['new Date() / Date.now()','当前时间 / 时间戳','数字']
+  ];
+  const cats=['全部',...new Set(SHEET.map(r=>r[2]))];let cur='全部';
+  const body=view.querySelector('#jsSheetBody'), q=view.querySelector('#jsSheetQ'), catsEl=view.querySelector('#jsSheetCats');
+  cats.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='cat'+(c==='全部'?' on':'');b.textContent=c;b.addEventListener('click',()=>{cur=c;catsEl.querySelectorAll('.cat').forEach(x=>x.classList.toggle('on',x===b));drawSheet();});catsEl.append(b);});
+  function drawSheet(){
+    const s=q.value.trim().toLowerCase();
+    const rows=SHEET.filter(r=>(cur==='全部'||r[2]===cur)&&(!s||(r[0]+r[1]+r[2]).toLowerCase().includes(s)));
+    body.innerHTML=rows.length?rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td><span class="cat-badge">'+r[2]+'</span></td></tr>').join(''):'<tr><td colspan="3" class="empty">没有找到，换个关键词试试</td></tr>';
+  }
+  q.addEventListener('input',drawSheet);drawSheet();
+
+  /* ---------- 测验 ---------- */
+  FL.makeQuiz(view.querySelector('#js-quiz'),[
+    ['不会被重新赋值的变量，应该用哪个关键字声明？',['var','let','const','static'],2,'默认用 const，需要重新赋值时才用 let。var 有作用域问题，不再使用。'],
+    ['typeof null 的结果是？',['"null"','"undefined"','"object"','"empty"'],2,'这是 JS 早期留下的 bug，一直保留到现在。判断 null 要写 x === null。'],
+    ['0 == "" 和 0 === "" 分别是？',['true, false','false, false','true, true','false, true'],0,'== 会先转换类型再比，所以 0 == "" 为 true。永远用 === 就不会被坑。'],
+    ['下面哪个值放进 if 里会被当作 true？',['0','""','[]','null'],2,'空数组是对象，对象都是真值。6 个假值是 false、0、""、null、undefined、NaN。'],
+    ['[1, 2, 3].map(n => n * 2) 的结果是？',['6','[2, 4, 6]','[1, 2, 3]','undefined'],1,'map 把每一项转换后，返回同样长度的新数组。'],
+    ['想从数组里筛选出所有满足条件的项，用？',['find','filter','some','forEach'],1,'filter 返回所有满足条件的项组成的新数组；find 只返回第一个。'],
+    ['const { name } = user; 这种写法叫？',['展开','解构','闭包','模板字符串'],1,'解构赋值：一次从对象或数组里取出多个值。'],
+    ['想阻止表单提交时刷新页面，在事件回调里调用？',['event.stop()','event.preventDefault()','return false','form.cancel()'],1,'preventDefault 阻止浏览器的默认行为，比如表单提交、链接跳转。'],
+    ['把用户输入显示到页面上，哪种写法更安全？',['el.innerHTML = input','el.textContent = input','document.write(input)','el.outerHTML = input'],1,'textContent 只当纯文本处理。innerHTML 会把内容当 HTML 解析，可能被注入脚本（XSS）。'],
+    ['同步代码、Promise.then、setTimeout(0) 的执行顺序是？',['setTimeout → then → 同步','同步 → setTimeout → then','同步 → then → setTimeout','then → 同步 → setTimeout'],2,'同步代码先跑完，再跑微任务（Promise.then），最后才是宏任务（setTimeout）。'],
+    ['await 只能直接写在哪里？',['任何函数里','async 函数里（或模块顶层）','for 循环里','回调函数里'],1,'在普通函数里写 await 会报语法错误。'],
+    ['fetch 请求返回 404 时，会发生什么？',['Promise 被 reject，进入 catch','Promise 正常 resolve，res.ok 为 false','直接抛出 SyntaxError','页面自动刷新'],1,'只有网络错误才会 reject。HTTP 错误状态要自己检查 res.ok 或 res.status。']
+  ]);
+
+  /* ---------- 挑战：自动判题 ---------- */
+  const chEd=editors.find(e=>e.box.id==='jsChallengeEd');
+  const prelude=chEd.box.querySelector('template').innerHTML.replace(/<\/?script>/g,'');
+  const TESTS=[
+    ['total(cart) 返回 1696','total(cart) === 1696 && total([]) === 0'],
+    ['cheapItems(cart, 200) 返回 ["键盘", "鼠标"]','JSON.stringify(cheapItems(cart, 200)) === \'["键盘","鼠标"]\' && cheapItems(cart, 10).length === 0'],
+    ['formatPrice(12.5) 返回 "¥12.50"','formatPrice(12.5) === "¥12.50" && formatPrice(3) === "¥3.00" && formatPrice(0.1 + 0.2) === "¥0.30"'],
+    ['groupByCategory 按分类分组','JSON.stringify(groupByCategory(cart)) === JSON.stringify({ 外设: ["键盘", "鼠标"], 显示: ["显示器"] })'],
+    ['loadCartTotal() 异步返回 1696','(await loadCartTotal()) === 1696'],
+    ['没有修改原数组 cart','total(cart) === 1696 && (cheapItems(cart, 100), groupByCategory(cart), cart.length === 3 && cart[0].name === "键盘")']
+  ];
+  const ANSWER=`const cart = [
+  { name: "键盘", price: 199, qty: 1, category: "外设" },
+  { name: "鼠标", price: 99, qty: 2, category: "外设" },
+  { name: "显示器", price: 1299, qty: 1, category: "显示" },
+];
+
+// 1. reduce 求和
+function total(items) {
+  return items.reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+// 2. 先 filter 再 map
+function cheapItems(items, max) {
+  return items.filter((item) => item.price <= max).map((item) => item.name);
+}
+
+// 3. toFixed 保留两位小数
+function formatPrice(n) {
+  return "¥" + n.toFixed(2);
+}
+
+// 4. reduce 分组
+function groupByCategory(items) {
+  return items.reduce((groups, item) => {
+    (groups[item.category] ??= []).push(item.name);
+    return groups;
+  }, {});
+}
+
+// 5. async / await
+async function loadCartTotal() {
+  const res = await mockFetch("/api/cart");
+  const items = await res.json();
+  return total(items);
+}
+
+console.log(total(cart), cheapItems(cart, 200), formatPrice(12.5));
+console.log(groupByCategory(cart));
+loadCartTotal().then((t) => console.log("异步总价：", t));
+`;
+  const checksEl=view.querySelector('#jsChecks'), banner=view.querySelector('#jsDoneBanner'), state=view.querySelector('#jsTestState');
+  checksEl.innerHTML=TESTS.map(t=>'<li>'+esc(t[0])+'</li>').join('');
+  let seq=0,timer=null;
+  function test(){
+    const my=++seq;state.textContent='测试运行中…';
+    FL.runTests(chEd.ta.value,TESTS.map(t=>t[1]),{prelude}).then(r=>{
+      if(my!==seq)return;
+      r.forEach((ok,i)=>checksEl.children[i].classList.toggle('done',ok));
+      const n=r.filter(Boolean).length;state.textContent='通过 '+n+' / '+r.length;
+      banner.hidden=n!==r.length;
+    });
+  }
+  chEd.onchange=()=>{clearTimeout(timer);timer=setTimeout(test,700);};
+  view.querySelector('#jsRunTests').addEventListener('click',test);
+  view.querySelector('#jsShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
+  test();
+
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 视图切换（按网址 # 后面的部分） ====================== */
+(function(){
+  const views = [...document.querySelectorAll(".view")];
+  const nav = document.getElementById("siteNav");
+  const items = [{ id: "home", short: "脑图首页", c: null }, ...MODULES.filter(m => m.ready)];
+  items.forEach(m => {
+    const a = document.createElement("a");
+    a.href = "#" + m.id; a.dataset.view = m.id;
+    if (m.c) { a.style.setProperty("--c", `var(${m.c})`); a.innerHTML = `<span class="dot"></span>`; }
+    a.append(m.short);
+    nav.appendChild(a);
+  });
+
+  let current = null;
+  function route() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    let view = "home", target = null;
+    if (views.some(v => v.dataset.view === id)) view = id;
+    else if (id) {
+      target = document.getElementById(id);
+      const v = target && target.closest(".view");
+      if (v) view = v.dataset.view; else target = null;
+    }
+    const changed = view !== current;
+    if (changed) {
+      views.forEach(v => { v.hidden = v.dataset.view !== view; });
+      nav.querySelectorAll("a").forEach(a => a.toggleAttribute("aria-current", false));
+      const cur = nav.querySelector(`a[data-view="${view}"]`);
+      if (cur) cur.setAttribute("aria-current", "page");
+      const m = MODULES.find(x => x.id === view);
+      document.title = m ? `${m.title} · FeLearn` : "FeLearn 学习站";
+      // 视图从隐藏变为显示后：重载预览 iframe、让编辑器重新计算高度（隐藏时测不出尺寸）
+      if (current !== null) {
+        document.querySelectorAll(`.view[data-view="${view}"] iframe[srcdoc]`).forEach(f => { f.srcdoc = f.srcdoc; });
+      }
+      current = view;
+      dispatchEvent(new Event("resize"));
+      dispatchEvent(new Event("scroll"));
+    }
+    if (target) target.scrollIntoView();
+    else if (changed) scrollTo({ top: 0, behavior: "instant" });
+  }
+  addEventListener("hashchange", route);
+  route();
+})();
+</script>
+</body>
+</html>
