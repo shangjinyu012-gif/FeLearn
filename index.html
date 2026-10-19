@@ -26,7 +26,7 @@
   --code-bg:#1A2131; --code-fg:#E5E9F0; --code-line:#2A3346; --code-hover:#232C40;
   --c-tag:#FF8F66; --c-attr:#72D6CA; --c-val:#C8A8FF; --c-com:#7D879A; --c-doc:#9AA4B8;
   /* 知识主干配色（脑图与模块卡片共用） */
-  --html:#d2462a; --css:#2a62d6; --js:#a57d00; --net:#0f8a82; --fw:#7a45c9; --eng:#5d6676; --be:#2b8a3e;
+  --html:#d2462a; --css:#2a62d6; --js:#a57d00; --net:#0f8a82; --fw:#7a45c9; --eng:#5d6676; --be:#2b8a3e; --tools:#0e6fb8;
   --f-display:"Bricolage Grotesque","Noto Sans SC",system-ui,sans-serif;
   --f-body:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans SC",monospace;
@@ -43,7 +43,7 @@
     --ok:#5CCB8A; --ok-soft:#14301F; --bad:#FF7A70; --bad-soft:#3A1715;
     --chrome:#1F2734; --chrome-ink:#97A1B3;
     --code-bg:#0A0F17; --code-line:#1F2837; --code-hover:#141B27;
-    --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72;
+    --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72; --tools:#5bb4f2;
     color-scheme:dark;
   }
 }
@@ -54,7 +54,7 @@
   --ok:#5CCB8A; --ok-soft:#14301F; --bad:#FF7A70; --bad-soft:#3A1715;
   --chrome:#1F2734; --chrome-ink:#97A1B3;
   --code-bg:#0A0F17; --code-line:#1F2837; --code-hover:#141B27;
-  --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72;
+  --html:#ff7a5c; --css:#6f9bff; --js:#e8c14a; --net:#3fc7bc; --fw:#b48cff; --eng:#a3adbd; --be:#5fcf72; --tools:#5bb4f2;
   color-scheme:dark;
 }
 
@@ -598,6 +598,53 @@ img{max-width:100%}
 .v-be .plan label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font-size:15px}
 .v-be .plan input{margin-top:4px;accent-color:var(--accent);flex:none}
 .v-be .plan small{display:block;color:var(--muted);font-size:13px}
+
+/* ====================== 模块：VS Code 开发环境 ====================== */
+.v-tools{--accent:#0E6FB8;--accent-ink:#FFFFFF;--accent-soft:#E1EEF9}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .v-tools{--accent:#5BB4F2;--accent-ink:#06213A;--accent-soft:#13293C}}
+:root[data-theme="dark"] .v-tools{--accent:#5BB4F2;--accent-ink:#06213A;--accent-soft:#13293C}
+.v-tools .tree{margin:16px 0;padding:14px 16px;border-radius:12px;background:var(--code-bg);color:var(--code-fg);font:13px/1.75 var(--f-mono);white-space:pre;overflow-x:auto}
+.v-tools .tree i{font-style:normal;color:#8A94A6}
+/* 系统切换 */
+.v-tools .os{display:inline-flex;gap:4px;padding:4px;border-radius:10px;background:var(--surface);border:1px solid var(--line);margin:4px 0 12px}
+.v-tools .os button{font:600 13px var(--f-body);padding:6px 14px;border-radius:7px;border:0;background:none;color:var(--muted);cursor:pointer}
+.v-tools .os button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.v-tools [data-os]{display:none}
+.v-tools.os-mac [data-os="mac"],.v-tools.os-win [data-os="win"]{display:revert}
+/* 界面导览：模拟窗口 */
+.v-tools .vsc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);margin:20px 0}
+.v-tools .vsc-win{display:grid;grid-template-columns:44px minmax(90px,.9fr) minmax(0,2.4fr);grid-template-rows:30px minmax(150px,1fr) 82px 24px;font:12px/1.4 var(--f-mono);background:#1E1E1E;color:#CCCCCC;user-select:none}
+.v-tools :where(.vsc-win>button){all:unset;box-sizing:border-box;cursor:pointer;position:relative;overflow:hidden;padding:6px 8px;outline-offset:-2px}
+.v-tools .vsc-win>button:hover{box-shadow:inset 0 0 0 2px #5BB4F2}
+.v-tools .vsc-win>button:focus-visible{box-shadow:inset 0 0 0 2px #fff}
+.v-tools .vsc-win>button.on{box-shadow:inset 0 0 0 3px #FFC857;z-index:1}
+.v-tools .r-title{grid-column:1/-1;background:#3C3C3C;text-align:center;color:#ccc;line-height:18px}
+.v-tools .r-act{grid-row:2/4;background:#333;display:flex!important;flex-direction:column;align-items:center;gap:12px;padding-top:10px!important;font-size:17px}
+.v-tools .r-side{grid-row:2/4;background:#252526;line-height:1.8}
+.v-tools .r-side b{display:block;font-size:10.5px;letter-spacing:.08em;color:#bbb}
+.v-tools .r-edit{background:#1E1E1E;line-height:1.75}
+.v-tools .r-edit .tab{display:inline-block;background:#1E1E1E;border-top:1px solid #5BB4F2;padding:2px 10px;margin:-6px 0 6px -8px;color:#fff}
+.v-tools .r-edit .k{color:#569CD6}.v-tools .r-edit .s{color:#CE9178}.v-tools .r-edit .f{color:#DCDCAA}.v-tools .r-edit .c{color:#6A9955}
+.v-tools .r-panel{background:#1E1E1E;border-top:1px solid #444;line-height:1.7}
+.v-tools .r-panel b{font-size:10.5px;color:#fff;border-bottom:1px solid #fff;margin-right:12px}
+.v-tools .r-panel span{color:#4EC9B0}
+.v-tools .r-status{grid-column:1/-1;background:#007ACC;color:#fff;display:flex!important;justify-content:space-between;align-items:center;padding:0 10px!important;font-size:11px}
+.v-tools .vsc-info{padding:14px 16px;display:grid;gap:6px;border-top:1px solid var(--line);min-height:120px}
+.v-tools .vsc-info h4{margin:0;font:700 17px var(--f-body)}
+.v-tools .vsc-info p{margin:0;max-width:none}
+.v-tools .vsc-info ul{margin:0;padding-left:1.2em;font-size:14px}
+@media (max-width:560px){.v-tools .vsc-win{grid-template-columns:36px minmax(70px,.8fr) minmax(0,2fr);font-size:10.5px}.v-tools .r-status span+span{display:none}}
+/* 快捷键 */
+.v-tools .keys-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.v-tools .keys-bar input{flex:1 1 200px;font:14px var(--f-body);padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);min-width:0}
+.v-tools kbd{display:inline-block;font:600 12px/1 var(--f-mono);padding:4px 6px;border-radius:6px;border:1px solid var(--line);border-bottom-width:2px;background:var(--surface);color:var(--ink);margin:1px 1px;white-space:nowrap}
+.v-tools .k-star{color:var(--accent);font-weight:700}
+/* 清单 */
+.v-tools .plan{list-style:none;margin:16px 0;padding:0;display:grid;gap:6px}
+.v-tools .plan label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font-size:15px}
+.v-tools .plan input{margin-top:4px;accent-color:var(--accent);flex:none}
+.v-tools .plan small{display:block;color:var(--muted);font-size:13px}
+.v-tools .plan code{font:12.5px var(--f-mono)}
 </style>
 </head>
 <body>
@@ -3975,9 +4022,283 @@ app.listen(3000, () => console.log("服务器已启动：http://localhost:3000")
 </div>
 </section>
 
+<!-- ====================== 模块：VS Code 开发环境 ====================== -->
+<section class="view lesson v-tools os-win" data-view="tools" hidden>
+<div class="progress"></div>
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <p class="toc-title">目录</p>
+    <ol>
+      <li><a href="#tools-why"><span>01</span>开工前要装什么</a></li>
+      <li><a href="#tools-node"><span>02</span>安装 Node.js</a></li>
+      <li><a href="#tools-git"><span>03</span>安装和配置 Git</a></li>
+      <li><a href="#tools-install"><span>04</span>安装 VS Code</a></li>
+      <li><a href="#tools-ui"><span>05</span>界面导览</a></li>
+      <li><a href="#tools-keys"><span>06</span>快捷键</a></li>
+      <li><a href="#tools-ext"><span>07</span>必装插件</a></li>
+      <li><a href="#tools-settings"><span>08</span>推荐设置</a></li>
+      <li><a href="#tools-first"><span>09</span>第一个项目</a></li>
+      <li><a href="#tools-debug"><span>10</span>调试</a></li>
+      <li><a href="#tools-faq"><span>11</span>常见问题</a></li>
+      <li><a href="#tools-quiz"><span>12</span>自测</a></li>
+      <li><a href="#tools-check"><span>13</span>开工检查清单</a></li>
+    </ol>
+  </nav>
+
+  <main class="content">
+    <header class="hero">
+      <p class="eyebrow">一周全栈计划 · 出发前</p>
+      <h1><span class="lt">code .</span> 用 VS Code 开发前端</h1>
+      <p class="lede">学习站里的练习都能在浏览器里直接改，但做真正的项目需要在自己电脑上搭好环境。这一页带你装好 Node.js、Git 和 VS Code，认识 VS Code 的界面、快捷键和插件，再从零跑起第一个项目。</p>
+      <ul class="goals">
+        <li>装好并验证 Node.js、Git、VS Code 三件套</li>
+        <li>熟悉 VS Code 的界面、常用快捷键和必装插件</li>
+        <li>在 VS Code 里创建、运行、调试、提交一个前端项目</li>
+      </ul>
+      <p style="margin:14px 0 0">你用的是：</p>
+      <div class="os" role="group" aria-label="选择操作系统"><button type="button" data-set-os="win">Windows</button><button type="button" data-set-os="mac">macOS</button></div>
+    </header>
+
+    <!-- 01 -->
+    <section class="chap" id="tools-why">
+      <div class="chap-head"><span class="chap-num">01</span><h2>开工前要装什么</h2></div>
+      <p class="sub">前端开发只需要三样东西，全部免费。装好一次，后面七站都用得上。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>工具</th><th>作用</th><th>验证命令</th></tr></thead>
+        <tbody>
+          <tr><td>Node.js（自带 npm）</td><td>运行前端工具链（Vite、ESLint）和后端代码</td><td><code class="i">node -v</code>、<code class="i">npm -v</code></td></tr>
+          <tr><td>Git</td><td>版本管理，和 GitHub 协作、部署</td><td><code class="i">git --version</code></td></tr>
+          <tr><td>VS Code</td><td>写代码的编辑器，自带终端和调试器</td><td><code class="i">code -v</code></td></tr>
+          <tr><td>浏览器</td><td>Chrome 或 Edge，用开发者工具调试页面</td><td>按 F12 能打开</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">为什么是 VS Code</span><p>免费、轻量、插件多，对 JS、TypeScript、React 的支持最好，是前端开发者用得最多的编辑器。Cursor、Windsurf 这类 AI 编辑器也是基于 VS Code 做的，学会了可以无缝切换。</p></div>
+    </section>
+
+    <!-- 02 -->
+    <section class="chap" id="tools-node">
+      <div class="chap-head"><span class="chap-num">02</span><h2>安装 Node.js</h2></div>
+      <p class="sub">去官网 <b>nodejs.org</b> 下载 <b>LTS</b>（长期支持）版本，不要选 Current。安装时一路下一步即可，npm 会一起装上。</p>
+      <div data-os="win">
+        <ol class="steps">
+          <li>下载 Windows Installer（.msi），双击安装，保持“Add to PATH”勾选。</li>
+          <li>装完<b>重新打开</b>终端（开始菜单搜索“PowerShell”或“终端”），环境变量才会生效。</li>
+          <li>如果运行 npm 提示“禁止运行脚本”，用管理员身份打开 PowerShell 执行：<code class="i wrap">Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></li>
+        </ol>
+      </div>
+      <div data-os="mac">
+        <ol class="steps">
+          <li>下载 macOS Installer（.pkg）双击安装；或者用 Homebrew：<code class="i">brew install node</code>。</li>
+          <li>打开“终端”（Command + 空格，搜索 Terminal）。</li>
+        </ol>
+      </div>
+      <pre class="tree">node -v     <i># 显示 v22.x.x 之类的版本号就成功了</i>
+npm -v      <i># 显示 10.x.x</i></pre>
+      <div class="tip"><span class="lbl">国内下载慢</span><p>把 npm 的下载源换成国内镜像，装依赖会快很多：<code class="i wrap">npm config set registry https://registry.npmmirror.com</code>。想换回官方源，把地址改成 <code class="i wrap">https://registry.npmjs.org</code>。</p></div>
+      <div class="tip"><span class="lbl">进阶：版本管理器</span><p>不同项目可能需要不同的 Node 版本。以后可以用 <b>fnm</b> 或 <b>nvm</b>（Windows 用 nvm-windows）安装和切换多个版本。刚开始直接装 LTS 就够了。</p></div>
+    </section>
+
+    <!-- 03 -->
+    <section class="chap" id="tools-git">
+      <div class="chap-head"><span class="chap-num">03</span><h2>安装和配置 Git</h2></div>
+      <div data-os="win"><p class="sub">去 <b>git-scm.com</b> 下载 Git for Windows 安装。选项基本保持默认；遇到“默认编辑器”时可以选 VS Code。装好后会多一个 Git Bash，VS Code 的终端里也能直接用 git。</p></div>
+      <div data-os="mac"><p class="sub">macOS 第一次在终端输入 <code class="i">git --version</code> 时，会提示安装“命令行开发者工具”，点安装即可。也可以 <code class="i">brew install git</code>。</p></div>
+      <p>装好后先告诉 Git 你是谁，每次提交都会记录这个名字和邮箱（用和 GitHub 账号一样的邮箱）：</p>
+      <pre class="tree">git --version
+git config --global user.name "Jim"
+git config --global user.email "你的邮箱@example.com"
+git config --global init.defaultBranch main   <i># 新仓库默认分支叫 main</i>
+git config --global --list                     <i># 检查一下</i></pre>
+      <div class="tip"><span class="lbl">连上 GitHub</span><p>注册 github.com 账号。第一次在 VS Code 里推送代码时，会弹出浏览器让你登录 GitHub 授权，按提示点同意即可，不用手动配置密钥。想用 SSH 的话，可以按 GitHub 文档生成 SSH key 再添加到账号里。</p></div>
+    </section>
+
+    <!-- 04 -->
+    <section class="chap" id="tools-install">
+      <div class="chap-head"><span class="chap-num">04</span><h2>安装 VS Code</h2></div>
+      <p class="sub">去 <b>code.visualstudio.com</b> 下载安装。下面几个设置在安装时或装完后顺手做好。</p>
+      <div data-os="win">
+        <ol class="steps">
+          <li>安装时勾选 <b>“添加到 PATH”</b> 和 <b>“将‘通过 Code 打开’操作添加到右键菜单”</b>，以后在文件夹上右键就能用 VS Code 打开。</li>
+          <li>装好后重新打开终端，输入 <code class="i">code -v</code> 能看到版本号就说明 <code class="i">code</code> 命令可用。</li>
+        </ol>
+      </div>
+      <div data-os="mac">
+        <ol class="steps">
+          <li>把下载的 Visual Studio Code 拖进“应用程序”文件夹。</li>
+          <li>打开 VS Code，按 <kbd>Cmd</kbd><kbd>Shift</kbd><kbd>P</kbd>，输入 <b>shell command</b>，选择 <b>Install 'code' command in PATH</b>。之后终端里就能用 <code class="i">code</code> 命令。</li>
+        </ol>
+      </div>
+      <ol class="steps">
+        <li><b>中文界面：</b>打开扩展面板，搜索 <b>Chinese (Simplified)</b> 安装，重启即可。（建议先熟悉英文菜单名，搜教程时会方便很多，两种都可以。）</li>
+        <li><b>同步设置：</b>左下角头像 → 打开“设置同步”，用 GitHub 账号登录，换电脑时插件和设置都会跟着走。</li>
+      </ol>
+      <pre class="tree">cd 项目目录
+code .        <i># 用 VS Code 打开当前文件夹，最常用的打开方式</i>
+code app.js   <i># 打开某个文件</i></pre>
+      <div class="tip warn"><span class="lbl">打开文件夹，不要只打开文件</span><p>VS Code 以“文件夹”为单位工作：终端、搜索、Git、插件都基于打开的那个文件夹。做项目时始终用“文件 → 打开文件夹”或 <code class="i">code .</code> 打开项目根目录（有 package.json 的那一层）。</p></div>
+    </section>
+
+    <!-- 05 -->
+    <section class="chap" id="tools-ui">
+      <div class="chap-head"><span class="chap-num">05</span><h2>界面导览</h2></div>
+      <p class="sub">VS Code 的窗口分成五个区域。点下面示意图里的任意区域，看看它是做什么的。</p>
+      <div class="vsc" id="toolsUI">
+        <div class="vsc-win">
+          <button type="button" class="r-title" data-r="title">my-app — Visual Studio Code</button>
+          <button type="button" class="r-act" data-r="act" aria-label="活动栏"><span>📄</span><span>🔍</span><span>⑂</span><span>▷</span><span>⊞</span></button>
+          <button type="button" class="r-side" data-r="side"><b>资源管理器</b>▾ MY-APP<br>&nbsp;▸ node_modules<br>&nbsp;▾ src<br>&nbsp;&nbsp;&nbsp;App.jsx<br>&nbsp;&nbsp;&nbsp;main.jsx<br>&nbsp;index.html<br>&nbsp;package.json</button>
+          <button type="button" class="r-edit" data-r="edit"><span class="tab">App.jsx</span><br><span class="k">export default function</span> <span class="f">App</span>() {<br>&nbsp;&nbsp;<span class="k">return</span> &lt;h1&gt;你好&lt;/h1&gt;;<br>}<br><span class="c">// 在这里写代码</span></button>
+          <button type="button" class="r-panel" data-r="panel"><b>终端</b>问题&nbsp;&nbsp;输出<br>$ npm run dev<br>&nbsp;&nbsp;<span>➜ Local: http://localhost:5173/</span></button>
+          <button type="button" class="r-status" data-r="status"><span>⑂ main&nbsp;&nbsp;⊗ 0 ⚠ 0</span><span>行 3，列 12&nbsp;&nbsp;UTF-8&nbsp;&nbsp;JavaScript JSX</span></button>
+        </div>
+        <div class="vsc-info" aria-live="polite"></div>
+      </div>
+      <div class="tip"><span class="lbl">命令面板</span><p>记不住菜单在哪也没关系：按 <span data-os="win"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>P</kbd></span><span data-os="mac"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>P</kbd></span> 打开<b>命令面板</b>，输入关键词就能找到 VS Code 的任何功能，比如“format”“theme”“git clone”。这是最值得记住的一个快捷键。</p></div>
+    </section>
+
+    <!-- 06 -->
+    <section class="chap" id="tools-keys">
+      <div class="chap-head"><span class="chap-num">06</span><h2>常用快捷键</h2></div>
+      <p class="sub">不用一次全记住。先练熟带 ★ 的，每天用几次自然就会了。快捷键会跟着页面顶部选的系统切换。</p>
+      <div class="keys-bar"><input id="toolsKeySearch" placeholder="搜索，例如：多光标、终端、格式化" aria-label="搜索快捷键"><button class="chip" type="button" id="toolsKeyStar">只看 ★</button></div>
+      <div class="table-wrap"><table class="ref" id="toolsKeys">
+        <thead><tr><th>快捷键</th><th>做什么</th><th>分类</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">查和改快捷键</span><p>命令面板里输入“键盘快捷方式”（Keyboard Shortcuts）可以看到全部快捷键，也能改成自己习惯的组合。</p></div>
+    </section>
+
+    <!-- 07 -->
+    <section class="chap" id="tools-ext">
+      <div class="chap-head"><span class="chap-num">07</span><h2>必装插件</h2></div>
+      <p class="sub">点左侧活动栏的扩展图标（或 <span data-os="win"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>X</kbd></span><span data-os="mac"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>X</kbd></span>），搜索名字安装。插件不是越多越好，下面这些足够了。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>插件</th><th>作用</th><th>什么时候装</th></tr></thead>
+        <tbody>
+          <tr><td>Prettier - Code formatter</td><td>保存时自动排版代码</td><td>现在</td></tr>
+          <tr><td>ESLint</td><td>在编辑器里直接标出代码问题</td><td>现在</td></tr>
+          <tr><td>Error Lens</td><td>把错误信息直接显示在出错的那一行后面</td><td>现在</td></tr>
+          <tr><td>Live Server</td><td>右键 HTML 文件“Open with Live Server”，保存后浏览器自动刷新。学 HTML / CSS 时用</td><td>学 HTML、CSS 时</td></tr>
+          <tr><td>Auto Rename Tag</td><td>改开始标签时，结束标签自动跟着改</td><td>学 HTML 时</td></tr>
+          <tr><td>Path Intellisense</td><td>写文件路径时自动补全</td><td>任何时候</td></tr>
+          <tr><td>GitLens</td><td>每一行代码是谁、什么时候改的，历史一目了然</td><td>学 Git 时</td></tr>
+          <tr><td>Tailwind CSS IntelliSense</td><td>Tailwind 类名补全</td><td>用 Tailwind 时</td></tr>
+          <tr><td>Prisma</td><td>schema.prisma 的高亮和格式化</td><td>写后端时</td></tr>
+          <tr><td>主题与图标（可选）</td><td>One Dark Pro、GitHub Theme；Material Icon Theme 让文件图标更好认</td><td>随意</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tip"><span class="lbl">Emmet：不用装的神器</span><p>VS Code 自带 Emmet。在 HTML 文件里输入 <code class="i">!</code> 然后按 Tab，生成完整的 HTML 骨架；输入 <code class="i">ul&gt;li.item*3</code> 再按 Tab，生成一个带三个 li 的列表。在 JSX 文件里也能用。</p></div>
+      <div class="tip"><span class="lbl">AI 编程助手</span><p>GitHub Copilot 等 AI 插件能补全代码、回答问题。学习阶段建议先自己写，卡住了再问它，并且一定要读懂它给的代码再用。</p></div>
+    </section>
+
+    <!-- 08 -->
+    <section class="chap" id="tools-settings">
+      <div class="chap-head"><span class="chap-num">08</span><h2>推荐设置</h2></div>
+      <p class="sub">命令面板输入 <b>Preferences: Open User Settings (JSON)</b>，打开设置文件，把下面的内容合并进去。点开每一行看它的作用。</p>
+      <div class="reader" id="toolsSettings">
+        <div class="reader-bar"><span class="ed-title">settings.json</span><button class="chip" data-expand>全部展开</button></div>
+        <ol></ol>
+      </div>
+      <div class="tip"><span class="lbl">团队项目</span><p>设置也可以放在项目里的 <code class="i">.vscode/settings.json</code>，只对这个项目生效，提交到 Git 后大家用同一套配置。推荐插件可以写进 <code class="i">.vscode/extensions.json</code>，别人打开项目时 VS Code 会提示安装。</p></div>
+    </section>
+
+    <!-- 09 -->
+    <section class="chap" id="tools-first">
+      <div class="chap-head"><span class="chap-num">09</span><h2>第一个项目：从零跑起来</h2></div>
+      <p class="sub">把前面装的东西串起来走一遍。下面每一步都在 VS Code 里完成。</p>
+      <ol class="steps">
+        <li><b>打开终端：</b>打开 VS Code，按 <span data-os="win"><kbd>Ctrl</kbd><kbd>`</kbd></span><span data-os="mac"><kbd>Ctrl</kbd><kbd>`</kbd></span>（数字 1 左边那个键）打开内置终端，<code class="i">cd</code> 到放项目的目录，比如 <code class="i">cd ~/code</code>（没有就先 <code class="i">mkdir code</code>）。</li>
+        <li><b>创建项目：</b><code class="i wrap">npm create vite@latest my-app -- --template react</code></li>
+        <li><b>用 VS Code 打开：</b><code class="i">code my-app</code>，在新窗口里再打开终端。</li>
+        <li><b>装依赖并启动：</b><code class="i">npm install</code>，然后 <code class="i">npm run dev</code>。按住 <span data-os="win"><kbd>Ctrl</kbd></span><span data-os="mac"><kbd>Cmd</kbd></span> 点击终端里的 <code class="i">http://localhost:5173</code>，浏览器就打开了。</li>
+        <li><b>改代码：</b>打开 <code class="i">src/App.jsx</code>，改一行文字并保存，浏览器自动更新。终端要一直开着，停止服务器按 <kbd>Ctrl</kbd><kbd>C</kbd>。</li>
+        <li><b>第一次提交：</b>点活动栏的“源代码管理”图标 → “初始化仓库”，在输入框写提交说明，点“提交”。改了文件后，这里会列出改动，点文件还能看到修改前后的对比。</li>
+        <li><b>推到 GitHub：</b>同一个面板里点“发布分支”，选择公开或私有仓库，VS Code 会帮你在 GitHub 上建好仓库并推送。之后就可以按工程化那一站讲的连上 Vercel 部署。</li>
+      </ol>
+      <pre class="tree">my-app/                <i># 在 VS Code 的资源管理器里看到的结构</i>
+├── node_modules/      <i># npm install 装的依赖，不用管也不要提交</i>
+├── public/
+├── src/
+│   ├── App.jsx        <i># 从这里开始改</i>
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js</pre>
+      <div class="tip"><span class="lbl">学 HTML / CSS 时更简单</span><p>不需要 Vite：新建一个文件夹，用 VS Code 打开，新建 <code class="i">index.html</code>，输入 <code class="i">!</code> 按 Tab 生成骨架，右键选 <b>Open with Live Server</b>，边写边看效果。</p></div>
+    </section>
+
+    <!-- 10 -->
+    <section class="chap" id="tools-debug">
+      <div class="chap-head"><span class="chap-num">10</span><h2>调试：别只会 console.log</h2></div>
+      <p class="sub">console.log 很好用，但遇到复杂问题时，<b>断点</b>能让代码停在某一行，看清每个变量当时的值。</p>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>场景</th><th>怎么调试</th></tr></thead>
+        <tbody>
+          <tr><td>页面里的 JS / React</td><td>浏览器开发者工具：Sources 面板里点行号打断点；或者在代码里写一行 <code class="i">debugger;</code>，打开开发者工具时会自动停在那里。React 推荐装 <b>React Developer Tools</b> 浏览器扩展，查看组件的 props 和 state。</td></tr>
+          <tr><td>Node.js 后端</td><td>VS Code 左侧“运行和调试”：点行号左边打红点断点，然后选“JavaScript 调试终端”，在里面运行 <code class="i">node server.js</code> 或 <code class="i">npm run dev</code>，就会停在断点处。</td></tr>
+          <tr><td>报错信息</td><td>终端或控制台里的报错一定要读完：错误类型、信息、文件名和行号。按住 <span data-os="win"><kbd>Ctrl</kbd></span><span data-os="mac"><kbd>Cmd</kbd></span> 点击文件路径可以直接跳过去。</td></tr>
+          <tr><td>红色波浪线</td><td>鼠标悬停看原因；“问题”面板（<span data-os="win"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>M</kbd></span><span data-os="mac"><kbd>Cmd</kbd><kbd>Shift</kbd><kbd>M</kbd></span>）列出整个项目的错误和警告。</td></tr>
+        </tbody>
+      </table></div>
+      <h3>断点停住以后</h3>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>按钮</th><th>快捷键</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td>继续</td><td><kbd>F5</kbd></td><td>运行到下一个断点</td></tr>
+          <tr><td>单步跳过</td><td><kbd>F10</kbd></td><td>执行当前行，停在下一行</td></tr>
+          <tr><td>单步进入</td><td><kbd>F11</kbd></td><td>进入当前行调用的函数内部</td></tr>
+          <tr><td>单步跳出</td><td><kbd>Shift</kbd><kbd>F11</kbd></td><td>执行完当前函数，回到调用它的地方</td></tr>
+        </tbody>
+      </table></div>
+      <p>停住时把鼠标放在变量上就能看到值，左侧“变量”面板列出当前作用域的所有变量，“监视”里可以输入任意表达式。</p>
+    </section>
+
+    <!-- 11 -->
+    <section class="chap" id="tools-faq">
+      <div class="chap-head"><span class="chap-num">11</span><h2>常见问题</h2></div>
+      <div class="table-wrap"><table class="ref">
+        <thead><tr><th>现象</th><th>原因和解决</th></tr></thead>
+        <tbody>
+          <tr><td>'node' / 'npm' / 'code' 不是内部或外部命令（command not found）</td><td>安装后没有重开终端，或者没加进 PATH。关掉所有终端和 VS Code 重新打开；还不行就重装并勾选“添加到 PATH”。</td></tr>
+          <tr><td>npm install 很慢或卡住</td><td>换国内镜像（第 02 节）。实在失败可以删掉 node_modules 和 package-lock.json 再装一次。</td></tr>
+          <tr><td>Port 5173 is in use</td><td>端口被另一个还在运行的服务器占用了。找到那个终端按 <kbd>Ctrl</kbd><kbd>C</kbd> 停掉，或者直接用 Vite 自动换的新端口。</td></tr>
+          <tr><td>Cannot find module 'xxx'</td><td>依赖没装：在项目根目录运行 <code class="i">npm install</code>。注意终端当前目录是不是项目根目录（有 package.json 的那层）。</td></tr>
+          <tr><td>保存后没有自动格式化</td><td>检查是否装了 Prettier、设置里 <code class="i">editor.formatOnSave</code> 是否为 true、默认格式化工具是否选了 Prettier。</td></tr>
+          <tr><td>改了代码页面没变化</td><td>文件是不是没保存（标签上有个圆点）？开启“自动保存”能避免这个问题。开发服务器是不是停了？</td></tr>
+          <tr><td>路径里有中文或空格导致奇怪的错误</td><td>项目放在纯英文、无空格的路径下，比如 <code class="i">~/code/my-app</code>。</td></tr>
+          <tr><td>Windows 上 npm 报“禁止运行脚本”</td><td>见第 02 节的 Set-ExecutionPolicy 命令，或者在 VS Code 终端右上角把默认终端换成 Command Prompt / Git Bash。</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- 12 -->
+    <section class="chap" id="tools-quiz">
+      <div class="chap-head"><span class="chap-num">12</span><h2>自测：8 道题</h2></div>
+      <p class="sub">选完立刻显示答案和解析。</p>
+      <div class="quiz-score">
+        <span>得分 <b data-q="score">0</b> / <span data-q="total">8</span></span>
+        <div class="meter"><i data-q="meter"></i></div>
+        <button class="btn ghost" data-q="reset" type="button">重新作答</button>
+      </div>
+      <div data-q="box"></div>
+    </section>
+
+    <!-- 13 -->
+    <section class="chap" id="tools-check">
+      <div class="chap-head"><span class="chap-num">13</span><h2>开工检查清单</h2></div>
+      <p class="sub">在你的电脑上逐项完成并打勾，全部勾上就可以从 HTML5 开始第一站了。勾选会保存在这个浏览器里。</p>
+      <ul class="plan" id="toolsPlan"></ul>
+      <div id="toolsDoneBanner" class="done-banner" hidden>环境全部就绪！回到首页从 HTML5 核心速通开始吧。</div>
+      <footer class="end">VS Code 开发环境 · FeLearn 一周全栈计划。官方文档 code.visualstudio.com/docs 有完整的入门视频和各语言的配置说明。</footer>
+    </section>
+  </main>
+</div>
+</section>
+
 <script>
 /* ---------- 知识模块登记表：新增模块时在这里改 ready ---------- */
 const MODULES = [
+  { id: "tools", title: "VS Code 开发环境", short: "VS Code", c: "--tools", day: "出发前", desc: "装好 Node、Git、VS Code，学会界面、快捷键、插件和调试。", ready: true },
   { id: "html5", title: "HTML5 核心速通", short: "HTML5", c: "--html", day: "D1", desc: "页面骨架、语义化标签、表单，每个示例都能边改边看。", ready: true },
   { id: "css", title: "CSS 样式与布局", short: "CSS", c: "--css", day: "D1–D2", desc: "选择器、优先级、盒模型、Flex 与 Grid、响应式，带练习场和挑战。", ready: true },
   { id: "js", title: "JavaScript 核心", short: "JS", c: "--js", day: "D3–D4", desc: "语言基础、函数与数组、DOM 与事件、异步，代码能直接运行。", ready: true },
@@ -6153,6 +6474,140 @@ app.listen(3000, () => console.log("服务器已启动：http://localhost:3000")
   view.querySelector('#beShowAnswer').addEventListener('click',()=>chEd.set(ANSWER));
   test();
 
+  FL.tocSpy(view);
+})();
+</script>
+
+<script>
+/* ====================== 模块：VS Code 开发环境 ====================== */
+(function(){
+  const {esc}=FL;
+  const view=document.querySelector('.v-tools');
+
+  /* ---------- 系统切换：默认按访问设备猜，记住选择 ---------- */
+  const OSKEY='felearn-tools-os';
+  let os=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent)?'mac':'win';
+  try{os=localStorage.getItem(OSKEY)||os;}catch(e){}
+  function setOs(o){
+    os=o;view.classList.toggle('os-mac',o==='mac');view.classList.toggle('os-win',o==='win');
+    view.querySelectorAll('[data-set-os]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.setOs===o)));
+    try{localStorage.setItem(OSKEY,o);}catch(e){}
+    keys();
+  }
+  view.querySelectorAll('[data-set-os]').forEach(b=>b.addEventListener('click',()=>setOs(b.dataset.setOs)));
+
+  /* ---------- 界面导览 ---------- */
+  const UI={
+    title:['标题栏','显示当前打开的文件夹（项目）名。',['窗口标题旁的“…”菜单里有文件、编辑、查看等全部菜单']],
+    act:['活动栏 Activity Bar','最左边一列图标，切换侧边栏显示的内容。',['📄 资源管理器：文件和文件夹','🔍 搜索：在整个项目里搜索和替换','⑂ 源代码管理：Git 提交、对比、推送','▷ 运行和调试：断点调试','⊞ 扩展：安装插件']],
+    side:['侧边栏 Side Bar','显示活动栏选中的内容，最常用的是资源管理器（文件树）。',['右键可以新建文件、文件夹，重命名、删除','可以直接把文件拖进去','按 Ctrl/Cmd + B 显示或隐藏，给编辑区腾地方']],
+    edit:['编辑区 Editor','写代码的地方。可以开多个标签页，也可以左右分屏。',['标签页上有圆点表示还没保存','Ctrl/Cmd + \\ 分屏，左边看组件、右边看样式','鼠标悬停在变量、函数上会显示类型和说明，按住 Ctrl/Cmd 点击跳到定义']],
+    panel:['面板 Panel','下方区域，包含终端、问题、输出、调试控制台。',['终端就是系统命令行，npm、git 命令都在这里运行','可以开多个终端：一个跑开发服务器，一个敲 git 命令','“问题”标签列出所有报错和警告']],
+    status:['状态栏 Status Bar','最底下一行，显示当前状态。',['左边：当前 Git 分支、错误和警告数量，点分支名可以切换分支','右边：光标位置、文件编码、语言模式（识别错了可以点它手动选）','蓝色变成紫色或橙色，通常表示正在调试']]
+  };
+  const uiBox=view.querySelector('#toolsUI'), info=uiBox.querySelector('.vsc-info');
+  function ui(k){
+    uiBox.querySelectorAll('[data-r]').forEach(b=>{b.classList.toggle('on',b.dataset.r===k);b.setAttribute('aria-pressed',String(b.dataset.r===k));});
+    const [t,d,l]=UI[k];info.innerHTML='<h4>'+esc(t)+'</h4><p>'+esc(d)+'</p><ul>'+l.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
+  }
+  uiBox.querySelectorAll('[data-r]').forEach(b=>b.addEventListener('click',()=>ui(b.dataset.r)));
+  ui('edit');
+
+  /* ---------- 快捷键 ---------- */
+  // [做什么, Windows, macOS, 分类, 是否必会]
+  const KEYS=[
+    ['命令面板：搜索 VS Code 的任何功能','Ctrl Shift P','Cmd Shift P','通用',1],
+    ['按文件名快速打开文件','Ctrl P','Cmd P','通用',1],
+    ['打开 / 关闭终端','Ctrl `','Ctrl `','通用',1],
+    ['显示 / 隐藏侧边栏','Ctrl B','Cmd B','通用',0],
+    ['打开设置','Ctrl ,','Cmd ,','通用',0],
+    ['保存','Ctrl S','Cmd S','通用',1],
+    ['撤销 / 重做','Ctrl Z / Ctrl Shift Z','Cmd Z / Cmd Shift Z','编辑',1],
+    ['注释或取消注释当前行','Ctrl /','Cmd /','编辑',1],
+    ['格式化整个文件','Shift Alt F','Shift Option F','编辑',1],
+    ['上下移动当前行','Alt ↑ / ↓','Option ↑ / ↓','编辑',1],
+    ['向下复制当前行','Shift Alt ↓','Shift Option ↓','编辑',0],
+    ['删除当前行','Ctrl Shift K','Cmd Shift K','编辑',0],
+    ['选中下一个相同的词（多光标）','Ctrl D','Cmd D','多光标',1],
+    ['选中所有相同的词','Ctrl Shift L','Cmd Shift L','多光标',0],
+    ['在点击处添加光标','Alt + 点击','Option + 点击','多光标',0],
+    ['在上 / 下一行添加光标','Ctrl Alt ↑ / ↓','Cmd Option ↑ / ↓','多光标',0],
+    ['当前文件内查找 / 替换','Ctrl F / Ctrl H','Cmd F / Cmd Option F','搜索',1],
+    ['在整个项目里搜索','Ctrl Shift F','Cmd Shift F','搜索',1],
+    ['跳到定义','F12 或 Ctrl + 点击','F12 或 Cmd + 点击','跳转',1],
+    ['重命名变量（所有引用一起改）','F2','F2','跳转',1],
+    ['跳到某一行','Ctrl G','Ctrl G','跳转',0],
+    ['在文件里的函数、变量之间跳转','Ctrl Shift O','Cmd Shift O','跳转',0],
+    ['返回上一个光标位置','Alt ←','Ctrl -','跳转',0],
+    ['分屏编辑','Ctrl \\','Cmd \\','窗口',0],
+    ['切换标签页','Ctrl Tab','Ctrl Tab','窗口',0],
+    ['关闭当前标签页','Ctrl W','Cmd W','窗口',0],
+    ['手动触发代码提示','Ctrl 空格','Ctrl 空格','编辑',0],
+    ['快速修复（自动导入、修正错误）','Ctrl .','Cmd .','编辑',1],
+    ['开始调试 / 继续','F5','F5','调试',0],
+    ['在断点处单步执行','F10 / F11','F10 / F11','调试',0]
+  ];
+  const kt=view.querySelector('#toolsKeys tbody'), ks=view.querySelector('#toolsKeySearch'), kstar=view.querySelector('#toolsKeyStar');
+  let onlyStar=false;
+  const kbd=s=>s.split(' / ').map(p=>p.split(' ').map(k=>/^(或|\+|点击)$/.test(k)?' '+esc(k)+' ':'<kbd>'+esc(k)+'</kbd>').join('')).join(' / ');
+  function keys(){
+    const q=ks.value.trim().toLowerCase();
+    const rows=KEYS.filter(k=>(!onlyStar||k[4])&&(!q||(k[0]+k[3]+k[1]+k[2]).toLowerCase().includes(q)));
+    kt.innerHTML=rows.length?rows.map(k=>'<tr><td>'+kbd(os==='mac'?k[2]:k[1])+'</td><td>'+(k[4]?'<span class="k-star">★ </span>':'')+esc(k[0])+'</td><td>'+esc(k[3])+'</td></tr>').join(''):'<tr><td colspan="3" class="empty">没有找到，换个词试试</td></tr>';
+  }
+  ks.addEventListener('input',keys);
+  kstar.addEventListener('click',()=>{onlyStar=!onlyStar;kstar.setAttribute('aria-pressed',String(onlyStar));kstar.textContent=onlyStar?'显示全部':'只看 ★';keys();});
+
+  FL.makeReader(view.querySelector('#toolsSettings'),[
+    ['{',''],
+    ['  "editor.formatOnSave": true,','<b>保存时自动格式化</b>，再也不用手动调缩进。'],
+    ['  "editor.defaultFormatter": "esbenp.prettier-vscode",','默认用 Prettier 格式化（需要先装 Prettier 插件）。'],
+    ['  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },','保存时自动修复 ESLint 能修的问题。'],
+    ['  "files.autoSave": "onFocusChange",','切换到别的窗口（比如浏览器）时自动保存，避免“改了没保存所以没效果”。'],
+    ['  "editor.tabSize": 2,','缩进 2 个空格，前端社区的主流习惯。'],
+    ['  "editor.wordWrap": "on",','长行自动折行显示，不用左右滚动。'],
+    ['  "editor.fontSize": 15,','字号，按自己的屏幕调。'],
+    ['  "editor.minimap.enabled": false,','关掉右侧的代码缩略图，多留点地方。'],
+    ['  "editor.bracketPairColorization.enabled": true,','成对的括号用同一种颜色，嵌套多层时一眼看清。'],
+    ['  "editor.linkedEditing": true,','改 HTML / JSX 开始标签时，结束标签跟着改。'],
+    ['  "emmet.includeLanguages": { "javascript": "javascriptreact" },','在 .js 文件里也能用 Emmet 写 JSX。'],
+    ['  "javascript.updateImportsOnFileMove.enabled": "always",','移动或重命名文件时，自动更新其他文件里的 import 路径。'],
+    ['  "terminal.integrated.defaultProfile.windows": "Git Bash"','（仅 Windows，可选）终端默认用 Git Bash，命令和 Mac、Linux 一致。'],
+    ['}','']
+  ],true);
+
+  FL.makeQuiz(view.querySelector('#tools-quiz'),[
+    ['下载 Node.js 应该选哪个版本？',['Current（最新功能）','LTS（长期支持）','随便哪个','最老的版本'],1,'LTS 版本稳定，工具和框架都优先保证兼容它。'],
+    ['装好 Node.js 后终端提示 npm 不是命令，最先该做什么？',['重装系统','关掉终端和 VS Code 重新打开','换浏览器','删除 Node'],1,'安装会修改 PATH 环境变量，已打开的终端不会自动读到新的值。'],
+    ['VS Code 里找任何功能最快的方式是？',['翻遍菜单','命令面板 Ctrl/Cmd + Shift + P','重启','问同事'],1,'命令面板能搜索所有命令，记不住快捷键时也可以在这里找。'],
+    ['在终端里用 VS Code 打开当前文件夹的命令是？',['open vscode','code .','vscode -o','npm run code'],1,'需要先把 code 命令加进 PATH（Windows 安装时勾选，Mac 在命令面板里安装）。'],
+    ['想把一个变量名一次性改掉，同时更新所有用到它的地方？',['手动一个个改','选中后按 F2 重命名','Ctrl/Cmd + F 后逐个替换','删掉重写'],1,'F2 是“重命名符号”，只改真正引用这个变量的地方，比文本替换更安全。'],
+    ['选中一个词后按 Ctrl/Cmd + D 会？',['删除这个词','再选中下一个相同的词，同时编辑多处','复制这个词','跳到定义'],1,'这是多光标编辑，一次改多个相同的地方。'],
+    ['保存时自动排版代码，需要？',['装 Prettier 并开启 editor.formatOnSave','装 Live Server','打开 minimap','装中文语言包'],0,'Prettier 负责排版规则，formatOnSave 负责在保存时触发。'],
+    ['用 VS Code 做项目时应该打开什么？',['单个文件','项目根目录文件夹（有 package.json 的那层）','整个 C 盘','桌面'],1,'终端、搜索、Git、插件都以打开的文件夹为准。']
+  ]);
+
+  /* ---------- 开工检查清单 ---------- */
+  const PLAN=[
+    ['node -v 能显示版本号','装好 Node.js LTS，重开终端再试'],
+    ['npm -v 能显示版本号','可选：换成国内镜像 registry.npmmirror.com'],
+    ['git --version 能显示版本号','并且配置好了 user.name 和 user.email'],
+    ['注册好 GitHub 账号','用和 Git 配置相同的邮箱'],
+    ['终端里 code . 能打开 VS Code',''],
+    ['装好 Prettier、ESLint、Error Lens、Live Server',''],
+    ['在 settings.json 里开启保存时格式化','第 08 节'],
+    ['用 Vite 创建项目并在浏览器里看到页面','第 09 节，npm run dev'],
+    ['在 VS Code 里完成第一次 Git 提交',''],
+    ['记住三个快捷键：命令面板、快速打开文件、打开终端','']
+  ];
+  const plan=view.querySelector('#toolsPlan'), KEY='felearn-tools-plan', banner=view.querySelector('#toolsDoneBanner');
+  let done={};try{done=JSON.parse(localStorage.getItem(KEY))||{};}catch(e){}
+  plan.innerHTML=PLAN.map((p,i)=>'<li><label><input type="checkbox" data-i="'+i+'"'+(done[i]?' checked':'')+'><span>'+esc(p[0])+(p[1]?'<small>'+esc(p[1])+'</small>':'')+'</span></label></li>').join('');
+  const upd=()=>{banner.hidden=PLAN.some((p,i)=>!done[i]);};
+  plan.addEventListener('change',e=>{const i=e.target.dataset.i;if(i===undefined)return;done[i]=e.target.checked;try{localStorage.setItem(KEY,JSON.stringify(done));}catch(err){}upd();});
+  upd();
+
+  setOs(os);
   FL.tocSpy(view);
 })();
 </script>
