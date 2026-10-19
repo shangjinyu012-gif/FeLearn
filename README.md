@@ -6,6 +6,7 @@
 
 - **脑图首页**（`#home`）：前端全栈脑图、一周学习路径、知识模块入口。
 - **知识模块**：每个模块是页面里的一个 `<section class="view v-模块id" data-view="模块id">`，用网址 `#模块id` 打开。目前有：
+  - `#tools` VS Code 开发环境（出发前：安装 Node、Git、VS Code，快捷键、插件、调试）
   - `#html5` HTML5 核心速通（原来的 `html5/index.html` 已并入这里）
   - `#css` CSS 样式与布局
   - `#js` JavaScript 核心
